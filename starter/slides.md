@@ -825,6 +825,46 @@ So what would actually satisfy that third criterion? Here's a spectrum. Propriet
 
 ---
 
+# CRDTs: Merge Without a Server
+
+<div v-click="1" class="mb-4">
+
+**The problem — last-write-wins is broken:**
+
+```
+Peer A (offline):  counter = 3   ── both go online ──┐
+Peer B (offline):  counter = 2   ─────────────────────┤
+                                                       ▼
+                            Last-write-wins → 3 or 2 (both wrong — real answer is 5)
+```
+
+</div>
+
+<div v-click="2" class="mb-4">
+
+**G-Counter CRDT — each peer owns a slot:**
+
+```
+Peer A: { A: 3, B: 0 }     merge = max per key
+Peer B: { A: 0, B: 2 }     ─────────────────→  { A: 3, B: 2 }  →  sum = 5 ✓
+```
+
+Deterministic. No coordination. Always converges.
+
+</div>
+
+<Callout v-click="3" type="info">
+
+The server needs **zero conflict-resolution logic** — it just relays bytes. This is what makes the P2P option from the previous slide actually work.
+
+</Callout>
+
+<!--
+Let's answer that hanging question about P2P conflict resolution. Imagine two peers both increment a shared counter while offline. Peer A counted 3 things, Peer B counted 2. When they reconnect, last-write-wins gives you 3 or 2 — both wrong. The real answer is 5. [click] A G-Counter CRDT solves this elegantly: each peer only increments its own slot in a map. To merge, you take the max of each key. A:3, B:2 — sum is 5. Correct, deterministic, no coordination needed. [click] Here's the key insight for our architecture: the server doesn't need any conflict resolution logic at all. It just relays bytes between peers. This is what makes true peer-to-peer sync possible — and it's the foundation that sync engines build on.
+-->
+
+---
+
 # What Sync Engines Add to Our Scorecard
 
 <div v-click="1" class="flex justify-center gap-12 mt-2 mb-4">
@@ -897,7 +937,7 @@ From the Ink & Switch essay on local-first software (2019):
 <div class="grid gap-1.5 ml-1">
   <div class="flex items-center gap-2"><div class="i-ph-lightning-bold text-pink-400" /> <span><strong>Fast</strong> — No spinners. Data is local.</span></div>
   <div class="flex items-center gap-2"><div class="i-ph-devices-bold text-pink-400" /> <span><strong>Multi-device</strong> — Sync across all your devices.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-wifi-none-bold text-pink-400" /> <span><strong>Works offline</strong> — Network is optional.</span></div>
+  <div class="flex items-center gap-2"><div class="i-ph-wifi-slash-bold text-pink-400" /> <span><strong>Works offline</strong> — Network is optional.</span></div>
   <div class="flex items-center gap-2"><div class="i-ph-users-bold text-pink-400" /> <span><strong>Collaboration</strong> — Real-time co-editing.</span></div>
 </div>
 
@@ -982,7 +1022,7 @@ The app that comes closest to nailing all 7 ideals? **Obsidian.**
 <div class="grid gap-1 text-sm mt-2">
   <div class="flex items-center gap-2"><div class="i-ph-lightning-bold text-emerald-400" /> <strong>Fast</strong> — local markdown files</div>
   <div class="flex items-center gap-2"><div class="i-ph-devices-bold text-emerald-400" /> <strong>Multi-device</strong> — Obsidian Sync / git / iCloud</div>
-  <div class="flex items-center gap-2"><div class="i-ph-wifi-none-bold text-emerald-400" /> <strong>Offline</strong> — plain files on your disk</div>
+  <div class="flex items-center gap-2"><div class="i-ph-wifi-slash-bold text-emerald-400" /> <strong>Offline</strong> — plain files on your disk</div>
   <div class="flex items-center gap-2"><div class="i-ph-users-bold text-yellow-400" /> <strong>Collaboration</strong> — limited (git, shared vaults)</div>
   <div class="flex items-center gap-2"><div class="i-ph-clock-bold text-emerald-400" /> <strong>Longevity</strong> — it's just `.md` files!</div>
   <div class="flex items-center gap-2"><div class="i-ph-lock-bold text-emerald-400" /> <strong>Privacy</strong> — your files, your disk</div>
@@ -1111,7 +1151,7 @@ So where do you start? Three concrete steps. Step one: use Dexie. You get offlin
   <tbody>
     <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-lightning-bold text-pink-400 text-xs" /> Fast</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
     <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-devices-bold text-pink-400 text-xs" /> Multi-device</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
-    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-wifi-none-bold text-pink-400 text-xs" /> Works offline</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
+    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-wifi-slash-bold text-pink-400 text-xs" /> Works offline</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
     <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-users-bold text-pink-400 text-xs" /> Collaboration</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
     <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-clock-bold text-pink-400 text-xs" /> Longevity</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
     <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-lock-bold text-pink-400 text-xs" /> Privacy</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
