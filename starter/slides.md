@@ -105,13 +105,10 @@ Here's the roadmap. We'll start with where we are today — the status quo. Then
 -->
 
 ---
-layout: section
 transition: fade
 ---
 
-# Part 0
-
-## The Status Quo — Vue Abstracts the DOM, Not the Data
+<PartSlide part="0" title="The Status Quo" subtitle="Vue Abstracts the DOM, Not the Data" />
 
 <!--
 Before we talk about where we're going, let's be honest about where we are. Vue gave us reactive rendering — but the data layer? That's still on us.
@@ -281,13 +278,10 @@ This is where most Vue apps are today. Zero out of seven. Vue abstracted the DOM
 -->
 
 ---
-layout: section
 transition: fade
 ---
 
-# Part 1
-
-## Offline-First — The App That Never Stops Working
+<PartSlide part="1" title="Offline-First" subtitle="The App That Never Stops Working" />
 
 <!--
 So what if we flip the model? What if data lives on the client first, and syncs to the server when it can?
@@ -476,13 +470,10 @@ So that's Part 1. Offline-first naturally gives us two things: speed and offline
 -->
 
 ---
-layout: section
 transition: fade
 ---
 
-# Part 2
-
-## Sync Engines — The New Data Layer
+<PartSlide part="2" title="Sync Engines" subtitle="The New Data Layer" />
 
 <!--
 This is where things get really interesting. Sync engines are the missing piece between offline-first and true multi-device collaboration.
@@ -543,13 +534,10 @@ This isn't theoretical. Three of the most successful product companies — Linea
 -->
 
 ---
-layout: section
 transition: fade
 ---
 
-# Let's Build It
-
-## Dexie.js + Vue
+<PartSlide title="Let's Build It" subtitle="Dexie.js + Vue" icon="🛠️" />
 
 <!--
 Enough theory. Let's write some code! We'll use Dexie — it's the most accessible entry point for Vue developers. You can start local and add sync later.
@@ -912,13 +900,10 @@ That's Part 2. Adding a sync engine upgrades us from 2 to 4. We get multi-device
 -->
 
 ---
-layout: section
 transition: fade
 ---
 
-# Part 3
-
-## Local-First — It's About Values, Not Just Technology
+<PartSlide part="3" title="Local-First" subtitle="It's About Values, Not Just Technology" />
 
 <!--
 We've been tracking a scorecard throughout this talk. We hit 2 out of 7 with offline-first, 4 out of 7 with sync engines. Now let's reveal what those 7 actually are — and why the last 3 change everything.
@@ -1172,13 +1157,10 @@ And there it is — the full picture. Offline-first gets you 2 out of 7. Add a s
 -->
 
 ---
-layout: section
 transition: fade
 ---
 
-# Closing
-
-## The Rendering Era Is Over
+<PartSlide title="Closing" subtitle="The Rendering Era Is Over" />
 
 ---
 
