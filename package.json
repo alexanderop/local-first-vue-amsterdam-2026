@@ -17,5 +17,8 @@
   ],
   "author": "Alexander Opalic",
   "license": "MIT",
-  "packageManager": "pnpm@9.12.3"
+  "packageManager": "pnpm@9.12.3",
+  "devDependencies": {
+    "@iconify-json/ph": "^1.2.2"
+  }
 }

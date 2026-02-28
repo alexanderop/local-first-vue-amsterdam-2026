@@ -1,3 +1,7 @@
-import { defineConfig } from 'unocss'
+import { defineConfig, presetIcons } from 'unocss'
 
-export default () => defineConfig({})
+export default () => defineConfig({
+  presets: [
+    presetIcons(),
+  ],
+})

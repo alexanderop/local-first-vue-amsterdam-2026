@@ -1,13 +1,13 @@
 <template>
   <div class="bg-main slidev-layout h-full">
-    <div class="grid grid-cols-2 gap-16 h-full items-center px-16 py-12">
+    <div class="grid grid-cols-2 gap-10 h-full items-start px-14 py-12">
       <!-- Left Column -->
-      <div class="flex justify-center items-center">
+      <div class="flex flex-col">
         <slot />
       </div>
 
       <!-- Right Column -->
-      <div class="flex flex-col justify-center">
+      <div class="flex flex-col">
         <slot name="right" />
       </div>
     </div>
