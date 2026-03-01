@@ -21,6 +21,9 @@
     "build": "slidev build slides.md",
     "export": "slidev export slides.md"
   },
+  "dependencies": {
+    "roughjs": "^4.6.6"
+  },
   "devDependencies": {
     "@iconify-json/ph": "^1.2.2",
     "@slidev/cli": "^52.13.0"

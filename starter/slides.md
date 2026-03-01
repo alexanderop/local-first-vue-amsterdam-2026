@@ -2,35 +2,35 @@
 theme: '@alexop/slidev-theme-brand'
 addons:
   - '@alexop/slidev-addon-utils'
-title: 'Building Websites with Local-First and Vue'
+title: 'How to Build Local-First Apps with Vue'
 transition: slide-left
 mdc: true
 drawings:
   persist: false
 info: |
-  ## Building Websites with Local-First and Vue
+  ## How to Build Local-First Apps with Vue 
 
-  By Alexander Opalic — Vue Amsterdam 2026
-layout: cover
+  Local-First is a new community that was created based on the idea of building apps where users have more control over them. It is related to the offline-first concept, but takes it a step further. In this talk, I will explain what Local-First means and how we can build applications with Vue
+hideFooter: true
 ---
 
-# Building Websites with Local-First and Vue
-
-<div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 300, duration: 600 } }">
-
-From jQuery to reactive frameworks to sync engines — and why the data layer is the next frontier.
-
+<div class="flex items-center justify-center h-full">
+  <img src="/vue-amsterdam.png" class="max-h-full max-w-full" />
 </div>
 
-<div class="abs-bl mx-14 my-12 flex flex-col gap-2 text-left">
-  <div class="text-sm op-50">Vue Amsterdam 2026</div>
-  <div class="text-sm op-50">Alexander Opalic</div>
-</div>
+---
+
+<PartSlide title="How to Build Local-First Apps with Vue" subtitle="Vue Amsterdam 2026 — Alexander Opalic" />
 
 <!--
-Welcome everyone! Today we're going on a journey — from the days of manual DOM manipulation, through the reactive revolution, all the way to a fundamentally different way of thinking about data in web applications.
+BREATHE. Smile. Make eye contact.
 
-By the end of this talk, you'll understand what local-first means, why it matters, and how to start building this way with Vue today.
+"Hey everyone — thanks for being here. Today I want to take you on a journey: from the jQuery days of manual DOM manipulation, through the reactive revolution that Vue gave us, all the way to a fundamentally different way of thinking about data in web applications."
+
+- By the end: what local-first means, why it matters, how to start with Vue TODAY
+- Promise: you'll leave with code you can use on Monday
+
+[CHECK: 0:00 — starting]
 -->
 
 ---
@@ -40,7 +40,11 @@ By the end of this talk, you'll understand what local-first means, why it matter
 <About />
 
 <!--
-Quick intro about myself.
+- Name, company, role — keep it to 15 seconds
+- Mention: blog at alexop.dev, article comparing 7 sync engines for Vue
+- "Enough about me — let's talk about you."
+
+TRANSITION: "Quick show of hands..."
 -->
 
 ---
@@ -51,7 +55,14 @@ transition: fade-out
 # Raise your hand if you've heard of local-first
 
 <!--
-Quick pulse check — who here has heard of local-first? Great, a good number of you. For those who haven't, don't worry — by the end of this talk you'll know exactly what it means and why it matters.
+EYE CONTACT — scan the room.
+
+"Raise your hand if you've heard of local-first."
+
+- Wait 3 full seconds. Let hands go up.
+- "Great — a good number. For those who haven't, don't worry. By the end you'll know exactly what it means."
+
+TRANSITION: "Now keep those hands up..."
 -->
 
 ---
@@ -62,46 +73,33 @@ transition: fade-out
 # Keep it up if you've built an offline-capable app
 
 <!--
-Now keep your hand up if you've actually built an app that works offline. Usually way fewer hands — that's exactly why we're here today.
+"...keep your hand up if you've actually BUILT an app that works offline."
+
+PAUSE — watch hands drop. Smile.
+
+"Yeah — way fewer hands. That gap is exactly why we're here today."
+
+TRANSITION: "Here's the roadmap for the next 25 minutes..."
 -->
 
 ---
 
-# Talk Outline
-
-<div class="grid gap-3 mt-6">
-  <Card v-click variant="muted">
-    <div class="flex items-center gap-3">
-      <span class="text-white/30 font-mono text-sm w-6">0</span>
-      <span class="font-bold">The Status Quo</span>
-      <span class="text-sm op-50 ml-auto">Vue abstracts the DOM, not the data</span>
-    </div>
-  </Card>
-  <Card v-click variant="muted">
-    <div class="flex items-center gap-3">
-      <span class="text-white/30 font-mono text-sm w-6">1</span>
-      <span class="font-bold">Offline-First</span>
-      <span class="text-sm op-50 ml-auto">The app that never stops working</span>
-    </div>
-  </Card>
-  <Card v-click variant="muted">
-    <div class="flex items-center gap-3">
-      <span class="text-white/30 font-mono text-sm w-6">2</span>
-      <span class="font-bold">Sync Engines</span>
-      <span class="text-sm op-50 ml-auto">The new data layer</span>
-    </div>
-  </Card>
-  <Card v-click variant="muted">
-    <div class="flex items-center gap-3">
-      <span class="text-white/30 font-mono text-sm w-6">3</span>
-      <span class="font-bold">Local-First</span>
-      <span class="text-sm op-50 ml-auto">It's about values, not just technology</span>
-    </div>
-  </Card>
-</div>
+<PyramidOutline :items="[
+  { title: 'The Status Quo', subtitle: 'Vue abstracts the DOM, not the data' },
+  { title: 'Offline-First', subtitle: 'The app that never stops working' },
+  { title: 'Sync Engines', subtitle: 'The new data layer' },
+  { title: 'Local-First', subtitle: `It's about values, not just technology` }
+]" />
 
 <!--
-Here's the roadmap. We'll start with where we are today — the status quo. Then we'll add offline support, layer on sync engines, and finally zoom out to understand what local-first really means. Each part builds on the last. Let's go.
+"Four parts, each building on the last."
+
+- Point at pyramid as you name each: status quo → offline-first → sync engines → local-first
+- "Each level adds capabilities. By the end we'll have a full scorecard."
+
+TRANSITION: "Let's start at the bottom — the status quo."
+
+[CHECK: ~2:00 — if past 3:00 you're slow, pick up pace]
 -->
 
 ---
@@ -111,33 +109,72 @@ transition: fade
 <PartSlide part="0" title="The Status Quo" subtitle="Vue Abstracts the DOM, Not the Data" />
 
 <!--
-Before we talk about where we're going, let's be honest about where we are. Vue gave us reactive rendering — but the data layer? That's still on us.
+SLOW DOWN — this is a section transition. Let it land.
+
+"Before we talk about where we're going, let's be honest about where we are."
+
+- WHY IT MATTERS: The audience needs to feel the pain before you offer the cure
+- "Vue gave us reactive rendering — but the data layer? That's still entirely on us."
 -->
 
 ---
+clicks: 5
+---
 
-# The Problem That Remains
-
-Vue solved client-side sync, but we still <span v-mark="{ type: 'highlight', color: '#ff6bed' }" class="font-bold">duplicate logic</span> across frontend and backend.
-
-State management became its own discipline: Vuex, Pinia, TanStack Query, SWR...
-
-```
-┌─────────────────────┐         ┌─────────────────────┐
-│      FRONTEND       │         │      BACKEND        │
-│                     │         │                     │
-│  ref([])            │  fetch  │  app.get('/todos')  │
-│  loading = true     │◀───────▶│  validate(...)      │
-│  try { ... }        │  POST   │  db.insert(...)     │
-│  catch { ... }      │◀───────▶│  authorize(...)     │
-│  finally { ... }    │         │                     │
-│  invalidateCache()  │         │  SAME LOGIC         │
-│                     │         │  DUPLICATED         │
-└─────────────────────┘         └─────────────────────┘
-```
+<div class="flex items-center justify-center h-full">
+<DuplicatedArchDiagram
+  :panels="[
+    {
+      title: 'FRONTEND',
+      items: [
+        { id: 'ref', label: 'ref([])', click: 1 },
+        { id: 'loading', label: 'loading = true', click: 1 },
+        { id: 'try', label: 'try { ... }', click: 1 },
+        { id: 'catch', label: 'catch { ... }', click: 1 },
+        { id: 'finally', label: 'finally { ... }', click: 1 },
+        { id: 'cache', label: 'invalidateCache()', click: 1 },
+      ],
+      warnings: [
+        { text: '⚠ validation' },
+        { text: '⚠ auth checks' },
+        { text: '⚠ error types' },
+      ],
+      warningClick: 4,
+    },
+    {
+      title: 'BACKEND',
+      items: [
+        { id: 'get', label: 'app.get(\'/todos\')', click: 2 },
+        { id: 'validate', label: 'validate(...)', click: 2 },
+        { id: 'insert', label: 'db.insert(...)', click: 2 },
+        { id: 'auth', label: 'authorize(...)', click: 2 },
+      ],
+      warnings: [
+        { text: '⚠ validation' },
+        { text: '⚠ auth checks' },
+        { text: '⚠ error types' },
+      ],
+      warningClick: 4,
+    },
+  ]"
+  :connections="[
+    { label: 'fetch', click: 3 },
+    { label: 'POST', click: 3 },
+  ]"
+  :callout="{ label: 'DUPLICATED', click: 5, variant: 'danger' }"
+  :seed="150"
+/>
+</div>
 
 <!--
-This is the pain we all know. We solved rendering with Vue, but we're still stuck manually syncing data between client and server. Loading states, error handling, cache invalidation — we write this over and over. Sound familiar?
+Point at the diagram. Let them read it for 3 seconds.
+
+- "Look at all this duplicated logic — validation on both sides, auth checks on both sides, error types on both sides."
+- "We solved rendering. But we're still manually wiring the data plumbing. Over and over."
+
+PAUSE — let them nod. They know this pain.
+
+TRANSITION: "Kyle Mathews has a great analogy for this..."
 -->
 
 ---
@@ -150,16 +187,27 @@ transition: fade
 Kyle Mathews
 
 <!--
-Kyle Mathews nailed it. Just like we used to manually sync the DOM, we now manually sync data between frontend and backend. History is repeating itself. Let me show you what that looks like in code.
+SLOW DOWN — this is a key quote.
+
+- Kyle Mathews = founder of Gatsby, now CEO of ElectricSQL
+- Said this on localfirst.fm podcast
+- "With jQuery, you'd grab a DOM element, tweak text, remove a child... you were fiddling with the DOM constantly. Vue freed us from that."
+- "But we're STILL doing the same imperative dance with DATA — fetch this, cache that, retry this, invalidate that."
+- "We're in the jQuery era of data. History is repeating."
+
+PAUSE — let the analogy sink in.
+
+TRANSITION: "Let me show you what that looks like in Vue code..."
 -->
 
 ---
-layout: two-cols
 ---
 
-## Traditional Vue
+# What Does This Look Like in Code?
 
+````md magic-move {lines: true}
 ```ts
+// Traditional Vue
 const todos = ref([])
 const loading = ref(true)
 const error = ref(null)
@@ -176,20 +224,8 @@ async function load() {
   }
 }
 ```
-
-<div class="text-sm mt-2">
-
-15 lines, loading states, error handling, cache invalidation, <span class="text-pink-400 font-bold">works online only</span>
-
-</div>
-
-::right::
-
-<div v-click>
-
-## With a Sync Engine
-
 ```ts
+// With a Sync Engine
 const todos = useQuery(...)
 
 function addTodo(title) {
@@ -200,43 +236,112 @@ function addTodo(title) {
 // No cache invalidation.
 // Data is already local.
 ```
-
-<div class="text-sm mt-2">
-
-8 lines, no loading states, no error handling, no cache invalidation, <span class="text-green-400 font-bold">works offline + syncs</span>
-
-</div>
-
-</div>
+```ts
+// Traditional Vue          // With a Sync Engine
+const todos = ref([])       const todos = useQuery(...)
+const loading = ref(true)
+const error = ref(null)     function addTodo(title) {
+                              mutate({ title })
+async function load() {     }
+  loading.value = true
+  try {                     // No loading. No error.
+    const res = fetch(...)  // No cache invalidation.
+    todos.value = res       // Data is already local.
+  } catch (e) {
+    error.value = e
+  } finally {
+    loading.value = false
+  }
+}
+```
+````
 
 <!--
-Look at this difference. On the left, the traditional approach — tons of boilerplate just to fetch and display data. On the right, a sync engine handles all of that for you. The data is local, so reads are instant. Writes queue and sync when possible. But how did we get here?
+Start with the traditional code visible. "This is what we all write. 15 lines just to fetch some todos. Loading states, error handling, cache invalidation..."
+
+CLICK — magic move morphs the code. Watch the audience react as lines disappear.
+
+"8 lines. The complexity just... vanished."
+
+CLICK — summary text appears.
+
+"No loading. No error handling. Works offline AND syncs. But how? Let's rewind."
+
+TRANSITION: "To understand this, let's look at what Vue already solved..."
+
+[CHECK: ~5:00]
 -->
 
 ---
+clicks: 2
+---
 
-# A Brief History: From DOM Sync to Data Sync
+# Vue Solved DOM Sync
 
-Vue solved **DOM sync** — you declare state with `ref()`, the framework keeps the UI in sync.
+You declare state with `ref()`, the framework keeps the UI in sync.
 
-```
-Source → Reconciler → Target
+<FlowDiagram
+  :nodes="[
+    { id: 'source', label: 'Source', subtitle: 'ref(0)', variant: 'accent' },
+    { id: 'reconciler', label: 'Reconciler', subtitle: 'Virtual DOM diff', click: 1 },
+    { id: 'target', label: 'Target', subtitle: 'Real DOM', click: 2, variant: 'success' },
+  ]"
+  :edges="[
+    { from: 'source', to: 'reconciler', click: 1 },
+    { from: 'reconciler', to: 'target', click: 2 },
+  ]"
+/>
 
-ref(0)  →  Virtual DOM (diff)  →  Real DOM
-```
-
-But who solves <span v-mark="{ type: 'circle', color: '#ff6bed' }" class="font-bold">data sync</span>?
-
-```
-jQuery era:    YOU were the sync engine for the DOM
-Vue era:       Vue became the sync engine for the DOM
-Now:           Who's the sync engine for DATA?
-```
-
-The **source → reconciler → target** pattern repeats at every layer. Vue solved it for rendering. Sync engines solve it for data. This is the pattern we'll see again and again.
+The **source → reconciler → target** pattern — remember it.
 
 <!--
-Here's the key insight. In the jQuery era, you were the sync engine — manually updating the DOM with getElementById and appendChild. Vue solved that with reactivity. But now we have the exact same problem one layer up: data sync between client and server. The source-reconciler-target pattern repeats. Vue solved rendering. Now we need something to solve data. Keep this pattern in mind — it comes back later.
+- "Vue solved this: you declare state, the framework syncs the DOM."
+- Point at the three boxes: source → reconciler → target
+
+CLICK — reveal the callback.
+
+"This pattern — source, reconciler, target — remember it. It comes back."
+
+- Repeat: "Source. Reconciler. Target." Emphasize each word.
+-->
+
+---
+clicks: 2
+---
+
+# But Who Solves Data Sync?
+
+<FlowDiagram
+  :nodes="[
+    { id: 'jquery', label: 'jQuery Era', subtitle: 'YOU → DOM', variant: 'muted' },
+    { id: 'vue', label: 'Vue Era', subtitle: 'Vue → DOM', click: 1 },
+    { id: 'now', label: 'Now', subtitle: '??? → DB', click: 2, variant: 'accent' },
+  ]"
+  :edges="[
+    { from: 'jquery', to: 'vue', click: 1 },
+    { from: 'vue', to: 'now', click: 2 },
+  ]"
+/>
+
+<v-clicks>
+
+- jQuery era: **YOU** were the sync engine for the DOM
+- Vue era: **Vue** became the sync engine for the DOM
+- Now: Who's the sync engine for **DATA**?
+
+</v-clicks>
+
+<!--
+Build this progressively with clicks:
+
+CLICK 1: "jQuery era — YOU were the sync engine. getElementById. appendChild. Manual everything."
+CLICK 2: "Vue era — Vue became the sync engine for the DOM. Declarative. Reactive."
+CLICK 3: "Now — who's the sync engine for DATA?" PAUSE. Let them think.
+
+- "The same pattern repeats, one layer up."
+- "Vue solved rendering. Now we need something to solve data."
+
+TRANSITION: "Let's see where that leaves us on the scorecard..."
 -->
 
 ---
@@ -274,7 +379,18 @@ Vue solved **rendering**. But the data layer? Still the jQuery era. **0 out of 7
 </div>
 
 <!--
-This is where most Vue apps are today. Zero out of seven. Vue abstracted the DOM beautifully — but we're still manually wiring up data fetching, caching, syncing, error handling. The rendering era is solved. The data era hasn't started yet. Let's change that.
+CLICK — reveal the 7 question marks.
+
+"This is where most Vue apps sit today. Seven question marks. Zero solved."
+
+CLICK — reveal the summary.
+
+- Don't list all seven — just gesture at them
+- "The rendering era is solved. The data era hasn't started. Let's change that."
+
+TRANSITION: "What if we flipped the model?"
+
+[CHECK: ~7:00 — entering Part 1]
 -->
 
 ---
@@ -284,9 +400,15 @@ transition: fade
 <PartSlide part="1" title="Offline-First" subtitle="The App That Never Stops Working" />
 
 <!--
-So what if we flip the model? What if data lives on the client first, and syncs to the server when it can?
+Section transition — let the slide breathe for a moment.
+
+"What if we flip the model? What if data lives on the client FIRST, and syncs to the server when it can?"
+
+BREATHE.
 -->
 
+---
+clicks: 5
 ---
 
 # What Is Offline-First?
@@ -295,28 +417,49 @@ The app works without a network connection — reads and writes happen **locally
 
 The server is still the authority, but the client doesn't wait for it.
 
-```
-        ONLINE                          OFFLINE
-┌─────────────────────┐       ┌─────────────────────┐
-│  ┌───────┐  read    │       │  ┌───────┐  read    │
-│  │Local  │◀─────    │       │  │Local  │◀─────    │
-│  │Store  │          │       │  │Store  │          │
-│  │(IDB/  │─────▶    │       │  │(IDB/  │─────▶    │
-│  │SQLite)│  write   │       │  │SQLite)│  write   │
-│  └───┬───┘          │       │  └───┬───┘          │
-│      │ sync ↕       │       │      │ queued       │
-│  ┌───▼───┐          │       │      │ ✗ no network │
-│  │Server │          │       │  ┌───▼───┐          │
-│  │  DB   │          │       │  │Pending│          │
-│  └───────┘          │       │  │Writes │          │
-└─────────────────────┘       └─────────────────────┘
-                                Still works!
-```
+<SplitDiagram
+  :panels="[
+    {
+      title: 'ONLINE',
+      nodes: [
+        { id: 'local', label: 'Local Store', subtitle: '(IDB/SQLite)', variant: 'accent', leftLabel: '◀── read', rightLabel: 'write ──▶', click: 1 },
+        { id: 'server', label: 'Server DB', variant: 'success', click: 2 },
+      ],
+      edges: [
+        { from: 'local', to: 'server', label: 'sync ↕', click: 2 },
+      ],
+    },
+    {
+      title: 'OFFLINE',
+      click: 3,
+      nodes: [
+        { id: 'local2', label: 'Local Store', subtitle: '(IDB/SQLite)', variant: 'accent', leftLabel: '◀── read', rightLabel: 'write ──▶', click: 3 },
+        { id: 'pending', label: 'Pending Writes', variant: 'muted', click: 4 },
+      ],
+      edges: [
+        { from: 'local2', to: 'pending', label: 'queued', click: 4 },
+      ],
+      badges: [
+        { text: '✗ no network', position: 'inline', variant: 'danger', click: 4 },
+        { text: 'Still works!', position: 'bottom', variant: 'success', click: 5 },
+      ],
+    },
+  ]"
+  :seed="200"
+/>
 
 <!--
-Offline-first means the app works even when the network drops. Reads come from a local store — IndexedDB or SQLite. Writes are queued locally and sync when connectivity returns.
+Point at ONLINE side: "Reads and writes go to local store. Syncs in the background."
+Point at OFFLINE side: "Network drops? App doesn't care. Writes queue up, sync when it returns."
+
+- Key phrase: "The app never stops working."
+- "Still works!" — point at the bottom right
+
+TRANSITION: "But there's a gotcha most people miss..."
 -->
 
+---
+clicks: 5
 ---
 
 # PWAs: The Shell That Makes Offline Possible
@@ -325,30 +468,50 @@ Before we can store data offline, we need the **app itself** to load offline.
 
 Progressive Web Apps give us this via **Service Workers**.
 
-```
-WITHOUT PWA                        WITH PWA
-───────────                        ────────
-
-User opens app offline:            User opens app offline:
-
-┌─────────────────────┐           ┌─────────────────────┐
-│                     │           │  ┌───────────────┐  │
-│    ┌───────────┐    │           │  │ Service Worker│  │
-│    │  Chrome   │    │           │  │ intercepts    │  │
-│    │  Dino     │    │           │  │ request       │  │
-│    │           │    │           │  └───────┬───────┘  │
-│    │  No       │    │           │          ▼          │
-│    │  Internet │    │           │  ┌───────────────┐  │
-│    └───────────┘    │           │  │ Cached HTML,  │  │
-│                     │           │  │ JS, CSS, WASM │  │
-│ Data in IndexedDB?  │           │  │ → App loads!  │  │
-│ Doesn't matter —    │           │  └───────────────┘  │
-│ app can't even load.│           │                     │
-└─────────────────────┘           └─────────────────────┘
-```
+<PwaDiagram
+  :panels="[
+    {
+      title: 'WITHOUT PWA',
+      titleIcon: '❌',
+      boxes: [
+        { id: 'error', label: '🦕 Chrome Dino', subtitle: '\"No Internet\"', variant: 'danger', click: 1 },
+      ],
+      arrows: [],
+      annotations: [
+        { text: 'IndexedDB has data...', variant: 'muted', click: 2 },
+        { text: 'but who cares?', variant: 'muted', click: 2 },
+        { text: 'App can\\'t even load.', variant: 'danger', click: 2 },
+      ],
+    },
+    {
+      title: 'WITH PWA',
+      titleIcon: '✅',
+      boxes: [
+        { id: 'sw', label: 'Service Worker', subtitle: 'intercepts fetch', variant: 'accent', click: 3 },
+        { id: 'cache', label: 'Cache Storage', subtitle: 'HTML, JS, CSS, WASM', variant: 'default', click: 4 },
+      ],
+      arrows: [
+        { from: 'sw', to: 'cache', click: 4 },
+      ],
+      annotations: [],
+      resultText: 'App loads!',
+      resultIcon: '🚀',
+      resultVariant: 'success',
+      resultClick: 5,
+    },
+  ]"
+  :seed="300"
+/>
 
 <!--
-This is a crucial point that's easy to miss. You can put all your data in IndexedDB, but if the app shell can't load offline, none of it matters. Service Workers cache your HTML, JS, CSS, and even WASM binaries so the app loads from cache.
+WHY IT MATTERS: Most people skip this — it's the #1 gotcha.
+
+"You can put all your data in IndexedDB. But if the app shell itself can't load offline — none of it matters. You get the Chrome dinosaur."
+
+Point at left: "Without PWA — dino."
+Point at right: "With PWA — Service Worker intercepts, serves from cache. App loads."
+
+- "The PWA is the FOUNDATION. Data layer sits on top."
 -->
 
 ---
@@ -382,36 +545,58 @@ The PWA is the **delivery mechanism**, IndexedDB/SQLite is the **data layer**.
 ```
 
 <!--
-Here's the full stack. Vue components at the top, a data layer with IndexedDB or SQLite in the middle, and a Service Worker at the bottom ensuring the whole thing loads offline. Three layers working together.
+- Top: Vue/Nuxt components — your app
+- Middle: Data layer — IndexedDB or SQLite WASM
+- Bottom: Service Worker — caches the shell
+
+"Three layers. Vue for rendering, a local database for data, and a Service Worker to make the whole thing load offline."
+
+- Mention: vite-plugin-pwa or @vite-pwa/nuxt — easy to add
+
+TRANSITION: "Now which local database should you pick?"
 -->
 
 ---
-layout: two-cols
----
 
-## IndexedDB
+# Local Storage Options
 
-- Native browser API since 2015
-- Object store (not relational)
-- Async only
-- Widely considered slow
-- Works everywhere
-
-**Libraries:** Dexie — nice API, live queries, transactions
-
-::right::
-
-## SQLite (WASM)
-
-- Compiled to WASM via wa-sqlite or official SDK
-- Full SQL engine — ACID, triggers, FTS, JSON, CTE
-- OPFS + sync handles (2023)
-- ~500KB bundle
-
-**Libraries:** wa-sqlite, SQLite WASM (official), PGlite
+```
+┌─────────────────────────────── Browser ───────────────────────────────┐
+│                                                                       │
+│  ┌───────────────────────────┐    ┌───────────────────────────────┐   │
+│  │        IndexedDB          │    │        SQLite (WASM)          │   │
+│  │                           │    │                               │   │
+│  │  ┌─────────────────────┐  │    │  ┌─────────────────────────┐  │   │
+│  │  │  Object Store A     │  │    │  │  ┌─────┬──────┬──────┐  │  │   │
+│  │  │  { key: value }     │  │    │  │  │ id  │ name │ age  │  │  │   │
+│  │  └─────────────────────┘  │    │  │  ├─────┼──────┼──────┤  │  │   │
+│  │  ┌─────────────────────┐  │    │  │  │  1  │ Alex │  30  │  │  │   │
+│  │  │  Object Store B     │  │    │  │  │  2  │ Sara │  25  │  │  │   │
+│  │  │  { key: value }     │  │    │  │  └─────┴──────┴──────┘  │  │   │
+│  │  └─────────────────────┘  │    │  └─────────────────────────┘  │   │
+│  │                           │    │                               │   │
+│  │  API: async, callbacks    │    │  API: full SQL queries        │   │
+│  │  Storage: native          │    │  Storage: OPFS / memory       │   │
+│  │  Since: 2015, everywhere  │    │  Bundle: ~500KB WASM          │   │
+│  └───────────────────────────┘    └───────────────────────────────┘   │
+│                                                                       │
+│  ┌─ Libraries ─────────────────────────────────────────────────────┐  │
+│  │  Dexie             wa-sqlite       SQLite WASM        PGlite   │  │
+│  └─────────────────────────────────────────────────────────────────┘  │
+└───────────────────────────────────────────────────────────────────────┘
+```
 
 <!--
-Two main options for client-side storage. IndexedDB is native and everywhere, but its API is rough — Dexie wraps it beautifully. SQLite via WASM is the new kid on the block, bringing full SQL power to the browser. Both work, different tradeoffs.
+Don't read the diagram — audience can read. Focus on the comparison:
+
+- Left: "IndexedDB — native, everywhere. API is rough. Dexie wraps it beautifully."
+- Right: "SQLite WASM — full SQL engine compiled to WebAssembly. The new kid on the block."
+- Point at the key-value vs table visual: "Object stores vs relational tables — fundamentally different models."
+- "Both work. Different tradeoffs. For today's demo we'll use Dexie."
+
+TRANSITION: "Storing data locally is the easy part. The hard part..."
+
+[CHECK: ~10:00]
 -->
 
 ---
@@ -429,7 +614,17 @@ Storing data locally is the **easy part**.
 </v-clicks>
 
 <!--
-We can store data locally no problem. But the moment you want that data on multiple devices, or want two users editing the same thing... you've entered distributed systems territory. And that needs a sync engine.
+Build tension here — this is the cliffhanger before Part 2.
+
+"Storing data locally? Easy. We just did it."
+
+CLICK: "But what happens when two devices change the same data offline?"
+CLICK: "That's a distributed systems problem."
+CLICK: "And it needs a sync engine."
+
+PAUSE — let the problem statement hang.
+
+TRANSITION: "But first, let's see what offline-first already gives us..."
 -->
 
 ---
@@ -466,7 +661,17 @@ We can store data locally no problem. But the moment you want that data on multi
 </div>
 
 <!--
-So that's Part 1. Offline-first naturally gives us two things: speed and offline capability. But there's a lot more we're missing — five question marks still open. We need something more.
+CLICK — reveal the 2 green cards.
+
+"Offline-first gives us two things for free: speed — because data is local, reads are instant — and offline capability."
+
+CLICK — reveal the 5 question marks.
+
+"But five question marks are still open. We need something more."
+
+TRANSITION: "That something is a sync engine."
+
+[CHECK: ~12:00 — entering Part 2]
 -->
 
 ---
@@ -476,36 +681,60 @@ transition: fade
 <PartSlide part="2" title="Sync Engines" subtitle="The New Data Layer" />
 
 <!--
-This is where things get really interesting. Sync engines are the missing piece between offline-first and true multi-device collaboration.
+Section transition — energy up! This is the exciting part.
+
+"This is where things get really interesting."
+
+BREATHE.
 -->
 
+---
+clicks: 2
 ---
 
 # What Is a Sync Engine?
 
 Same pattern as Vue's reactivity, but **bidirectional** and **across the network**.
 
-```
-Layer 2: DATA SYNC (bidirectional — the hard part)
-┌──────────────────────────────────────────────────────┐
-│  ┌──────────┐     ┌─────────────┐     ┌──────────┐  │
-│  │  Local   │◀───▶│ Sync Engine │◀───▶│  Server  │  │
-│  │  Store   │     │  (protocol) │     │  Database│  │
-│  └────┬─────┘     └─────────────┘     └──────────┘  │
-│       │                                              │
-└───────┼──────────────────────────────────────────────┘
-        │
-Layer 1: UI SYNC (one-directional — Vue already solved this)
-┌───────┼──────────────────────────────────────────────┐
-│       ▼                                              │
-│  ┌──────────┐     ┌─────────────┐     ┌──────────┐  │
-│  │  ref()   │────▶│ Virtual DOM │────▶│ Real DOM │  │
-│  └──────────┘     └─────────────┘     └──────────┘  │
-└──────────────────────────────────────────────────────┘
-```
+<div class="text-xs op-60 mb-1">Layer 2: DATA SYNC</div>
+<FlowDiagram
+  :nodes="[
+    { id: 'local', label: 'Local Store', variant: 'accent' },
+    { id: 'sync', label: 'Sync Engine', subtitle: 'protocol', click: 1 },
+    { id: 'server', label: 'Server DB', click: 1, variant: 'success' },
+  ]"
+  :edges="[
+    { from: 'local', to: 'sync', click: 1 },
+    { from: 'sync', to: 'server', click: 1 },
+  ]"
+  :nodeHeight="60"
+  :gap="80"
+  :seed="100"
+/>
+
+<div class="text-xs op-60 mb-1 mt-2">Layer 1: UI SYNC (Vue already solved this)</div>
+<FlowDiagram
+  :nodes="[
+    { id: 'ref', label: 'ref()', variant: 'muted', click: 2 },
+    { id: 'vdom', label: 'Virtual DOM', variant: 'muted', click: 2 },
+    { id: 'dom', label: 'Real DOM', variant: 'muted', click: 2 },
+  ]"
+  :edges="[
+    { from: 'ref', to: 'vdom', click: 2 },
+    { from: 'vdom', to: 'dom', click: 2 },
+  ]"
+  :nodeHeight="60"
+  :gap="80"
+  :seed="200"
+/>
 
 <!--
-Remember the source-reconciler-target pattern from earlier? A sync engine is the same thing, but for data across the network. Layer 1 — Vue handles UI sync. Layer 2 — a sync engine handles data sync. Two layers of the same pattern.
+"Remember the pattern I asked you to remember? Source, reconciler, target."
+
+Point at Layer 1: "Vue handles UI sync — we know this."
+Point at Layer 2: "A sync engine is the SAME pattern, but for data across the network."
+
+- "Two layers. Same idea. Vue solved layer 1. A sync engine solves layer 2."
 -->
 
 ---
@@ -514,23 +743,29 @@ Remember the source-reconciler-target pattern from earlier? A sync engine is the
 
 Three teams — **Linear, Figma, and Asana** — all converged on this independently.
 
-```
-┌──────────────┐                    ┌──────────────┐
-│ LOCAL STORE  │                    │ SERVER STORE │
-│              │     Sync           │              │
-│  Instant     │     Protocol       │  Authority   │
-│  reads       │◀──────────────────▶│  Durability  │
-│  Instant     │  (minimal deltas)  │  Server-side │
-│  writes      │                    │  compute     │
-│  No          │                    │              │
-│  spinners    │                    │              │
-└──────────────┘                    └──────────────┘
-```
+<FlowDiagram
+  :nodes="[
+    { id: 'local', label: 'Local Store', subtitle: 'Instant reads/writes', variant: 'accent' },
+    { id: 'server', label: 'Server Store', subtitle: 'Authority + durability', variant: 'success' },
+  ]"
+  :edges="[
+    { from: 'local', to: 'server', label: 'sync protocol' },
+  ]"
+  :gap="160"
+/>
 
 Three teams built this independently. **Same architecture.** That's a strong signal.
 
 <!--
-This isn't theoretical. Three of the most successful product companies — Linear, Figma, and Asana — all independently arrived at the same architecture. Local store for instant reads and writes, server store for durability, and a sync protocol to keep them in sync.
+"This isn't theoretical. Linear, Figma, Asana — three of the most successful product teams — all independently arrived at the SAME architecture."
+
+PAUSE — let "independently" land. That's the signal.
+
+- Local store = instant reads/writes, no spinners
+- Server store = durability, authority
+- Sync protocol = minimal deltas between them
+
+TRANSITION: "Let's build this ourselves. With Dexie and Vue."
 -->
 
 ---
@@ -540,7 +775,14 @@ transition: fade
 <PartSlide title="Let's Build It" subtitle="Dexie.js + Vue" icon="🛠️" />
 
 <!--
-Enough theory. Let's write some code! We'll use Dexie — it's the most accessible entry point for Vue developers. You can start local and add sync later.
+Energy shift — hands-on mode!
+
+"Enough theory. Let's write some code."
+
+- Dexie = most accessible entry point for Vue developers
+- Start local, add sync later — progressive upgrade path
+
+[CHECK: ~14:00 — code section starts]
 -->
 
 ---
@@ -564,7 +806,12 @@ Enough theory. Let's write some code! We'll use Dexie — it's the most accessib
 </Callout>
 
 <!--
-Dexie is great for Vue developers because it follows the same reactive patterns we're already used to. liveQuery works like computed — when the data changes, your UI updates. And the upgrade path from local-only to cloud sync is just an npm install and one config line.
+Build progressively with clicks — don't read the list.
+
+- Key selling point: "liveQuery is reactive like computed() — when data changes, your UI updates."
+- Upgrade path: "Go from local-only to cloud sync with one npm install and one config line."
+
+TRANSITION: "Let me show you the three steps..."
 -->
 
 ---
@@ -603,7 +850,16 @@ db.cloud.configure({
 ```
 
 <!--
-Here's the database definition. Standard Dexie setup with the cloud addon. The @ prefix on id means Dexie Cloud generates the IDs. The cloud.configure call at the bottom is all you need to enable sync. One line to go from local to cloud.
+SLOW DOWN through code — point at highlighted sections as they animate.
+
+- Lines 1-2: "Import Dexie and the cloud addon."
+- Lines 4-9: "Standard TypeScript interface."
+- Lines 11-20: "Extend Dexie. The @ prefix means cloud-generated IDs."
+- Lines 22-27: "cloud.configure — THIS is all you need for sync. One call."
+
+Key takeaway: "One line to go from local to cloud."
+
+TRANSITION: "Now let's use this in a Vue composable..."
 -->
 
 ---
@@ -657,7 +913,21 @@ export function useTodos() {
 </Callout>
 
 <!--
-This is the full composable. liveQuery from Dexie gives us a reactive subscription to IndexedDB data — just like computed, it re-evaluates when the underlying data changes. No loading state. No error handling boilerplate. No cache invalidation. Data is local, so reads are instant. And it already syncs across devices.
+Walk through the highlighted sections:
+
+- Lines 1-4: "Imports — Dexie, VueUse for RxJS bridge, liveQuery."
+- Lines 6-7: "Standard Vue imports."
+- Lines 9-13: "HERE's the magic. liveQuery wraps your IndexedDB query in a reactive observable. useObservable from VueUse bridges it to Vue's reactivity."
+- Lines 15-17: "Regular computed — works on top of the live query."
+- Lines 19-35: "addTodo and toggleTodo — just write to the DB. No loading state. No error handling. No cache invalidation."
+
+PAUSE.
+
+"Notice what's MISSING. No loading ref. No error ref. No try/catch. Data is local. Reads are instant. It already syncs."
+
+Required packages: dexie, dexie-cloud-addon, rxjs, @vueuse/rxjs
+
+[CHECK: ~17:00]
 -->
 
 ---
@@ -693,7 +963,17 @@ Two users edit the same todo offline, then reconnect:
 You don't write this logic. **Dexie handles it.**
 
 <!--
-Conflict resolution is automatic. If users edit different fields, Dexie auto-merges them. Same field? Last write wins. Delete versus update? Delete wins to prevent zombie records. You get all of this for free.
+Walk through the diagram — tell the story:
+
+"User A changes the title offline. User B toggles completed offline. They both reconnect."
+
+- Different fields → auto-merge. "Both changes survive."
+- Same field → last-write-wins. "Not perfect, but predictable."
+- Delete vs update → delete wins. "Prevents zombie records."
+
+"You don't write any of this. Dexie handles it."
+
+TRANSITION: "So we've built a working sync app. But here's the uncomfortable question..."
 -->
 
 ---
@@ -710,9 +990,21 @@ After everything we've seen — would you say yes or no?
 </div>
 
 <!--
-Here's where we need to be honest. We've built something great, but is it actually local-first? Let's find out.
+PAUSE — build tension.
 
-[click] Take a moment. Think about it. Raise your hand if you'd say yes — Dexie Cloud is truly local-first. And raise your hand if you'd say no. Interesting split. Let me show you the answer.
+"We've built something great. But is it actually local-first?"
+
+CLICK — reveal the sub-question.
+
+EYE CONTACT. "Think about it. Hands up — who says yes?"
+
+Wait 3 seconds. Count hands.
+
+"Who says no?"
+
+"Interesting. Let me show you the answer."
+
+[CHECK: ~19:00]
 -->
 
 ---
@@ -761,7 +1053,17 @@ Martin Kleppmann defines **truly local-first** as meeting three criteria:
 </Callout>
 
 <!--
-Kleppmann's definition cuts right through the noise. Truly local-first needs three things: multi-device sync, offline support, and surviving the developer shutting down. Dexie Cloud passes two out of three. And that third one — surviving shutdown — is the defining criterion. If they shut down tomorrow, your local data survives in IndexedDB, but sync, auth, and new device setup are all gone. Some engines like Zero are open-source and self-hostable, which helps — but most teams still depend on hosted infrastructure in practice.
+Martin Kleppmann = author of "Designing Data-Intensive Applications"
+
+Build progressively with clicks:
+
+CLICK 1: "Multiplayer sync? Yes — while their cloud is up. But tied to their servers."
+CLICK 2: "Offline? Full pass. IndexedDB works great."
+CLICK 3: "Survives shutdown? No." PAUSE. "If Dexie shuts down tomorrow, your local data survives in IndexedDB. But sync? Auth? New device setup? All gone."
+
+CLICK 4: "2 out of 3. And number 3 is the one that matters most."
+
+- Some engines like Zero are open-source and self-hostable — helps, but most teams still rely on hosted infra in practice
 -->
 
 ---
@@ -808,7 +1110,16 @@ Each step improves resilience, but none is the full answer. Notice: the P2P opti
 </Callout>
 
 <!--
-So what would actually satisfy that third criterion? Here's a spectrum. Proprietary servers offer zero protection. Open-source self-hostable is better, but who's going to run a server for your grandma? Peer-to-peer removes the central server entirely, but offline peers can't discover each other without signaling. File sync via Dropbox or iCloud is actually the most resilient — but real-time collaboration breaks. No single approach nails it. But notice that P2P option — it needs conflict resolution without a central authority. Peers must independently merge changes and converge.
+Build the table progressively — worst to best:
+
+CLICK 1: "Proprietary servers — zero protection. They shut down, you're done."
+CLICK 2: "Open-source self-hostable — better. But who runs a server for your grandma?"
+CLICK 3: "Peer-to-peer — no central server! But... offline peers can't find each other."
+CLICK 4: "File sync — Dropbox, iCloud. Actually the MOST resilient! But real-time collab breaks."
+
+CLICK 5 (callout): "No single approach nails it. But notice the P2P option — it needs conflict resolution WITHOUT a central authority."
+
+TRANSITION: "And that's where CRDTs come in."
 -->
 
 ---
@@ -848,7 +1159,23 @@ The server needs **zero conflict-resolution logic** — it just relays bytes. Th
 </Callout>
 
 <!--
-Let's answer that hanging question about P2P conflict resolution. Imagine two peers both increment a shared counter while offline. Peer A counted 3 things, Peer B counted 2. When they reconnect, last-write-wins gives you 3 or 2 — both wrong. The real answer is 5. [click] A G-Counter CRDT solves this elegantly: each peer only increments its own slot in a map. To merge, you take the max of each key. A:3, B:2 — sum is 5. Correct, deterministic, no coordination needed. [click] Here's the key insight for our architecture: the server doesn't need any conflict resolution logic at all. It just relays bytes between peers. This is what makes true peer-to-peer sync possible — and it's the foundation that sync engines build on.
+SLOW DOWN — this is the most technical slide. Explain carefully.
+
+CLICK 1: "Imagine two peers offline, both incrementing a counter. A counted 3, B counted 2."
+- "They reconnect. Last-write-wins gives you 3 or 2 — BOTH WRONG."
+- "The real answer is 5."
+
+PAUSE — let the problem land.
+
+CLICK 2: "G-Counter CRDT. Each peer owns a slot. To merge: take the max per key."
+- "A:3, B:2. Sum = 5. Correct. Deterministic. No coordination."
+
+CLICK 3: "Key insight: the SERVER needs zero conflict resolution logic. It just relays bytes."
+- "THIS is what makes true P2P sync possible."
+
+TRANSITION: "Let's update our scorecard..."
+
+[CHECK: ~22:00]
 -->
 
 ---
@@ -896,7 +1223,15 @@ Let's answer that hanging question about P2P conflict resolution. Imagine two pe
 </div>
 
 <!--
-That's Part 2. Adding a sync engine upgrades us from 2 to 4. We get multi-device sync and real-time collaboration. But there are still three things we haven't addressed. What are they? Turns out, they're not technology problems at all.
+CLICK 1: "From 2 to 4. Sync engines add multi-device and collaboration."
+CLICK 2: Point at the 7 cards — "Two green from before, two new pink stars."
+CLICK 3: "But three question marks remain."
+
+PAUSE.
+
+"Turns out — they're not technology problems at all."
+
+TRANSITION: "They're values."
 -->
 
 ---
@@ -906,7 +1241,13 @@ transition: fade
 <PartSlide part="3" title="Local-First" subtitle="It's About Values, Not Just Technology" />
 
 <!--
-We've been tracking a scorecard throughout this talk. We hit 2 out of 7 with offline-first, 4 out of 7 with sync engines. Now let's reveal what those 7 actually are — and why the last 3 change everything.
+Section transition — this is the philosophical turn. Slow down.
+
+"We've been tracking a scorecard. 0, then 2, then 4. Now let's reveal what those 7 actually are."
+
+BREATHE.
+
+[CHECK: ~23:00 — if past 25:00, speed up closing slides]
 -->
 
 ---
@@ -941,7 +1282,15 @@ From the Ink & Switch essay on local-first software (2019):
 </div>
 
 <!--
-Here they are — the 7 ideals of local-first software. The first four are technology. We've already seen them. But the last three — longevity, privacy, user control — those are VALUES. That's what makes local-first fundamentally different from just another architecture pattern. It's a philosophy about who owns the data.
+From the Ink & Switch essay (2019) — the foundational text.
+
+CLICK 1 — Technology: "The first four we already know. Fast, multi-device, offline, collaboration. Technology."
+
+CLICK 2 — Values: "But THESE three — longevity, privacy, user control..."
+
+PAUSE.
+
+"These are VALUES. Not features. That's what makes local-first fundamentally different from just another architecture pattern. It's a philosophy about who owns the data."
 -->
 
 ---
@@ -995,7 +1344,15 @@ Server can't reject your write → it just relays
 </div>
 
 <!--
-This is the key philosophical difference. Offline-first still treats the server as the authority — the client is just a cache. Local-first flips that completely. You are the owner of your data. The server is just a utility for relay and backup. It can't reject your writes. It just syncs them.
+Point left: "Offline-first asks: how do I keep working without a server? The server is still the OWNER. Client is a cache."
+
+Point right: "Local-first asks a different question entirely: why does the server own my data AT ALL?"
+
+PAUSE — let the contrast land.
+
+"YOU are the owner. Server is a utility. It can't reject your writes. It just relays them."
+
+- This is the single most important conceptual shift in the talk
 -->
 
 ---
@@ -1021,7 +1378,14 @@ The app that comes closest to nailing all 7 ideals? **Obsidian.**
 </Callout>
 
 <!--
-Obsidian is the gold standard. It works because it uses the filesystem — plain markdown files. But on the web we don't have that luxury. We need IndexedDB or SQLite plus a sync layer. And every sync engine today ties you to their cloud.
+"The app that comes closest to all 7? Obsidian."
+
+- Don't read the list — audience can read
+- Key point: "It works because it's just markdown files on your disk."
+- "But on the WEB? We don't have a filesystem. We need IndexedDB or SQLite plus a sync layer."
+- "And every sync engine today ties you to their cloud."
+
+TRANSITION: "So what's missing?"
 -->
 
 ---
@@ -1030,38 +1394,73 @@ Obsidian is the gold standard. It works because it uses the filesystem — plain
 
 From Martin Kleppmann at Local-First Conf 2024 — **the local-first endgame:**
 
-```
-TODAY: Every sync engine = proprietary cloud
+<div class="mt-8 flex justify-center">
+<FlowDiagram
+  :nodes="[
+    { id: 'app', label: 'Your App' },
+    { id: 'dexie', label: 'Dexie Cloud', subtitle: '(proprietary)' },
+  ]"
+  :edges="[
+    { from: 'app', to: 'dexie', label: 'locked to their API' },
+  ]"
+  direction="horizontal"
+  :node-width="200"
+  :node-height="80"
+  :gap="120"
+/>
+</div>
 
-┌──────────┐    locked to    ┌──────────────┐
-│ Your App │◀──────────────▶│ Dexie Cloud  │
-│          │   their API     │ (proprietary)│
-└──────────┘                 └──────────────┘
-
+<div class="mt-6 text-center text-white/50">
 They shut down? Sync is gone. Switch provider? Rewrite your app.
-```
-
-```
-THE LOCAL-FIRST ENDGAME: generic sync, multiple backends
-
-┌──────────┐                 ┌──────────────┐
-│ Your App │    open         │  AWS / Cloud │
-│          │    protocol     ├──────────────┤
-│ ALL biz  │◀──────────────▶│  Self-hosted │
-│ logic    │  standardized   ├──────────────┤
-│ HERE     │                 │  P2P / NAS   │
-└──────────┘                 └──────────────┘
-                              ▲ ▲ ▲
-                              all active simultaneously
-                              — redundancy, not just choice
-
-Like email: pick Gmail, Fastmail, self-host —
-the protocol is the same. Your data moves freely.
-Run multiple backends at once for true resilience.
-```
+</div>
 
 <!--
-Here's the endgame Kleppmann describes. Today every sync engine locks you to one proprietary cloud. The local-first endgame isn't just choosing any single provider — it's running multiple backends simultaneously. AWS for convenience, self-hosted for control, P2P or NAS for resilience. All active at once through a standardized open protocol. Like email — you pick your provider, the protocol is the same, your data moves freely. This is what makes ideals 5, 6, and 7 possible. It doesn't fully exist yet, but this is where the ecosystem is heading.
+Point at diagram: "Today — every sync engine locks you to one cloud."
+
+"They shut down? Sync is gone. Switch provider? Rewrite your app."
+-->
+
+---
+
+# The Local-First Endgame
+
+Generic sync, multiple backends:
+
+<div class="mt-8 flex justify-center">
+<FlowDiagram
+  :nodes="[
+    { id: 'app', label: 'Your App', subtitle: 'ALL biz logic HERE', variant: 'accent' },
+    { id: 'aws', label: 'AWS / Cloud' },
+    { id: 'self', label: 'Self-hosted' },
+    { id: 'p2p', label: 'P2P / NAS' },
+  ]"
+  :edges="[
+    { from: 'app', to: 'aws', label: 'open protocol' },
+    { from: 'app', to: 'self' },
+    { from: 'app', to: 'p2p' },
+  ]"
+  layout="fan-right"
+  :node-width="180"
+  :node-height="70"
+  :gap="120"
+/>
+</div>
+
+<div class="mt-6 text-center text-white/50">
+Like email: pick Gmail, Fastmail, self-host — the protocol is the same.
+</div>
+
+<!--
+Point at diagram: "The endgame — open protocol, MULTIPLE backends. AWS for convenience, self-hosted for control, P2P for resilience. All active at once."
+
+"Like email. Pick Gmail, Fastmail, self-host. The protocol is the same. Your data moves freely."
+
+- This doesn't fully exist yet — but this is where the ecosystem is heading
+- THIS is what makes ideals 5, 6, 7 possible
+
+TRANSITION: "Now — is this idealistic? Yes. But..."
+
+[CHECK: ~25:00 — entering closing]
 -->
 
 ---
@@ -1083,7 +1482,15 @@ Historical parallels:
 We're in the <span v-mark="{ type: 'underline', color: '#ff6bed' }" class="font-bold">pragmatist phase</span> — the tools aren't perfect, but you can start today.
 
 <!--
-Adam Wiggins makes a great point. Every technology movement follows this pattern. Idealists articulate the vision. Pragmatists make it practical. We're in the pragmatist phase of local-first. The tools aren't perfect yet, but they're good enough to start building.
+Adam Wiggins = co-founder of Heroku.
+
+Build with clicks:
+
+CLICK 1: "Cypherpunks dreamed of encrypted communication. Decades later: Let's Encrypt."
+CLICK 2: "Free software idealists. Decades later: GitHub and npm."
+CLICK 3: "Local-first ideals. The pragmatic infrastructure is... being built right now."
+
+"We're in the pragmatist phase. The tools aren't perfect. But they're good enough to start."
 -->
 
 ---
@@ -1115,7 +1522,17 @@ The generic sync engine is coming. When it arrives, upgrading from offline-first
 </Card>
 
 <!--
-So where do you start? Three concrete steps. Step one: use Dexie. You get offline-first with four out of seven ideals. That's already a massive upgrade for your users. Step two: add a data export button. JSON, CSV, whatever. That's the simplest gesture toward user ownership. Step three: keep watching this space. When the generic sync protocol arrives, upgrading will be a config change, not a rewrite.
+"So what can you do on Monday?"
+
+CLICK 1: "Step one: use Dexie. You get 4 out of 7 ideals. That's already a massive upgrade."
+
+CLICK 2: "Step two: add a download button. Let users export their data. JSON, CSV — whatever. That's the SIMPLEST local-first gesture."
+
+CLICK 3: "Step three: watch this space. When the generic sync protocol arrives, upgrading will be a config change, not a rewrite."
+
+- "You're not betting on a specific vendor. You're betting on a PATTERN."
+
+TRANSITION: "Let's see the full scorecard..."
 -->
 
 ---
@@ -1153,7 +1570,15 @@ Offline-first = a **subset** of local-first. Sync engines = a **bigger subset**.
 </Callout>
 
 <!--
-And there it is — the full picture. Offline-first gets you 2 out of 7. Add a sync engine and you're at 4. But the last three — longevity, privacy, user control — require a fundamentally different approach to data ownership. That's the gap between offline-first and local-first. Seven out of seven is the goal.
+The payoff slide — build it progressively.
+
+CLICK 1: "Technology row — 0, 2, 4... and local-first nails all four."
+CLICK 2: "Values row — only local-first checks these. That's the gap."
+CLICK 3: "0, 2, 4, 7."
+
+PAUSE — let the progression sink in.
+
+"The first 4 are technology. The last 3 are values. That's the difference."
 -->
 
 ---
@@ -1162,33 +1587,40 @@ transition: fade
 
 <PartSlide title="Closing" subtitle="The Rendering Era Is Over" />
 
+<!--
+BREATHE. You're almost done.
+
+"One more thing before I close."
+
+[CHECK: ~27:00 — if past 28:00, go straight to arc then thank you]
+-->
+
+---
+clicks: 5
+layout: center
+class: flex items-center justify-center h-full
 ---
 
-# The Arc of Frontend Development
-
-<div v-motion :initial="{ opacity: 0, y: 30 }" :enter="{ opacity: 1, y: 0, transition: { delay: 400, duration: 800 } }">
-
-```
-  jQuery          Reactive          Sync             Local-First
-  (2006)          (2014)            (2020)           (now)
-    │               │                 │                 │
-    ▼               ▼                 ▼                 ▼
-  You sync        Vue syncs         Engine syncs      User owns
-  the DOM         the DOM           the data          the data
-    │               │                 │                 │
-────●───────────────●─────────────────●─────────────────●────▶
-    │               │                 │                 │
-  Manual          Declarative       No spinners       Privacy
-  getElementById  ref() + v-bind    No cache mgmt     Longevity
-  innerHTML       computed()        Multi-device      Full control
-```
-
-</div>
-
-**We solved rendering. The data layer is where it's happening now.**
+<Timeline
+  :items="[
+    { id: 'jquery', title: 'jQuery', year: '(2006)', description: 'You sync the DOM', details: ['Manual', 'getElementById', 'innerHTML'], click: 1, variant: 'muted' },
+    { id: 'reactive', title: 'Reactive', year: '(2014)', description: 'Vue syncs the DOM', details: ['Declarative', 'ref() + v-bind', 'computed()'], click: 2 },
+    { id: 'sync', title: 'Sync', year: '(2020)', description: 'Engine syncs the data', details: ['No spinners', 'No cache mgmt', 'Multi-device'], click: 3, variant: 'success' },
+    { id: 'local-first', title: 'Local-First', year: '(now)', description: 'User owns the data', details: ['Privacy', 'Longevity', 'Full control'], click: 4, variant: 'accent' },
+  ]"
+/>
 
 <!--
-Here's the arc. jQuery era — you were the sync engine. Reactive era — Vue handles the DOM. Sync era — engines handle the data. Local-first era — the user owns everything. We solved rendering. The data layer is the next frontier. And Vue is perfectly positioned to be part of it.
+Let the animation play. Then walk through the timeline:
+
+"jQuery — you were the sync engine."
+"Vue — the framework syncs the DOM."
+"Sync engines — the engine syncs the data."
+"Local-first — the USER owns the data."
+
+PAUSE.
+
+"We solved rendering. The data layer is where it's happening now. And Vue is perfectly positioned to be part of it."
 -->
 
 ---
@@ -1208,7 +1640,14 @@ Here's the arc. jQuery era — you were the sync engine. Reactive era — Vue ha
 </div>
 
 <!--
-Here are all the references if you want to dive deeper. The Ink & Switch essay is the foundational read. My article on sync engines for Vue developers compares seven engines through Vue's lens. All links will be shared after the talk.
+Don't read the list — just gesture.
+
+"All the references are here and will be on the slides page."
+
+- Only call out: "The Ink & Switch essay is the foundational read. Start there."
+- "My article compares 7 sync engines through Vue's lens — link on the next slide."
+
+TRANSITION: "Thank you."
 -->
 
 ---
@@ -1237,5 +1676,13 @@ Slides, references & sync engine comparison
 </div>
 
 <!--
-Thank you! If you want to get started with any of this, check out my article comparing sync engines for Vue developers. Happy to chat about local-first after the talk.
+EYE CONTACT. Smile.
+
+"Thank you!"
+
+PAUSE — wait for applause to start.
+
+"Slides and all the links are at alexop.dev/vue-amsterdam. Come find me if you want to chat about local-first. Thank you!"
+
+[TARGET: ~28:00-30:00]
 -->

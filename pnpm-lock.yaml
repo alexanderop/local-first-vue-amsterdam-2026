@@ -13,6 +13,10 @@ importers:
         version: 1.2.2
 
   packages/slidev-addon-utils:
+    dependencies:
+      roughjs:
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@iconify-json/ph':
         specifier: ^1.2.2
