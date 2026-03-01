@@ -206,16 +206,15 @@ TRANSITION: "Let me show you what that looks like in Vue code..."
 
 ````md magic-move {lines: true}
 ```ts
-// Traditional Vue
+// Traditional Vue — Loading Todos
 const todos = ref([])
 const loading = ref(true)
 const error = ref(null)
 
-async function load() {
+async function fetchTodos() {
   loading.value = true
   try {
-    const res = await fetch('/api/todos')
-    todos.value = await res.json()
+    todos.value = await fetch('/api/todos').then(r => r.json())
   } catch (e) {
     error.value = e
   } finally {
@@ -224,47 +223,68 @@ async function load() {
 }
 ```
 ```ts
-// With a Sync Engine
-const todos = useQuery('todos')
+// Traditional Vue — Now let's add a todo...
+const todos = ref([])
+const loading = ref(true)
+const error = ref(null)
+
+async function fetchTodos() { /* ... */ }
+
+async function addTodo(title) {
+  const temp = { id: crypto.randomUUID(), title, done: false }
+  todos.value.push(temp) // optimistic update
+  try {
+    const saved = await fetch('/api/todos', {
+      method: 'POST',
+      body: JSON.stringify({ title }),
+    }).then(r => r.json())
+    todos.value = todos.value.map(t => t.id === temp.id ? saved : t)
+  } catch (e) {
+    todos.value = todos.value.filter(t => t.id !== temp.id) // rollback
+    error.value = e
+  }
+}
+```
+```ts
+// Traditional Vue — And we still need...
+const todos = ref([])
+const loading = ref(true)
+const error = ref(null)
+
+async function fetchTodos() { /* ... */ }
+async function addTodo(title) { /* ... */ }
+
+onMounted(fetchTodos)
+// TODO: real-time updates? → polling? websocket?
+// TODO: offline support?   → service worker? local cache?
+// TODO: optimistic UI?     → rollback on failure?
+// TODO: multiple tabs?     → BroadcastChannel? shared worker?
+```
+```ts
+// With LiveStore + Vue
+const { store } = useStore()
+const todos = useQuery(queryDb(() => tables.todos))
 
 function addTodo(title) {
-  mutate({ title })
+  store.commit(events.todoCreated({ id: crypto.randomUUID(), title }))
 }
 
-// No loading. No error.
-// No cache invalidation.
-// Data is already local.
-```
-```ts
-// Traditional Vue          // With a Sync Engine
-const todos = ref([])       const todos = useQuery('todos')
-const loading = ref(true)
-const error = ref(null)     function addTodo(title) {
-                              mutate({ title })
-async function load() {     }
-  loading.value = true
-  try {                     // No loading. No error.
-    const res = fetch(url)  // No cache invalidation.
-    todos.value = res       // Data is already local.
-  } catch (e) {
-    error.value = e
-  } finally {
-    loading.value = false
-  }
-}
+// Optimistic updates    — built in
+// Real-time sync        — built in
+// Offline reads/writes  — built in
+// Conflict resolution   — git-like rebasing
+// Multi-tab sync        — built in
 ```
 ````
 
 <!--
-Start with the traditional code visible. "This is what we all write. 15 lines just to fetch some todos. Loading states, error handling, cache invalidation..."
+Step 1: "OK, let's load some todos. Already 3 refs and a try/catch/finally just to fetch data."
 
-CLICK — magic move morphs the code. Watch the audience react as lines disappear.
+CLICK → Step 2: "Now we want to add a todo. Optimistic update so it feels instant... but we need rollback if the server fails. Look how much code that is."
 
-"8 lines. The complexity just... vanished."
+CLICK → Step 3: "And we're still not done. Real-time? Offline? Conflicts? Multiple tabs? Each one is another weekend of work."
 
-CLICK — summary text appears.
-
-"No loading. No error handling. Works offline AND syncs. But how? Let's rewind."
+CLICK → Step 4: Magic move collapses everything. "With LiveStore — useQuery gives you a reactive computed, store.commit writes an event that's applied locally and synced. Offline, real-time, conflict resolution via git-like rebasing, multi-tab — all built in."
 
 TRANSITION: "To understand this, let's look at what Vue already solved..."
 
@@ -341,45 +361,86 @@ TRANSITION: "Let's see where that leaves us on the scorecard..."
 
 # The Status Quo Scorecard
 
-<div v-click="1" class="grid grid-cols-7 gap-2 mt-6">
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> Fast?</div>
-  </Card>
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> Multi-device?</div>
-  </Card>
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> Works offline?</div>
-  </Card>
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> Collaboration?</div>
-  </Card>
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> Longevity?</div>
-  </Card>
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> Privacy?</div>
-  </Card>
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> User control?</div>
-  </Card>
+<div class="grid grid-cols-4 gap-3 mt-6">
+  <div v-click="1" class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+    <div class="i-ph-lightning text-2xl text-pink-400/50" />
+    <div class="text-sm font-semibold text-gray-300">Fast</div>
+    <div class="text-xs text-gray-500 leading-tight">No spinners. Instant response.</div>
+  </div>
+  <div v-click="2" class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+    <div class="i-ph-devices text-2xl text-pink-400/50" />
+    <div class="text-sm font-semibold text-gray-300">Multi-device</div>
+    <div class="text-xs text-gray-500 leading-tight">Your work on any device.</div>
+  </div>
+  <div v-click="3" class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+    <div class="i-ph-wifi-slash text-2xl text-pink-400/50" />
+    <div class="text-sm font-semibold text-gray-300">Works offline</div>
+    <div class="text-xs text-gray-500 leading-tight">The network is optional.</div>
+  </div>
+  <div v-click="4" class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+    <div class="i-ph-users-three text-2xl text-pink-400/50" />
+    <div class="text-sm font-semibold text-gray-300">Collaboration</div>
+    <div class="text-xs text-gray-500 leading-tight">Seamless real-time teamwork.</div>
+  </div>
 </div>
 
-<div v-click="2" class="mt-8 text-center text-gray-500">
+<div class="flex justify-center gap-3 mt-3">
+  <div v-click="5" class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+    <div class="i-ph-clock-countdown text-2xl text-pink-400/50" />
+    <div class="text-sm font-semibold text-gray-300">Longevity</div>
+    <div class="text-xs text-gray-500 leading-tight">Your data outlives the app.</div>
+  </div>
+  <div v-click="6" class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+    <div class="i-ph-shield-check text-2xl text-pink-400/50" />
+    <div class="text-sm font-semibold text-gray-300">Privacy</div>
+    <div class="text-xs text-gray-500 leading-tight">Security and privacy by default.</div>
+  </div>
+  <div v-click="7" class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+    <div class="i-ph-key text-2xl text-pink-400/50" />
+    <div class="text-sm font-semibold text-gray-300">User control</div>
+    <div class="text-xs text-gray-500 leading-tight">You retain ownership and control.</div>
+  </div>
+</div>
+
+<div v-click="8" class="mt-6 text-center">
+  <span class="text-sm text-gray-400 italic">The 7 ideals from </span>
+  <span class="text-sm font-semibold italic" style="color: #ff6bed">"Local-First Software"</span>
+  <span class="text-sm text-gray-400 italic"> — Ink & Switch, 2019</span>
+</div>
+
+<div v-click="9" class="mt-4 text-center text-gray-500">
 
 Vue solved **rendering**. But the data layer? Still the jQuery era. **0 out of 7.**
 
 </div>
 
 <!--
-CLICK — reveal the 7 question marks.
+CLICK 1 — "Fast"
+"Your app should respond instantly. No loading spinners, no waiting for the server."
 
-"This is where most Vue apps sit today. Seven question marks. Zero solved."
+CLICK 2 — "Multi-device"
+"People work across laptops, phones, tablets. The data should follow them."
 
-CLICK — reveal the summary.
+CLICK 3 — "Works offline"
+"Airplane mode, bad WiFi, underground — the app should still work."
 
-- Don't list all seven — just gesture at them
-- "The rendering era is solved. The data era hasn't started. Let's change that."
+CLICK 4 — "Collaboration"
+"Multiple people should be able to work on the same data, at the same time."
+
+CLICK 5 — "Longevity"
+"If a company shuts down, your data shouldn't disappear with it."
+
+CLICK 6 — "Privacy"
+"Your data should be encrypted and private by default."
+
+CLICK 7 — "User control"
+"You should own your data. Export it, move it, delete it — your choice."
+
+CLICK 8 — reveal the local-first paper attribution.
+"These aren't random criteria. These are the seven ideals from the Local-First Software paper by Ink & Switch."
+
+CLICK 9 — reveal the verdict.
+"And right now, with the typical Vue app? Zero out of seven. The rendering era is solved. The data era hasn't started. Let's change that."
 
 TRANSITION: "What if we flipped the model?"
 
@@ -516,34 +577,52 @@ TRANSITION: "Now which local database should you pick?"
 -->
 
 ---
+clicks: 4
+---
 
 # Local Storage Options
 
-```
-┌─────────────────────────────── Browser ───────────────────────────────┐
-│                                                                       │
-│  ┌───────────────────────────┐    ┌───────────────────────────────┐   │
-│  │        IndexedDB          │    │        SQLite (WASM)          │   │
-│  │                           │    │                               │   │
-│  │  ┌─────────────────────┐  │    │  ┌─────────────────────────┐  │   │
-│  │  │  Object Store A     │  │    │  │  ┌─────┬──────┬──────┐  │  │   │
-│  │  │  { key: value }     │  │    │  │  │ id  │ name │ age  │  │  │   │
-│  │  └─────────────────────┘  │    │  │  ├─────┼──────┼──────┤  │  │   │
-│  │  ┌─────────────────────┐  │    │  │  │  1  │ Alex │  30  │  │  │   │
-│  │  │  Object Store B     │  │    │  │  │  2  │ Sara │  25  │  │  │   │
-│  │  │  { key: value }     │  │    │  │  └─────┴──────┴──────┘  │  │   │
-│  │  └─────────────────────┘  │    │  └─────────────────────────┘  │   │
-│  │                           │    │                               │   │
-│  │  API: async, callbacks    │    │  API: full SQL queries        │   │
-│  │  Storage: native          │    │  Storage: OPFS / memory       │   │
-│  │  Since: 2015, everywhere  │    │  Bundle: ~500KB WASM          │   │
-│  └───────────────────────────┘    └───────────────────────────────┘   │
-│                                                                       │
-│  ┌─ Libraries ─────────────────────────────────────────────────────┐  │
-│  │  Dexie             wa-sqlite       SQLite WASM        PGlite   │  │
-│  └─────────────────────────────────────────────────────────────────┘  │
-└───────────────────────────────────────────────────────────────────────┘
-```
+<LocalStorageDiagram
+  :panels="[
+    {
+      panel: { title: 'IndexedDB', click: 1 },
+      stores: [
+        { label: 'Object Store A', value: '{ key: value }', click: 2 },
+        { label: 'Object Store B', value: '{ key: value }', click: 2 },
+      ],
+      meta: {
+        lines: [
+          { text: 'API: async, callbacks' },
+          { text: 'Storage: native' },
+          { text: 'Since: 2015, everywhere' },
+        ],
+        click: 3,
+      },
+    },
+    {
+      panel: { title: 'SQLite (WASM)', click: 1 },
+      table: {
+        headers: ['id', 'name', 'age'],
+        rows: [['1', 'Alex', '30'], ['2', 'Sara', '25']],
+        click: 2,
+      },
+      meta: {
+        lines: [
+          { text: 'API: full SQL queries' },
+          { text: 'Storage: OPFS / memory' },
+          { text: 'Bundle: ~500KB WASM' },
+        ],
+        click: 3,
+      },
+    },
+  ]"
+  :libraries="{ items: [
+    { name: 'Dexie' },
+    { name: 'wa-sqlite' },
+    { name: 'SQLite WASM' },
+    { name: 'PGlite' },
+  ], click: 4 }"
+/>
 
 <!--
 Don't read the diagram — audience can read. Focus on the comparison:
@@ -645,6 +724,68 @@ Section transition — energy up! This is the exciting part.
 "This is where things get really interesting."
 
 BREATHE.
+-->
+
+---
+---
+
+<ClientServerDiagram
+  :clients="[
+    { title: 'Client A', layers: [{ label: 'App code' }] },
+    { title: 'Client B', layers: [{ label: 'App code' }] },
+  ]"
+  server-label="API server"
+  connection-label="fetch()"
+  server-db-label="SQL"
+  database-label="Database"
+  caption="Sharing data with APIs"
+  :seed="300"
+/>
+
+<!--
+Traditional architecture: every client talks to the server via HTTP.
+
+The server is the single source of truth. Clients fetch, mutate, re-fetch.
+
+This works — but what happens when the network goes away?
+-->
+
+---
+---
+
+<ClientServerDiagram
+  :clients="[
+    {
+      title: 'Client A',
+      layers: [
+        { label: 'App code' },
+        { label: 'Sync client', variant: 'accent' },
+        { label: 'Local DB', variant: 'success' },
+      ],
+    },
+    {
+      title: 'Client B',
+      layers: [
+        { label: 'App code' },
+        { label: 'Sync client', variant: 'accent' },
+        { label: 'Local DB', variant: 'success' },
+      ],
+    },
+  ]"
+  server-label="Sync server"
+  connection-label="Sync"
+  server-db-label="SQL"
+  database-label="Database"
+  caption="Sharing data with sync"
+  :seed="310"
+/>
+
+<!--
+Now each client has its own local database and a sync layer.
+
+The app reads and writes locally — instant. The sync client handles replication in the background.
+
+This is the architecture that sync engines give you.
 -->
 
 ---
@@ -777,7 +918,14 @@ TRANSITION: "Let me show you the three steps..."
 
 # Step 1: Define Your Database
 
-```ts {all|1-2|4-9|11-20|22-27|all}
+````md magic-move {lines: true}
+```ts
+// db/todo.ts — Imports
+import Dexie, { type Table } from 'dexie'
+import dexieCloud from 'dexie-cloud-addon'
+```
+```ts
+// db/todo.ts — Define the shape
 import Dexie, { type Table } from 'dexie'
 import dexieCloud from 'dexie-cloud-addon'
 
@@ -787,6 +935,13 @@ export interface Todo {
   completed: boolean
   createdAt: Date
 }
+```
+```ts
+// db/todo.ts — Extend Dexie
+import Dexie, { type Table } from 'dexie'
+import dexieCloud from 'dexie-cloud-addon'
+
+export interface Todo { /* ... */ }
 
 export class TodoDB extends Dexie {
   todos!: Table<Todo>
@@ -799,6 +954,15 @@ export class TodoDB extends Dexie {
     })
   }
 }
+```
+```ts
+// db/todo.ts — Configure cloud sync
+import Dexie, { type Table } from 'dexie'
+import dexieCloud from 'dexie-cloud-addon'
+
+export interface Todo { /* ... */ }
+
+export class TodoDB extends Dexie { /* ... */ }
 
 export const db = new TodoDB()
 
@@ -806,15 +970,17 @@ db.cloud.configure({
   databaseUrl: import.meta.env.VITE_DEXIE_CLOUD_URL,
   requireAuth: true,
 })
+// ☝️ This is ALL you need for sync. One call.
 ```
+````
 
 <!--
-SLOW DOWN through code — point at highlighted sections as they animate.
+SLOW DOWN through code — let magic-move animate each step.
 
-- Lines 1-2: "Import Dexie and the cloud addon."
-- Lines 4-9: "Standard TypeScript interface."
-- Lines 11-20: "Extend Dexie. The @ prefix means cloud-generated IDs."
-- Lines 22-27: "cloud.configure — THIS is all you need for sync. One call."
+Step 1: "Import Dexie and the cloud addon. Two imports."
+CLICK → Step 2: "Standard TypeScript interface. Nothing special."
+CLICK → Step 3: "Extend Dexie. The @ prefix means cloud-generated IDs — no UUIDs to manage."
+CLICK → Step 4: "cloud.configure — THIS is all you need for sync. One call."
 
 Key takeaway: "One line to go from local to cloud."
 
@@ -825,12 +991,21 @@ TRANSITION: "Now let's use this in a Vue composable..."
 
 # Step 2: The Composable
 
-```ts {all|1-4|6-7|9-13|15-17|19-27|29-35|all}
+````md magic-move {lines: true}
+```ts
+// composables/useTodos.ts — Imports
 import { db, type Todo } from '@/db/todo'
 import { useObservable } from '@vueuse/rxjs'
 import { liveQuery } from 'dexie'
 import { from } from 'rxjs'
-
+import { computed, ref } from 'vue'
+```
+```ts
+// composables/useTodos.ts — Reactive query
+import { db, type Todo } from '@/db/todo'
+import { useObservable } from '@vueuse/rxjs'
+import { liveQuery } from 'dexie'
+import { from } from 'rxjs'
 import { computed, ref } from 'vue'
 
 export function useTodos() {
@@ -840,10 +1015,28 @@ export function useTodos() {
   const todos = useObservable<Todo[]>(
     from(liveQuery(() => db.todos.orderBy('createdAt').toArray()))
   )
+}
+```
+```ts
+// composables/useTodos.ts — Derived state
+export function useTodos() {
+  const newTodoTitle = ref('')
+
+  const todos = useObservable<Todo[]>(
+    from(liveQuery(() => db.todos.orderBy('createdAt').toArray()))
+  )
 
   const pendingTodos = computed(
     () => todos.value?.filter(t => !t.completed) ?? []
   )
+}
+```
+```ts
+// composables/useTodos.ts — Write operations
+export function useTodos() {
+  const newTodoTitle = ref('')
+  const todos = useObservable<Todo[]>(/* liveQuery */)
+  const pendingTodos = computed(/* ... */)
 
   const addTodo = async () => {
     if (!newTodoTitle.value.trim()) return
@@ -863,7 +1056,9 @@ export function useTodos() {
 
   return { todos, newTodoTitle, pendingTodos, addTodo, toggleTodo }
 }
+// No loading ref. No error ref. No try/catch. It just works.
 ```
+````
 
 <Callout type="info">
 
@@ -872,19 +1067,16 @@ export function useTodos() {
 </Callout>
 
 <!--
-Walk through the highlighted sections:
+Let magic-move animate each step:
 
-- Lines 1-4: "Imports — Dexie, VueUse for RxJS bridge, liveQuery."
-- Lines 6-7: "Standard Vue imports."
-- Lines 9-13: "HERE's the magic. liveQuery wraps your IndexedDB query in a reactive observable. useObservable from VueUse bridges it to Vue's reactivity."
-- Lines 15-17: "Regular computed — works on top of the live query."
-- Lines 19-35: "addTodo and toggleTodo — just write to the DB. No loading state. No error handling. No cache invalidation."
+Step 1: "Imports — Dexie, VueUse for the RxJS bridge, liveQuery."
+CLICK → Step 2: "HERE's the magic. liveQuery wraps your IndexedDB query in a reactive observable. useObservable bridges it to Vue's reactivity."
+CLICK → Step 3: "Regular computed — works on top of the live query. Same as you'd do with any ref."
+CLICK → Step 4: "addTodo and toggleTodo — just write to the DB. No loading state. No error handling. No cache invalidation."
 
 PAUSE.
 
 "Notice what's MISSING. No loading ref. No error ref. No try/catch. Data is local. Reads are instant. It already syncs."
-
-Required packages: dexie, dexie-cloud-addon, rxjs, @vueuse/rxjs
 
 [CHECK: ~17:00]
 -->
