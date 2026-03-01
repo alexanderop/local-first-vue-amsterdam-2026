@@ -1,12 +1,9 @@
 <script setup lang="ts">
-withDefaults(defineProps<{
+const { score, total, teaser = false } = defineProps<{
   score: number
   total?: number
   teaser?: boolean
-}>(), {
-  total: undefined,
-  teaser: false,
-})
+}>()
 </script>
 
 <template>

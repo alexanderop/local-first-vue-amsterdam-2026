@@ -1,22 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-interface Props {
+const { height = '600px', width = '100%', defaultTab = 'preview', url } = defineProps<{
   height?: string
   width?: string
   defaultTab?: 'script' | 'template' | 'style' | 'preview'
   url?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  height: '600px',
-  width: '100%',
-  defaultTab: 'preview',
-  url: undefined,
-})
+}>()
 
 const hash = computed(() =>
-  props.url ? new URL(props.url).hash : `#${props.defaultTab}`
+  url ? new URL(url).hash : `#${defaultTab}`
 )
 
 const playgroundUrl = computed(() =>
@@ -25,14 +18,14 @@ const playgroundUrl = computed(() =>
 
 // Calculate iframe height to account for the hidden header
 const iframeHeight = computed(() =>
-  `calc(${props.height} + 55px)`
+  `calc(${height} + 55px)`
 )
 </script>
 
 <template>
   <div
     class="vue-playground-wrapper"
-    :style="{ width: props.width, height: props.height }"
+    :style="{ width, height }"
   >
     <iframe
       :src="playgroundUrl"

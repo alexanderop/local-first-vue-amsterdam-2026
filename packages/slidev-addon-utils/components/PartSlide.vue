@@ -1,12 +1,14 @@
 <script setup lang="ts">
-const props = defineProps<{
+import { computed } from 'vue'
+
+const { part, title, subtitle, icon } = defineProps<{
   part?: string
   title: string
   subtitle?: string
   icon?: string
 }>()
 
-const hasNumber = props.part !== undefined
+const hasNumber = computed(() => part !== undefined)
 </script>
 
 <template>

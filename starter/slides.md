@@ -201,7 +201,6 @@ TRANSITION: "Let me show you what that looks like in Vue code..."
 -->
 
 ---
----
 
 # What Does This Look Like in Code?
 
@@ -215,7 +214,7 @@ const error = ref(null)
 async function load() {
   loading.value = true
   try {
-    const res = await fetch(...)
+    const res = await fetch('/api/todos')
     todos.value = await res.json()
   } catch (e) {
     error.value = e
@@ -226,7 +225,7 @@ async function load() {
 ```
 ```ts
 // With a Sync Engine
-const todos = useQuery(...)
+const todos = useQuery('todos')
 
 function addTodo(title) {
   mutate({ title })
@@ -238,14 +237,14 @@ function addTodo(title) {
 ```
 ```ts
 // Traditional Vue          // With a Sync Engine
-const todos = ref([])       const todos = useQuery(...)
+const todos = ref([])       const todos = useQuery('todos')
 const loading = ref(true)
 const error = ref(null)     function addTodo(title) {
                               mutate({ title })
 async function load() {     }
   loading.value = true
   try {                     // No loading. No error.
-    const res = fetch(...)  // No cache invalidation.
+    const res = fetch(url)  // No cache invalidation.
     todos.value = res       // Data is already local.
   } catch (e) {
     error.value = e
@@ -276,10 +275,6 @@ TRANSITION: "To understand this, let's look at what Vue already solved..."
 clicks: 2
 ---
 
-# Vue Solved DOM Sync
-
-You declare state with `ref()`, the framework keeps the UI in sync.
-
 <FlowDiagram
   :nodes="[
     { id: 'source', label: 'Source', subtitle: 'ref(0)', variant: 'accent' },
@@ -291,8 +286,6 @@ You declare state with `ref()`, the framework keeps the UI in sync.
     { from: 'reconciler', to: 'target', click: 2 },
   ]"
 />
-
-The **source → reconciler → target** pattern — remember it.
 
 <!--
 - "Vue solved this: you declare state, the framework syncs the DOM."
@@ -411,11 +404,7 @@ BREATHE.
 clicks: 5
 ---
 
-# What Is Offline-First?
 
-The app works without a network connection — reads and writes happen **locally**.
-
-The server is still the authority, but the client doesn't wait for it.
 
 <SplitDiagram
   :panels="[
@@ -462,25 +451,19 @@ TRANSITION: "But there's a gotcha most people miss..."
 clicks: 5
 ---
 
-# PWAs: The Shell That Makes Offline Possible
-
-Before we can store data offline, we need the **app itself** to load offline.
-
-Progressive Web Apps give us this via **Service Workers**.
-
 <PwaDiagram
   :panels="[
     {
       title: 'WITHOUT PWA',
       titleIcon: '❌',
       boxes: [
-        { id: 'error', label: '🦕 Chrome Dino', subtitle: '\"No Internet\"', variant: 'danger', click: 1 },
+        { id: 'error', label: '🦕 Chrome Dino', subtitle: 'No Internet', variant: 'danger', click: 1 },
       ],
       arrows: [],
       annotations: [
         { text: 'IndexedDB has data...', variant: 'muted', click: 2 },
         { text: 'but who cares?', variant: 'muted', click: 2 },
-        { text: 'App can\\'t even load.', variant: 'danger', click: 2 },
+        { text: 'App cannot even load.', variant: 'danger', click: 2 },
       ],
     },
     {
@@ -515,34 +498,10 @@ Point at right: "With PWA — Service Worker intercepts, serves from cache. App 
 -->
 
 ---
+clicks: 4
+---
 
-# The Offline-First Stack
-
-In Vue/Nuxt: `vite-plugin-pwa` or `@vite-pwa/nuxt` handles the Service Worker.
-
-The PWA is the **delivery mechanism**, IndexedDB/SQLite is the **data layer**.
-
-```
-┌─────────────────────────────────────────────────┐
-│                   YOUR APP                      │
-│                                                 │
-│  ┌─────────────────────────────────────────┐    │
-│  │         Vue / Nuxt Components           │    │
-│  └────────────────┬────────────────────────┘    │
-│                   │                             │
-│  ┌────────────────▼────────────────────────┐    │
-│  │         Data Layer                      │    │
-│  │   IndexedDB / SQLite (WASM)             │    │
-│  │   Dexie, wa-sqlite, ...                 │    │
-│  └─────────────────────────────────────────┘    │
-│                                                 │
-├─────────────────────────────────────────────────┤
-│  SERVICE WORKER (PWA)                           │
-│  Caches app shell for offline loading           │
-│  vite-plugin-pwa / @vite-pwa/nuxt               │
-│  Precaches HTML, JS, CSS, WASM                  │
-└─────────────────────────────────────────────────┘
-```
+<OfflineStackDiagram />
 
 <!--
 - Top: Vue/Nuxt components — your app
@@ -931,36 +890,18 @@ Required packages: dexie, dexie-cloud-addon, rxjs, @vueuse/rxjs
 -->
 
 ---
+clicks: 6
+---
 
 # Step 3: How Dexie Handles Conflicts
 
-Two users edit the same todo offline, then reconnect:
+<CrdtResolutionDiagram />
 
-```
-┌──────────────────┐           ┌──────────────────┐
-│    User A        │           │    User B        │
-│                  │           │                  │
-│  Changes TITLE   │           │  Toggles DONE    │
-│  "Buy milk"      │           │  completed: true │
-│  → "Buy oat milk"│           │                  │
-└────────┬─────────┘           └────────┬─────────┘
-         │                              │
-         │  reconnect + sync            │
-         ▼                              ▼
-┌────────────────────────────────────────────────┐
-│                                                │
-│  Different fields? → AUTO-MERGE                │
-│  title: "Buy oat milk" + completed: true       │
-│                                                │
-│  Same field? → LAST-WRITE-WINS                 │
-│                                                │
-│  Delete vs update? → DELETE WINS               │
-│  Prevents "zombie" records                     │
-│                                                │
-└────────────────────────────────────────────────┘
-```
+<div v-click="6" class="text-center mt-4 text-lg">
 
 You don't write this logic. **Dexie handles it.**
+
+</div>
 
 <!--
 Walk through the diagram — tell the story:
@@ -1686,3 +1627,35 @@ PAUSE — wait for applause to start.
 
 [TARGET: ~28:00-30:00]
 -->
+
+---
+layout: default
+hideFooter: true
+clicks: 6
+---
+
+# Rough Primitives Test
+
+<RoughSvg :width="700" :height="280" :seed="99">
+  <ClickGroup :click="1">
+    <RoughRect :x="0" :y="100" :width="160" :height="80" variant="accent" :seed="100" />
+    <text x="80" y="140" text-anchor="middle" dominant-baseline="central" :style="{ fontFamily: 'Geist, sans-serif', fontSize: '16px', fontWeight: 600, fill: 'rgba(234,237,243,0.95)' }">Client</text>
+  </ClickGroup>
+  <ClickGroup :click="2">
+    <RoughArrow :x1="170" :y1="140" :x2="260" :y2="140" :seed="101" />
+  </ClickGroup>
+  <ClickGroup :click="3">
+    <RoughRect :x="270" :y="100" :width="160" :height="80" variant="success" :seed="102" />
+    <text x="350" y="140" text-anchor="middle" dominant-baseline="central" :style="{ fontFamily: 'Geist, sans-serif', fontSize: '16px', fontWeight: 600, fill: 'rgba(234,237,243,0.95)' }">Server</text>
+  </ClickGroup>
+  <ClickGroup :click="4">
+    <RoughLine :x1="270" :y1="185" :x2="430" :y2="185" stroke="rgba(255,255,255,0.3)" :seed="106" />
+  </ClickGroup>
+  <ClickGroup :click="5">
+    <RoughArrow :x1="440" :y1="140" :x2="530" :y2="140" :seed="103" />
+  </ClickGroup>
+  <ClickGroup :click="6">
+    <RoughCircle :x="580" :y="140" :diameter="80" variant="danger" :seed="104" />
+    <text x="580" y="140" text-anchor="middle" dominant-baseline="central" :style="{ fontFamily: 'Geist, sans-serif', fontSize: '14px', fontWeight: 600, fill: 'rgba(234,237,243,0.95)' }">DB</text>
+  </ClickGroup>
+</RoughSvg>

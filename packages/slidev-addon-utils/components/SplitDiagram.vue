@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useSlideContext } from '@slidev/client'
-import rough from 'roughjs'
+import RoughRect from './RoughRect.vue'
+import RoughArrow from './RoughArrow.vue'
+import { useClickVisibility } from '../composables/useClickVisibility'
+import { hashId } from '../composables/useRough'
+import { EDGE_STROKE } from '../constants/colors'
+import type { Variant } from '../constants/colors'
 
 interface SplitNode {
   id: string
@@ -35,7 +39,7 @@ interface SplitPanel {
   click?: number
 }
 
-const props = withDefaults(defineProps<{
+const { panels, roughness = 1.5, seed = 42, panelWidth = 280, panelHeight = 260, nodeWidth = 150, nodeHeight = 60, nodeGap = 50, panelGap = 60 } = defineProps<{
   panels: SplitPanel[]
   roughness?: number
   seed?: number
@@ -45,37 +49,11 @@ const props = withDefaults(defineProps<{
   nodeHeight?: number
   nodeGap?: number
   panelGap?: number
-}>(), {
-  roughness: 1.5,
-  seed: 42,
-  panelWidth: 280,
-  panelHeight: 260,
-  nodeWidth: 150,
-  nodeHeight: 60,
-  nodeGap: 50,
-  panelGap: 60,
-})
+}>()
 
-const { $clicksContext } = useSlideContext()
-const clicks = computed(() => $clicksContext.current)
-const gen = rough.generator()
+const { isVisible } = useClickVisibility()
 const titleHeight = 30
 const panelPadding = 20
-
-function hashId(id: string): number {
-  let h = 0
-  for (let i = 0; i < id.length; i++) {
-    h = ((h << 5) - h + id.charCodeAt(i)) | 0
-  }
-  return Math.abs(h)
-}
-
-const variantColors = {
-  default: { stroke: 'rgba(255, 107, 237, 0.7)', fill: 'rgba(52, 63, 96, 0.4)' },
-  accent: { stroke: 'rgba(255, 107, 237, 0.9)', fill: 'rgba(255, 107, 237, 0.15)' },
-  success: { stroke: 'rgba(52, 211, 153, 0.8)', fill: 'rgba(52, 211, 153, 0.12)' },
-  muted: { stroke: 'rgba(255, 255, 255, 0.3)', fill: 'rgba(255, 255, 255, 0.05)' },
-}
 
 const badgeColors = {
   danger: 'rgba(248, 113, 113, 0.9)',
@@ -84,112 +62,60 @@ const badgeColors = {
 }
 
 const panelData = computed(() => {
-  return props.panels.map((panel, pi) => {
-    const px = pi * (props.panelWidth + props.panelGap)
+  return panels.map((panel, pi) => {
+    const px = pi * (panelWidth + panelGap)
     const contentTop = titleHeight
-
-    // Panel container rectangle
-    const panelRect = gen.rectangle(px, contentTop, props.panelWidth, props.panelHeight, {
-      roughness: props.roughness * 0.8,
-      seed: props.seed + pi * 100,
-      stroke: 'rgba(255, 255, 255, 0.15)',
-      fill: 'rgba(255, 255, 255, 0.03)',
-      fillStyle: 'solid',
-      strokeWidth: 1.5,
-    })
 
     // Node positions — stacked vertically, centered in panel
     const nodeStartY = contentTop + panelPadding
-    const nodeX = px + (props.panelWidth - props.nodeWidth) / 2
+    const nodeX = px + (panelWidth - nodeWidth) / 2
 
     const nodePositions = new Map<string, { x: number; y: number }>()
     panel.nodes.forEach((node, ni) => {
-      const ny = nodeStartY + ni * (props.nodeHeight + props.nodeGap)
+      const ny = nodeStartY + ni * (nodeHeight + nodeGap)
       nodePositions.set(node.id, { x: nodeX, y: ny })
     })
 
-    // Node shapes
+    // Node shapes (position data only)
     const nodeShapes = panel.nodes.map((node) => {
       const pos = nodePositions.get(node.id)!
-      const colors = variantColors[node.variant || 'default']
-      const drawable = gen.rectangle(pos.x, pos.y, props.nodeWidth, props.nodeHeight, {
-        roughness: props.roughness,
-        seed: props.seed + hashId(node.id),
-        stroke: colors.stroke,
-        fill: colors.fill,
-        fillStyle: 'solid',
-        strokeWidth: 2,
-      })
       return {
         ...node,
         x: pos.x,
         y: pos.y,
-        paths: gen.toPaths(drawable),
+        variant: (node.variant || 'default') as Variant,
       }
     })
 
-    // Edge shapes
+    // Edge shapes (position data only)
     const edgeShapes = panel.edges.map((edge) => {
       const from = nodePositions.get(edge.from)
       const to = nodePositions.get(edge.to)
       if (!from || !to) return null
 
-      const x1 = from.x + props.nodeWidth / 2
-      const y1 = from.y + props.nodeHeight
-      const x2 = to.x + props.nodeWidth / 2
+      const x1 = from.x + nodeWidth / 2
+      const y1 = from.y + nodeHeight
+      const x2 = to.x + nodeWidth / 2
       const y2 = to.y
-
-      const edgeSeed = props.seed + hashId(edge.from + edge.to)
-      const strokeColor = 'rgba(255, 107, 237, 0.5)'
-
-      const lineDrawable = gen.line(x1, y1, x2, y2, {
-        roughness: props.roughness * 0.5,
-        seed: edgeSeed,
-        stroke: strokeColor,
-        strokeWidth: 2,
-      })
-
-      // Arrowhead V pointing down
-      const arrowLen = 12
-      const a1x = x2 - arrowLen * 0.6
-      const a1y = y2 - arrowLen
-      const a2x = x2 + arrowLen * 0.6
-      const a2y = y2 - arrowLen
-
-      const arrow1 = gen.line(x2, y2, a1x, a1y, {
-        roughness: props.roughness * 0.3,
-        seed: edgeSeed + 1,
-        stroke: strokeColor,
-        strokeWidth: 2,
-      })
-      const arrow2 = gen.line(x2, y2, a2x, a2y, {
-        roughness: props.roughness * 0.3,
-        seed: edgeSeed + 2,
-        stroke: strokeColor,
-        strokeWidth: 2,
-      })
 
       return {
         from: edge.from,
         to: edge.to,
         label: edge.label,
         click: edge.click,
-        paths: [...gen.toPaths(lineDrawable), ...gen.toPaths(arrow1), ...gen.toPaths(arrow2)],
+        x1, y1, x2, y2,
+        seed: seed + hashId(edge.from + edge.to),
         labelX: (x1 + x2) / 2 + 14,
         labelY: (y1 + y2) / 2,
       }
-    }).filter(Boolean) as {
-      from: string; to: string; label?: string; click?: number
-      paths: { d: string; stroke?: string; strokeWidth?: number; fill?: string }[]
-      labelX: number; labelY: number
-    }[]
+    }).filter((e): e is NonNullable<typeof e> => e != null)
 
     // Badge positions
     const badges = (panel.badges || []).map((badge) => {
       let bx: number, by: number
       if (badge.position === 'bottom') {
-        bx = px + props.panelWidth / 2
-        by = contentTop + props.panelHeight + 24
+        bx = px + panelWidth / 2
+        by = contentTop + panelHeight + 24
       } else {
         // inline — position near the last edge's label area
         const lastEdge = edgeShapes[edgeShapes.length - 1]
@@ -197,8 +123,8 @@ const panelData = computed(() => {
           bx = lastEdge.labelX
           by = lastEdge.labelY + 16
         } else {
-          bx = px + props.panelWidth / 2
-          by = contentTop + props.panelHeight - 20
+          bx = px + panelWidth / 2
+          by = contentTop + panelHeight - 20
         }
       }
       return { ...badge, x: bx, y: by }
@@ -208,7 +134,8 @@ const panelData = computed(() => {
       title: panel.title,
       click: panel.click,
       px,
-      panelPaths: gen.toPaths(panelRect),
+      contentTop,
+      panelSeed: seed + pi * 100,
       nodeShapes,
       edgeShapes,
       badges,
@@ -217,27 +144,20 @@ const panelData = computed(() => {
 })
 
 const svgW = computed(() => {
-  const n = props.panels.length
-  return n * props.panelWidth + Math.max(0, n - 1) * props.panelGap + 48
+  const n = panels.length
+  return n * panelWidth + Math.max(0, n - 1) * panelGap + 48
 })
 
 const svgH = computed(() => {
-  // Account for title, panel, and possible bottom badges
-  const hasBottomBadge = props.panels.some(p =>
+  const hasBottomBadge = panels.some(p =>
     p.badges?.some(b => b.position === 'bottom')
   )
-  return titleHeight + props.panelHeight + (hasBottomBadge ? 40 : 0) + 24
+  return titleHeight + panelHeight + (hasBottomBadge ? 40 : 0) + 24
 })
 
 const viewBox = computed(() =>
   `${-24} ${-12} ${svgW.value} ${svgH.value}`
 )
-
-function isVisible(click?: number, panelClick?: number): boolean {
-  const effectiveClick = click ?? panelClick
-  if (effectiveClick == null) return true
-  return clicks.value >= effectiveClick
-}
 </script>
 
 <template>
@@ -255,13 +175,16 @@ function isVisible(click?: number, panelClick?: number): boolean {
       :class="{ '--hidden': !isVisible(panel.click) }"
     >
       <!-- Panel container -->
-      <path
-        v-for="(p, i) in panel.panelPaths"
-        :key="`pc-${i}`"
-        :d="p.d"
-        :stroke="p.stroke || 'none'"
-        :stroke-width="p.strokeWidth"
-        :fill="p.fill || 'none'"
+      <RoughRect
+        :x="panel.px"
+        :y="panel.contentTop"
+        :width="panelWidth"
+        :height="panelHeight"
+        stroke="rgba(255,255,255,0.15)"
+        fill="rgba(255,255,255,0.03)"
+        :roughness="roughness * 0.8"
+        :seed="panel.panelSeed"
+        :stroke-width="1.5"
       />
 
       <!-- Panel title -->
@@ -282,13 +205,14 @@ function isVisible(click?: number, panelClick?: number): boolean {
         class="split-diagram__el"
         :class="{ '--hidden': !isVisible(edge.click, panel.click) }"
       >
-        <path
-          v-for="(p, i) in edge.paths"
-          :key="i"
-          :d="p.d"
-          :stroke="p.stroke || 'none'"
-          :stroke-width="p.strokeWidth"
-          :fill="p.fill || 'none'"
+        <RoughArrow
+          :x1="edge.x1"
+          :y1="edge.y1"
+          :x2="edge.x2"
+          :y2="edge.y2"
+          :stroke="EDGE_STROKE"
+          :roughness="roughness"
+          :seed="edge.seed"
         />
         <text
           v-if="edge.label"
@@ -309,13 +233,14 @@ function isVisible(click?: number, panelClick?: number): boolean {
         class="split-diagram__el"
         :class="{ '--hidden': !isVisible(node.click, panel.click) }"
       >
-        <path
-          v-for="(p, i) in node.paths"
-          :key="i"
-          :d="p.d"
-          :stroke="p.stroke || 'none'"
-          :stroke-width="p.strokeWidth"
-          :fill="p.fill || 'none'"
+        <RoughRect
+          :x="node.x"
+          :y="node.y"
+          :width="nodeWidth"
+          :height="nodeHeight"
+          :variant="node.variant"
+          :roughness="roughness"
+          :seed="seed + hashId(node.id)"
         />
         <text
           :x="node.x + nodeWidth / 2"
@@ -388,6 +313,8 @@ function isVisible(click?: number, panelClick?: number): boolean {
 .split-diagram {
   max-width: 100%;
   height: auto;
+  display: block;
+  margin: auto;
 }
 
 .split-diagram__el {

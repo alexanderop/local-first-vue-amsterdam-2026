@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = withDefaults(defineProps<{
+const { icon, label, variant = 'default', glow, dimmed, dashed, size = 'md' } = defineProps<{
   icon?: string
   label?: string
   variant?: 'default' | 'muted' | 'success'
@@ -30,18 +30,15 @@ const props = withDefaults(defineProps<{
   dimmed?: boolean
   dashed?: boolean
   size?: 'sm' | 'md' | 'lg'
-}>(), {
-  variant: 'default',
-  size: 'md',
-})
+}>()
 
 const resolvedGlow = computed(() => {
-  if (props.glow !== undefined) return props.glow
-  return props.variant === 'default'
+  if (glow !== undefined) return glow
+  return variant === 'default'
 })
 
 const sizeClasses = computed(() => {
-  switch (props.size) {
+  switch (size) {
     case 'sm': return 'px-3 py-2.5 text-sm'
     case 'lg': return 'p-5'
     default: return 'px-4 py-2.5'
@@ -49,7 +46,7 @@ const sizeClasses = computed(() => {
 })
 
 const iconColor = computed(() => {
-  switch (props.variant) {
+  switch (variant) {
     case 'success': return 'rgb(52,211,153)'
     case 'muted': return 'rgba(255,255,255,0.5)'
     default: return 'rgb(255,107,237)'
@@ -59,7 +56,7 @@ const iconColor = computed(() => {
 const cardStyle = computed(() => {
   const styles: Record<string, string> = {}
 
-  switch (props.variant) {
+  switch (variant) {
     case 'default':
       styles.background = 'linear-gradient(135deg, rgba(255,107,237,0.04) 0%, rgba(52,63,96,0.4) 100%)'
       styles.borderColor = 'rgba(255,107,237,0.12)'
@@ -75,7 +72,7 @@ const cardStyle = computed(() => {
   }
 
   if (resolvedGlow.value) {
-    const color = props.variant === 'success'
+    const color = variant === 'success'
       ? '16,185,129'
       : '255,107,237'
     styles.boxShadow = [

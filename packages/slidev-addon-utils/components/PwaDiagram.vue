@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useSlideContext } from '@slidev/client'
-import rough from 'roughjs'
+import RoughRect from './RoughRect.vue'
+import RoughArrow from './RoughArrow.vue'
+import { useClickVisibility } from '../composables/useClickVisibility'
+import { hashId } from '../composables/useRough'
+import { EDGE_STROKE } from '../constants/colors'
+import type { Variant } from '../constants/colors'
 
 interface PwaBox {
   id: string
@@ -36,7 +40,7 @@ interface PwaPanel {
   click?: number
 }
 
-const props = withDefaults(defineProps<{
+const { panels, roughness = 1.5, seed = 42, panelWidth = 300, panelHeight = 320, panelGap = 80, boxWidth = 200, boxHeight = 52, boxGap = 50, centered = true } = defineProps<{
   panels: [PwaPanel, PwaPanel]
   roughness?: number
   seed?: number
@@ -46,38 +50,12 @@ const props = withDefaults(defineProps<{
   boxWidth?: number
   boxHeight?: number
   boxGap?: number
-}>(), {
-  roughness: 1.5,
-  seed: 42,
-  panelWidth: 300,
-  panelHeight: 320,
-  panelGap: 80,
-  boxWidth: 200,
-  boxHeight: 52,
-  boxGap: 50,
-})
+  centered?: boolean
+}>()
 
-const { $clicksContext } = useSlideContext()
-const clicks = computed(() => $clicksContext.current)
-const gen = rough.generator()
+const { isVisible } = useClickVisibility()
 const titleHeight = 30
 const panelPadding = 24
-
-function hashId(id: string): number {
-  let h = 0
-  for (let i = 0; i < id.length; i++) {
-    h = ((h << 5) - h + id.charCodeAt(i)) | 0
-  }
-  return Math.abs(h)
-}
-
-const variantColors = {
-  default: { stroke: 'rgba(255, 107, 237, 0.7)', fill: 'rgba(52, 63, 96, 0.4)' },
-  accent: { stroke: 'rgba(255, 107, 237, 0.9)', fill: 'rgba(255, 107, 237, 0.15)' },
-  success: { stroke: 'rgba(52, 211, 153, 0.8)', fill: 'rgba(52, 211, 153, 0.12)' },
-  danger: { stroke: 'rgba(248, 113, 113, 0.8)', fill: 'rgba(248, 113, 113, 0.1)' },
-  muted: { stroke: 'rgba(255, 255, 255, 0.3)', fill: 'rgba(255, 255, 255, 0.05)' },
-}
 
 const annotationColors = {
   default: 'rgba(234, 237, 243, 0.85)',
@@ -93,122 +71,70 @@ const resultColors = {
 }
 
 const panelData = computed(() => {
-  return props.panels.map((panel, pi) => {
-    const px = pi * (props.panelWidth + props.panelGap)
+  return panels.map((panel, pi) => {
+    const px = pi * (panelWidth + panelGap)
     const contentTop = titleHeight
-
-    // Panel container — dashed rough rectangle
-    const panelRect = gen.rectangle(px, contentTop, props.panelWidth, props.panelHeight, {
-      roughness: props.roughness * 0.8,
-      seed: props.seed + pi * 100,
-      stroke: 'rgba(255, 255, 255, 0.2)',
-      fill: 'rgba(255, 255, 255, 0.03)',
-      fillStyle: 'solid',
-      strokeWidth: 1.5,
-    })
 
     // Box positions — stacked vertically, centered in panel
     const boxStartY = contentTop + panelPadding
-    const boxX = px + (props.panelWidth - props.boxWidth) / 2
+    const boxX = px + (panelWidth - boxWidth) / 2
 
     const boxPositions = new Map<string, { x: number; y: number }>()
     panel.boxes.forEach((box, bi) => {
-      const by = boxStartY + bi * (props.boxHeight + props.boxGap)
+      const by = boxStartY + bi * (boxHeight + boxGap)
       boxPositions.set(box.id, { x: boxX, y: by })
     })
 
-    // Box shapes
+    // Box shapes (position data only)
     const boxShapes = panel.boxes.map((box) => {
       const pos = boxPositions.get(box.id)!
-      const colors = variantColors[box.variant || 'default']
-      const drawable = gen.rectangle(pos.x, pos.y, props.boxWidth, props.boxHeight, {
-        roughness: props.roughness,
-        seed: props.seed + hashId(box.id),
-        stroke: colors.stroke,
-        fill: colors.fill,
-        fillStyle: 'solid',
-        strokeWidth: 2,
-      })
       return {
         ...box,
         x: pos.x,
         y: pos.y,
-        paths: gen.toPaths(drawable),
+        variant: (box.variant || 'default') as Variant,
       }
     })
 
-    // Arrow shapes (downward between boxes)
+    // Arrow shapes (position data only)
     const arrowShapes = panel.arrows.map((arrow) => {
       const from = boxPositions.get(arrow.from)
       const to = boxPositions.get(arrow.to)
       if (!from || !to) return null
 
-      const x1 = from.x + props.boxWidth / 2
-      const y1 = from.y + props.boxHeight
-      const x2 = to.x + props.boxWidth / 2
-      const y2 = to.y
-
-      const arrowSeed = props.seed + hashId(arrow.from + arrow.to)
-      const strokeColor = 'rgba(255, 107, 237, 0.5)'
-
-      const lineDrawable = gen.line(x1, y1, x2, y2, {
-        roughness: props.roughness * 0.5,
-        seed: arrowSeed,
-        stroke: strokeColor,
-        strokeWidth: 2,
-      })
-
-      // Arrowhead V pointing down
-      const arrowLen = 12
-      const a1x = x2 - arrowLen * 0.6
-      const a1y = y2 - arrowLen
-      const a2x = x2 + arrowLen * 0.6
-      const a2y = y2 - arrowLen
-
-      const ah1 = gen.line(x2, y2, a1x, a1y, {
-        roughness: props.roughness * 0.3,
-        seed: arrowSeed + 1,
-        stroke: strokeColor,
-        strokeWidth: 2,
-      })
-      const ah2 = gen.line(x2, y2, a2x, a2y, {
-        roughness: props.roughness * 0.3,
-        seed: arrowSeed + 2,
-        stroke: strokeColor,
-        strokeWidth: 2,
-      })
-
       return {
         from: arrow.from,
         to: arrow.to,
         click: arrow.click,
-        paths: [...gen.toPaths(lineDrawable), ...gen.toPaths(ah1), ...gen.toPaths(ah2)],
+        x1: from.x + boxWidth / 2,
+        y1: from.y + boxHeight,
+        x2: to.x + boxWidth / 2,
+        y2: to.y,
+        seed: seed + hashId(arrow.from + arrow.to),
       }
-    }).filter(Boolean) as {
-      from: string; to: string; click?: number
-      paths: { d: string; stroke?: string; strokeWidth?: number; fill?: string }[]
-    }[]
+    }).filter((e): e is NonNullable<typeof e> => e != null)
 
     // Annotation positions — below last box
     const lastBoxBottom = panel.boxes.length > 0
-      ? boxStartY + (panel.boxes.length - 1) * (props.boxHeight + props.boxGap) + props.boxHeight
+      ? boxStartY + (panel.boxes.length - 1) * (boxHeight + boxGap) + boxHeight
       : boxStartY
     const annotationStartY = lastBoxBottom + 20
     const annotations = panel.annotations.map((ann, ai) => ({
       ...ann,
-      x: px + props.panelWidth / 2,
+      x: px + panelWidth / 2,
       y: annotationStartY + ai * 20,
     }))
 
     // Result text — near bottom of panel
-    const resultY = contentTop + props.panelHeight - 20
+    const resultY = contentTop + panelHeight - 20
 
     return {
       title: panel.title,
       titleIcon: panel.titleIcon,
       click: panel.click,
       px,
-      panelPaths: gen.toPaths(panelRect),
+      contentTop,
+      panelSeed: seed + pi * 100,
       boxShapes,
       arrowShapes,
       annotations,
@@ -222,28 +148,21 @@ const panelData = computed(() => {
 })
 
 const svgW = computed(() => {
-  const n = props.panels.length
-  return n * props.panelWidth + Math.max(0, n - 1) * props.panelGap + 48
+  const n = panels.length
+  return n * panelWidth + Math.max(0, n - 1) * panelGap + 48
 })
 
-const svgH = computed(() => titleHeight + props.panelHeight + 24)
+const svgH = computed(() => titleHeight + panelHeight + 24)
 
 const viewBox = computed(() =>
   `${-24} ${-12} ${svgW.value} ${svgH.value}`
 )
-
-function isVisible(click?: number, panelClick?: number): boolean {
-  const effectiveClick = click ?? panelClick
-  if (effectiveClick == null) return true
-  return clicks.value >= effectiveClick
-}
 </script>
 
 <template>
+  <div class="pwa-diagram-wrap" :class="{ '--centered': centered }">
   <svg
     :viewBox="viewBox"
-    :width="svgW"
-    :height="svgH"
     class="pwa-diagram"
     preserveAspectRatio="xMidYMid meet"
   >
@@ -256,13 +175,16 @@ function isVisible(click?: number, panelClick?: number): boolean {
         class="pwa-diagram__el"
         :class="{ '--hidden': !isVisible(panel.click) }"
       >
-        <path
-          v-for="(p, i) in panel.panelPaths"
-          :key="`pc-${pi}-${i}`"
-          :d="p.d"
-          :stroke="p.stroke || 'none'"
-          :stroke-width="p.strokeWidth"
-          :fill="p.fill || 'none'"
+        <RoughRect
+          :x="panel.px"
+          :y="panel.contentTop"
+          :width="panelWidth"
+          :height="panelHeight"
+          stroke="rgba(255,255,255,0.2)"
+          fill="rgba(255,255,255,0.03)"
+          :roughness="roughness * 0.8"
+          :seed="panel.panelSeed"
+          :stroke-width="1.5"
           stroke-dasharray="8 6"
         />
         <text
@@ -283,13 +205,14 @@ function isVisible(click?: number, panelClick?: number): boolean {
         class="pwa-diagram__el"
         :class="{ '--hidden': !isVisible(arrow.click, panel.click) }"
       >
-        <path
-          v-for="(p, i) in arrow.paths"
-          :key="i"
-          :d="p.d"
-          :stroke="p.stroke || 'none'"
-          :stroke-width="p.strokeWidth"
-          :fill="p.fill || 'none'"
+        <RoughArrow
+          :x1="arrow.x1"
+          :y1="arrow.y1"
+          :x2="arrow.x2"
+          :y2="arrow.y2"
+          :stroke="EDGE_STROKE"
+          :roughness="roughness"
+          :seed="arrow.seed"
         />
       </g>
 
@@ -300,13 +223,14 @@ function isVisible(click?: number, panelClick?: number): boolean {
         class="pwa-diagram__el"
         :class="{ '--hidden': !isVisible(box.click, panel.click) }"
       >
-        <path
-          v-for="(p, i) in box.paths"
-          :key="i"
-          :d="p.d"
-          :stroke="p.stroke || 'none'"
-          :stroke-width="p.strokeWidth"
-          :fill="p.fill || 'none'"
+        <RoughRect
+          :x="box.x"
+          :y="box.y"
+          :width="boxWidth"
+          :height="boxHeight"
+          :variant="box.variant"
+          :roughness="roughness"
+          :seed="seed + hashId(box.id)"
         />
         <text
           :x="box.x + boxWidth / 2"
@@ -369,12 +293,29 @@ function isVisible(click?: number, panelClick?: number): boolean {
       </g>
     </g>
   </svg>
+  </div>
 </template>
 
 <style scoped>
+.pwa-diagram-wrap.--centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.pwa-diagram-wrap.--centered .pwa-diagram {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+}
+
 .pwa-diagram {
   max-width: 100%;
   height: auto;
+  display: block;
+  margin: auto;
 }
 
 .pwa-diagram__el {

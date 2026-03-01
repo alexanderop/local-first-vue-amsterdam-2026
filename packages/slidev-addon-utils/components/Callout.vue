@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{
+const { type } = defineProps<{
   type?: 'info' | 'warn' | 'error'
 }>()
 

@@ -1,21 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = withDefaults(defineProps<{
+const { items = [], taper = 7, gap = 1 } = defineProps<{
   items?: { title: string; subtitle: string }[]
   taper?: number
   gap?: number
-}>(), {
-  taper: 7,
-  gap: 1,
-  items: () => [],
-})
+}>()
 
 const levels = computed(() => {
-  const total = props.items.length
-  return props.items.map((item, i) => {
-    const topInset = (i + 1) * props.taper
-    const bottomInset = i * props.taper
+  const total = items.length
+  return items.map((item, i) => {
+    const topInset = (i + 1) * taper
+    const bottomInset = i * taper
     return {
       ...item,
       index: i,
