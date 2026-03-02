@@ -12,10 +12,11 @@
     "export:png": "slidev export --format png"
   },
   "dependencies": {
-    "@alexop/slidev-theme-brand": "workspace:*",
-    "@alexop/slidev-addon-utils": "workspace:*"
+    "@alexop/slidev-addon-utils": "workspace:*",
+    "@alexop/slidev-theme-brand": "workspace:*"
   },
   "devDependencies": {
+    "@iconify-json/logos": "^1.2.10",
     "@slidev/cli": "^52.13.0",
     "@slidev/theme-default": "latest",
     "unocss": "^66.6.2"

@@ -12,7 +12,7 @@ interface FlowNode {
   label: string
   subtitle?: string
   click?: number
-  variant?: 'default' | 'accent' | 'muted' | 'success'
+  variant?: Variant
 }
 
 interface FlowEdge {
@@ -118,15 +118,17 @@ const edgeShapes = computed(() => {
 
     let x1: number, y1: number, x2: number, y2: number
     if (horizontalEdges.value) {
-      x1 = from.x + nodeWidth
+      const leftToRight = from.x < to.x
+      x1 = leftToRight ? from.x + nodeWidth : from.x
       y1 = from.y + nodeHeight / 2
-      x2 = to.x
+      x2 = leftToRight ? to.x : to.x + nodeWidth
       y2 = to.y + nodeHeight / 2
     } else {
+      const topToBottom = from.y < to.y
       x1 = from.x + nodeWidth / 2
-      y1 = from.y + nodeHeight
+      y1 = topToBottom ? from.y + nodeHeight : from.y
       x2 = to.x + nodeWidth / 2
-      y2 = to.y
+      y2 = topToBottom ? to.y : to.y + nodeHeight
     }
 
     return {

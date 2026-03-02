@@ -335,7 +335,7 @@ BREATHE.
 clicks: 5
 ---
 
-
+# The Offline-First Architecture
 
 <SplitDiagram
   :panels="[
@@ -381,6 +381,8 @@ TRANSITION: "But there's a gotcha most people miss..."
 ---
 clicks: 5
 ---
+
+# The PWA Gotcha
 
 <PwaDiagram
   :panels="[
@@ -500,7 +502,8 @@ Don't read the diagram — audience can read. Focus on the comparison:
 - Left: "IndexedDB — native, everywhere. API is rough. Dexie wraps it beautifully."
 - Right: "SQLite WASM — full SQL engine compiled to WebAssembly. The new kid on the block."
 - Point at the key-value vs table visual: "Object stores vs relational tables — fundamentally different models."
-- "Both work. Different tradeoffs. For today's demo we'll use Dexie."
+- Note: PGlite is actually Postgres-in-WASM, not SQLite — mention it as a third option if asked.
+- "Both work. Different tradeoffs. Most sync engines we'll see later pick one for you."
 
 TRANSITION: "But how long does that data actually stick around?"
 
@@ -580,34 +583,8 @@ CLICK 2: "Safari — this is the one that bites. 7-day cap. If the user doesn't 
 CLICK 3: "The fix? The Storage API. navigator.storage.persist() tells the browser: don't auto-evict my data. Chrome auto-grants it for sites with high engagement. And for Safari — making your app a PWA is the best protection you have."
 
 TRANSITION: "So we can store data, and we can keep it around. But the hard part..."
--->
 
----
-
-# The Missing Piece: How Do You Sync?
-
-Storing data locally is the **easy part**.
-
-<v-clicks>
-
-- What happens when two devices change the same data offline?
-- This is a **distributed systems** problem
-- It needs a **sync engine**
-
-</v-clicks>
-
-<!--
-Build tension here — this is the cliffhanger before Part 2.
-
-"Storing data locally? Easy. We just did it."
-
-CLICK: "But what happens when two devices change the same data offline?"
-CLICK: "That's a distributed systems problem."
-CLICK: "And it needs a sync engine."
-
-PAUSE — let the problem statement hang.
-
-TRANSITION: "But first, let's see what offline-first already gives us..."
+[CHECK: ~11:00 — if past 11:30, tighten the next two slides]
 -->
 
 ---
@@ -648,17 +625,59 @@ TRANSITION: "But first, let's see what offline-first already gives us..."
 </div>
 
 <!--
-CLICK — reveal the 2 green cards.
+CLICK 1 — reveal the 2 green cards.
 
 "Offline-first gives us two things for free: speed — because data is local, reads are instant — and offline capability."
 
-CLICK — reveal the 5 question marks.
+CLICK 2 — reveal the 5 question marks.
 
 "But five question marks are still open. We need something more."
 
-CLICK — reveal the counter.
+CLICK 3 — reveal the counter.
 
-"That's 2 out of 7 local-first principles. We need something more."
+"That's 2 out of 7 local-first principles. Good progress — but not enough."
+
+TRANSITION: "So what's holding us back?"
+-->
+
+---
+clicks: 3
+---
+
+# The Missing Piece: How Do You Sync?
+
+Storing data locally is the **easy part**.
+
+<FlowDiagram
+  :nodes="[
+    { id: 'a', label: 'Device A', subtitle: 'title: Buy milk', variant: 'accent' },
+    { id: 'conflict', label: '???', subtitle: 'conflict', click: 2, variant: 'danger' },
+    { id: 'b', label: 'Device B', subtitle: 'title: Buy oats', click: 1, variant: 'accent' },
+  ]"
+  :edges="[
+    { from: 'a', to: 'conflict', click: 2 },
+    { from: 'b', to: 'conflict', click: 2 },
+  ]"
+  :nodeHeight="60"
+  :gap="80"
+  :roughness="1.0"
+  :seed="150"
+/>
+
+<div v-click="3" class="text-center mt-4 text-gray-400">
+
+This is a **distributed systems** problem. It needs a **sync engine**.
+
+</div>
+
+<!--
+"Storing data locally? Easy. We just did it."
+
+CLICK 1: "But now imagine two devices editing the same todo offline."
+CLICK 2: "They both come back online. Who wins?" Point at the ??? conflict node.
+CLICK 3: "This is a distributed systems problem. And it needs a sync engine."
+
+PAUSE — let the problem statement hang. This is the cliffhanger into Part 2.
 
 TRANSITION: "That something is a sync engine."
 
