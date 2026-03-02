@@ -118,7 +118,7 @@ SLOW DOWN — this is a section transition. Let it land.
 -->
 
 ---
-clicks: 5
+clicks: 6
 ---
 
 <div class="flex items-center justify-center h-full">
@@ -126,42 +126,45 @@ clicks: 5
   :panels="[
     {
       title: 'FRONTEND',
+      click: 1,
       items: [
-        { id: 'ref', label: 'ref([])', click: 1 },
-        { id: 'loading', label: 'loading = true', click: 1 },
-        { id: 'try', label: 'try { ... }', click: 1 },
-        { id: 'catch', label: 'catch { ... }', click: 1 },
-        { id: 'finally', label: 'finally { ... }', click: 1 },
-        { id: 'cache', label: 'invalidateCache()', click: 1 },
+        { id: 'ref', label: 'ref([])', click: 2 },
+        { id: 'loading', label: 'loading = true', click: 2 },
+        { id: 'try', label: 'try { ... }', click: 2 },
+        { id: 'catch', label: 'catch { ... }', click: 2 },
+        { id: 'finally', label: 'finally { ... }', click: 2 },
+        { id: 'cache', label: 'invalidateCache()', click: 2 },
       ],
       warnings: [
         { text: '⚠ validation' },
         { text: '⚠ auth checks' },
         { text: '⚠ error types' },
       ],
-      warningClick: 4,
+      warningClick: 5,
     },
     {
       title: 'BACKEND',
+      click: 1,
       items: [
-        { id: 'get', label: 'app.get(\'/todos\')', click: 2 },
-        { id: 'validate', label: 'validate(...)', click: 2 },
-        { id: 'insert', label: 'db.insert(...)', click: 2 },
-        { id: 'auth', label: 'authorize(...)', click: 2 },
+        { id: 'get', label: 'app.get(\'/todos\')', click: 4 },
+        { id: 'validate', label: 'validate(...)', click: 4 },
+        { id: 'insert', label: 'db.insert(...)', click: 4 },
+        { id: 'auth', label: 'authorize(...)', click: 4 },
       ],
       warnings: [
         { text: '⚠ validation' },
         { text: '⚠ auth checks' },
         { text: '⚠ error types' },
       ],
-      warningClick: 4,
+      warningClick: 5,
     },
   ]"
   :connections="[
-    { label: 'fetch', click: 3 },
+    { label: 'GET', click: 3 },
     { label: 'POST', click: 3 },
   ]"
-  :callout="{ label: 'DUPLICATED', click: 5, variant: 'danger' }"
+  :database="{ label: 'query / write', click: 4 }"
+  :callout="{ label: 'DUPLICATED', click: 6, variant: 'danger' }"
   :seed="150"
 />
 </div>
@@ -197,125 +200,7 @@ SLOW DOWN — this is a key quote.
 
 PAUSE — let the analogy sink in.
 
-TRANSITION: "Let me show you what that looks like in Vue code..."
--->
-
----
-
-# What Does This Look Like in Code?
-
-````md magic-move {lines: true}
-```ts
-// Traditional Vue — Loading Todos
-const todos = ref([])
-const loading = ref(true)
-const error = ref(null)
-
-async function fetchTodos() {
-  loading.value = true
-  try {
-    todos.value = await fetch('/api/todos').then(r => r.json())
-  } catch (e) {
-    error.value = e
-  } finally {
-    loading.value = false
-  }
-}
-```
-```ts
-// Traditional Vue — Now let's add a todo...
-const todos = ref([])
-const loading = ref(true)
-const error = ref(null)
-
-async function fetchTodos() { /* ... */ }
-
-async function addTodo(title) {
-  const temp = { id: crypto.randomUUID(), title, done: false }
-  todos.value.push(temp) // optimistic update
-  try {
-    const saved = await fetch('/api/todos', {
-      method: 'POST',
-      body: JSON.stringify({ title }),
-    }).then(r => r.json())
-    todos.value = todos.value.map(t => t.id === temp.id ? saved : t)
-  } catch (e) {
-    todos.value = todos.value.filter(t => t.id !== temp.id) // rollback
-    error.value = e
-  }
-}
-```
-```ts
-// Traditional Vue — And we still need...
-const todos = ref([])
-const loading = ref(true)
-const error = ref(null)
-
-async function fetchTodos() { /* ... */ }
-async function addTodo(title) { /* ... */ }
-
-onMounted(fetchTodos)
-// TODO: real-time updates? → polling? websocket?
-// TODO: offline support?   → service worker? local cache?
-// TODO: optimistic UI?     → rollback on failure?
-// TODO: multiple tabs?     → BroadcastChannel? shared worker?
-```
-```ts
-// With a sync engine (e.g. LiveStore)
-const todos = useQuery(queryDb(tables.todos.select()))
-const { commit } = useStore()
-
-function addTodo(title) {
-  commit(events.todoCreated({ id: crypto.randomUUID(), title }))
-}
-
-// Optimistic updates    — built in
-// Real-time sync        — built in
-// Offline reads/writes  — built in
-// Conflict resolution   — built in
-// Multi-tab sync        — built in
-```
-````
-
-<!--
-Step 1: "OK, let's load some todos. Already 3 refs and a try/catch/finally just to fetch data."
-
-CLICK → Step 2: "Now we want to add a todo. Optimistic update so it feels instant... but we need rollback if the server fails. Look how much code that is."
-
-CLICK → Step 3: "And we're still not done. Real-time? Offline? Conflicts? Multiple tabs? Each one is another weekend of work."
-
-CLICK → Step 4: Magic move collapses everything. "With LiveStore — useQuery gives you a reactive computed, store.commit writes an event that's applied locally and synced. Offline, real-time, conflict resolution via git-like rebasing, multi-tab — all built in."
-
-TRANSITION: "To understand this, let's look at what Vue already solved..."
-
-[CHECK: ~5:00]
--->
-
----
-clicks: 2
----
-
-<FlowDiagram
-  :nodes="[
-    { id: 'source', label: 'Source', subtitle: 'ref(0)', variant: 'accent' },
-    { id: 'reconciler', label: 'Reconciler', subtitle: 'Virtual DOM diff', click: 1 },
-    { id: 'target', label: 'Target', subtitle: 'Real DOM', click: 2, variant: 'success' },
-  ]"
-  :edges="[
-    { from: 'source', to: 'reconciler', click: 1 },
-    { from: 'reconciler', to: 'target', click: 2 },
-  ]"
-/>
-
-<!--
-- "Vue solved this: you declare state, the framework syncs the DOM."
-- Point at the three boxes: source → reconciler → target
-
-CLICK — reveal the callback.
-
-"This pattern — source, reconciler, target — remember it. It comes back."
-
-- Repeat: "Source. Reconciler. Target." Emphasize each word.
+TRANSITION: "Let me show you where we are in this evolution..."
 -->
 
 ---
@@ -327,8 +212,8 @@ clicks: 2
 <FlowDiagram
   :nodes="[
     { id: 'jquery', label: 'jQuery Era', subtitle: 'YOU → DOM', variant: 'muted' },
-    { id: 'vue', label: 'Vue Era', subtitle: 'Vue → DOM', click: 1 },
-    { id: 'now', label: 'Now', subtitle: '??? → DB', click: 2, variant: 'accent' },
+    { id: 'vue', label: 'Vue Era', subtitle: 'ref() → VDOM → DOM', click: 1 },
+    { id: 'now', label: 'Now', subtitle: '??? → ??? → DB', click: 2, variant: 'accent' },
   ]"
   :edges="[
     { from: 'jquery', to: 'vue', click: 1 },
@@ -362,22 +247,22 @@ TRANSITION: "Let's see where that leaves us on the scorecard..."
 # The Status Quo Scorecard
 
 <div class="grid grid-cols-4 gap-3 mt-6">
-  <div v-click="1" class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+  <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
     <div class="i-ph-lightning text-2xl text-pink-400/50" />
     <div class="text-sm font-semibold text-gray-300">Fast</div>
     <div class="text-xs text-gray-500 leading-tight">No spinners. Instant response.</div>
   </div>
-  <div v-click="2" class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+  <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
     <div class="i-ph-devices text-2xl text-pink-400/50" />
     <div class="text-sm font-semibold text-gray-300">Multi-device</div>
     <div class="text-xs text-gray-500 leading-tight">Your work on any device.</div>
   </div>
-  <div v-click="3" class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+  <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
     <div class="i-ph-wifi-slash text-2xl text-pink-400/50" />
     <div class="text-sm font-semibold text-gray-300">Works offline</div>
     <div class="text-xs text-gray-500 leading-tight">The network is optional.</div>
   </div>
-  <div v-click="4" class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+  <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
     <div class="i-ph-users-three text-2xl text-pink-400/50" />
     <div class="text-sm font-semibold text-gray-300">Collaboration</div>
     <div class="text-xs text-gray-500 leading-tight">Seamless real-time teamwork.</div>
@@ -385,73 +270,58 @@ TRANSITION: "Let's see where that leaves us on the scorecard..."
 </div>
 
 <div class="flex justify-center gap-3 mt-3">
-  <div v-click="5" class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+  <div class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
     <div class="i-ph-clock-countdown text-2xl text-pink-400/50" />
     <div class="text-sm font-semibold text-gray-300">Longevity</div>
     <div class="text-xs text-gray-500 leading-tight">Your data outlives the app.</div>
   </div>
-  <div v-click="6" class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+  <div class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
     <div class="i-ph-shield-check text-2xl text-pink-400/50" />
     <div class="text-sm font-semibold text-gray-300">Privacy</div>
     <div class="text-xs text-gray-500 leading-tight">Security and privacy by default.</div>
   </div>
-  <div v-click="7" class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
+  <div class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
     <div class="i-ph-key text-2xl text-pink-400/50" />
     <div class="text-sm font-semibold text-gray-300">User control</div>
     <div class="text-xs text-gray-500 leading-tight">You retain ownership and control.</div>
   </div>
 </div>
 
-<div v-click="8" class="mt-6 text-center">
+<div v-click="1" class="mt-6 text-center">
   <span class="text-sm text-gray-400 italic">The 7 ideals from </span>
   <span class="text-sm font-semibold italic" style="color: #ff6bed">"Local-First Software"</span>
   <span class="text-sm text-gray-400 italic"> — Ink & Switch, 2019</span>
 </div>
 
-<div v-click="9" class="mt-4 text-center text-gray-500">
+<div v-click="2" class="mt-4 text-center text-gray-500">
 
 Vue solved **rendering**. But the data layer? Still the jQuery era. **0 out of 7.**
 
 </div>
 
 <!--
-CLICK 1 — "Fast"
-"Your app should respond instantly. No loading spinners, no waiting for the server."
+All 7 ideal cards are visible immediately — let the audience read them for a beat.
 
-CLICK 2 — "Multi-device"
-"People work across laptops, phones, tablets. The data should follow them."
+"Fast. Multi-device. Works offline. Collaboration. Longevity. Privacy. User control."
 
-CLICK 3 — "Works offline"
-"Airplane mode, bad WiFi, underground — the app should still work."
+Sweep through them verbally — don't linger on each one.
 
-CLICK 4 — "Collaboration"
-"Multiple people should be able to work on the same data, at the same time."
+CLICK 1 — reveal the Ink & Switch attribution.
+"These aren't random criteria. These are the seven ideals from the Local-First Software paper by Ink & Switch, 2019."
 
-CLICK 5 — "Longevity"
-"If a company shuts down, your data shouldn't disappear with it."
-
-CLICK 6 — "Privacy"
-"Your data should be encrypted and private by default."
-
-CLICK 7 — "User control"
-"You should own your data. Export it, move it, delete it — your choice."
-
-CLICK 8 — reveal the local-first paper attribution.
-"These aren't random criteria. These are the seven ideals from the Local-First Software paper by Ink & Switch."
-
-CLICK 9 — reveal the verdict.
-"And right now, with the typical Vue app? Zero out of seven. The rendering era is solved. The data era hasn't started. Let's change that."
+CLICK 2 — reveal the verdict.
+"And right now, with the typical Vue app? Zero out of seven. The rendering layer is solved. The data layer hasn't started. Let's change that."
 
 TRANSITION: "What if we flipped the model?"
 
-[CHECK: ~7:00 — entering Part 1]
+[CHECK: ~5:00 — entering Part 1]
 -->
 
 ---
 transition: fade
 ---
 
-<PartSlide part="1" title="Offline-First" subtitle="The App That Never Stops Working" />
+<PartSlide part="1" title="Offline-First" subtitle="The App That Works Without WiFi" />
 
 <!--
 Section transition — let the slide breathe for a moment.
@@ -632,9 +502,84 @@ Don't read the diagram — audience can read. Focus on the comparison:
 - Point at the key-value vs table visual: "Object stores vs relational tables — fundamentally different models."
 - "Both work. Different tradeoffs. For today's demo we'll use Dexie."
 
-TRANSITION: "Storing data locally is the easy part. The hard part..."
+TRANSITION: "But how long does that data actually stick around?"
 
 [CHECK: ~10:00]
+-->
+
+---
+
+# How Long Does Your Data Survive?
+
+<div class="grid grid-cols-2 gap-8 mt-4">
+
+<div v-click class="border border-gray-600 rounded-xl p-5 bg-gray-800/40">
+  <div class="flex items-center gap-2 mb-3">
+    <logos-chrome class="text-2xl" />
+    <span class="font-bold text-lg">Chrome</span>
+  </div>
+  <div class="space-y-2 text-sm">
+    <div class="flex items-center gap-2">
+      <span class="text-green-400">&#x2713;</span> <span>Data persists <strong>indefinitely</strong></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-yellow-400">&#x26A0;</span> <span>Evicted only under <strong>storage pressure</strong></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-gray-400">&#x25CF;</span> <span>Up to <strong>60%</strong> of disk per origin</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-gray-400">&#x25CF;</span> <span>LRU eviction — least recently used goes first</span>
+    </div>
+  </div>
+</div>
+
+<div v-click class="border border-gray-600 rounded-xl p-5 bg-gray-800/40">
+  <div class="flex items-center gap-2 mb-3">
+    <logos-safari class="text-2xl" />
+    <span class="font-bold text-lg">Safari</span>
+  </div>
+  <div class="space-y-2 text-sm">
+    <div class="flex items-center gap-2">
+      <span class="text-red-400">&#x2717;</span> <span><strong>7-day cap</strong> — no user visit = data deleted</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-yellow-400">&#x26A0;</span> <span>Part of Intelligent Tracking Prevention</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-gray-400">&#x25CF;</span> <span>Affects IndexedDB, Cache API, Service Workers</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-green-400">&#x2713;</span> <span><strong>PWAs exempt</strong> — home screen apps keep data</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div v-click class="mt-6 border border-pink-500/40 rounded-xl p-4 bg-pink-500/5">
+  <div class="font-bold text-pink-400 mb-1">PWA + Storage API = Protection</div>
+  <div class="text-sm text-gray-300">
+
+  ```ts
+  // Request persistent storage — browser won't auto-evict
+  const isPersisted = await navigator.storage.persist() // true = protected
+  ```
+
+  Safari exempts installed PWAs from the 7-day cap. Chrome auto-grants persistence for engaged sites.
+  </div>
+</div>
+
+<!--
+This is a critical gotcha slide — audiences always react to the Safari 7-day rule.
+
+CLICK 1: "Chrome — pretty generous. Your IndexedDB data stays until the disk fills up. Least recently used origins get evicted first."
+
+CLICK 2: "Safari — this is the one that bites. 7-day cap. If the user doesn't visit your site for a week, Safari deletes everything. IndexedDB, Cache API, Service Workers — all gone. This is part of their Intelligent Tracking Prevention. BUT — if your app is installed as a PWA on the home screen, you're exempt."
+
+CLICK 3: "The fix? The Storage API. navigator.storage.persist() tells the browser: don't auto-evict my data. Chrome auto-grants it for sites with high engagement. And for Safari — making your app a PWA is the best protection you have."
+
+TRANSITION: "So we can store data, and we can keep it around. But the hard part..."
 -->
 
 ---
@@ -849,7 +794,7 @@ Point at Layer 2: "A sync engine is the SAME pattern, but for data across the ne
 
 # The Object Sync Engine Pattern
 
-Three teams — **Linear, Figma, and Asana** — all converged on this independently.
+Three teams — **Linear, Figma, and Notion** — all converged on this independently.
 
 <FlowDiagram
   :nodes="[
@@ -865,13 +810,23 @@ Three teams — **Linear, Figma, and Asana** — all converged on this independe
 Three teams built this independently. **Same architecture.** That's a strong signal.
 
 <!--
-"This isn't theoretical. Linear, Figma, Asana — three of the most successful product teams — all independently arrived at the SAME architecture."
+"This isn't theoretical. Linear, Figma, Notion — three of the most successful product teams — all independently arrived at the SAME architecture."
 
 PAUSE — let "independently" land. That's the signal.
 
 - Local store = instant reads/writes, no spinners
 - Server store = durability, authority
 - Sync protocol = minimal deltas between them
+
+HOW EACH TEAM DOES IT:
+
+**Linear** — treats IndexedDB as a real database. Every change is a local DB write first — no network in the hot path. Mutations go to the server via GraphQL; real-time sync comes back over WebSockets as "delta packets" (minimal diffs with monotonically increasing sync IDs). On first load they bootstrap the full object graph into IndexedDB, then use MobX observables so React re-renders automatically. Models support different load strategies: instant (bootstrapped), lazy (loaded all-at-once when needed), or partial (on-demand). Transactions are reversible on the client if the server rejects — this also powers undo/redo. Result: most pages load in <50ms, works fully offline as a PWA.
+
+**Figma** — the document is a tree of objects (like the DOM: root → pages → layers → shapes). When you open a file, the client opens a WebSocket to the "multiplayer" service, which is the single source of truth. They DON'T use full CRDTs — since they have a central server, they stripped out the crdt protocol overhead. Instead they use "CRDT-inspired" data structures: each property has a last-writer-wins register with Lamport-like timestamps. The server validates, orders, and broadcasts. LiveGraph (their read-path sync engine) handles the non-canvas data (files, teams, projects) — it's a GraphQL-like subscription system that reads from the DB and pushes invalidations in real-time.
+
+**Notion** — every block is a record in SQLite on the client. For years this was "best-effort" caching — if data was missing, just fetch from the server. Their 2025 offline mode upgraded this to a guaranteed persistent store. They track offline pages as a "forest of offline page trees" — each page can be offline for multiple overlapping reasons (toggled, favorited, recent, inherited from parent database). Push-based sync: servers emit on per-page channels, clients subscribe; on reconnect, they compare `lastDownloadedTimestamp` vs server's `lastUpdatedTime` to skip unnecessary refetches. Pages marked offline are dynamically migrated to a CRDT data model for conflict resolution of concurrent edits.
+
+KEY INSIGHT: All three use the same two-box pattern (local store ↔ server store), but the sync protocols differ based on their data models: Linear syncs an object graph of issues, Figma syncs a design document tree, Notion syncs a block tree. The shape of the data determines the sync strategy.
 
 TRANSITION: "Let's look at what's out there. The ecosystem has exploded."
 -->
@@ -945,69 +900,8 @@ TRANSITION: "Let me show you what each looks like in code..."
 
 ---
 
-# Wait — What About rstore?
+# Jazz — Batteries-included
 
-<div class="grid grid-cols-2 gap-6 mt-6">
-
-<div>
-
-**rstore** (Guillaume Chau / Directus) is a **data management layer**, not a sync engine.
-
-<div class="text-sm mt-4 text-gray-400">
-
-- Normalized reactive cache
-- Plugin system — fetch from any source
-- Reads are always local (from cache)
-- First-class Nuxt module (`@rstore/nuxt`)
-
-</div>
-
-</div>
-
-<div>
-
-```ts
-const store = useStore()
-
-const { data: todos } = await store.todos
-  .query(q => q.many())
-
-// Reads: instant from cache
-// Writes: optimistic, then server
-await store.todos.create({
-  title: 'New todo', done: false,
-})
-```
-
-</div>
-
-</div>
-
-<Callout type="info">
-
-**Complementary, not competing.** rstore manages data in your app (like TanStack Query). Sync engines replicate data across devices. You could plug a sync engine into rstore's plugin system.
-
-</Callout>
-
-<!--
-"Quick sidebar — some of you might have heard of rstore. Guillaume Chau — Akryum, Vue core team — built this at Directus."
-
-"rstore is NOT a sync engine. It's a data management layer — like TanStack Query but Vue-native, with a normalized cache."
-
-"Its reads are always local from cache — that's a local-first principle. And its plugin system means you COULD plug a sync engine underneath."
-
-"Think of it as a complementary layer. rstore manages your data. A sync engine replicates it."
-
-"Guillaume has a talk about it at this conference — check it out!"
-
-TRANSITION: "Now let me show you how the actual sync engines look in code..."
--->
-
----
-
-# What Does Each Look Like in Vue?
-
-````md magic-move {lines: true}
 ```ts
 // Jazz — Batteries-included
 import { co, z } from 'jazz-tools'
@@ -1025,6 +919,15 @@ function addTodo(title: string) {
 // ✅ Auth, permissions, E2E encryption — all included
 // ✅ Real-time sync via Jazz Cloud or self-host
 ```
+
+<!--
+useCoState gives you a reactive reference. push() to write. Auth, permissions, encryption — all included. Zero boilerplate.
+-->
+
+---
+
+# LiveStore — Event-sourced SQLite
+
 ```ts
 // LiveStore — Event-sourced reactive SQLite
 import { useStore, useQuery } from 'vue-livestore'
@@ -1041,6 +944,15 @@ function addTodo(title: string) {
 // ✅ SQLite WASM running in the browser — full SQL queries
 // ✅ Git-like rebasing for conflict resolution
 ```
+
+<!--
+Event-sourced. You commit events, they materialize into SQLite state. Like Redux but with a real database.
+-->
+
+---
+
+# Dexie — IndexedDB + Optional Cloud
+
 ```ts
 // Dexie — IndexedDB wrapper + optional cloud
 import { liveQuery } from 'dexie'
@@ -1059,26 +971,45 @@ async function addTodo(title: string) {
 // ✅ Progressive: local-only → npm i dexie-cloud-addon → sync
 // ⚠ Last-write-wins conflict resolution
 ```
+
+<!--
+Wraps IndexedDB. liveQuery is reactive like computed(). Add DexieCloud later for sync.
+-->
+
+---
+
+# TanStack DB — Reactive Collections on Sync
+
 ```ts
-// Yjs — CRDT library, bring your own backend
-import * as Y from 'yjs'
-import { WebsocketProvider } from 'y-websocket'
-import { ref } from 'vue'
+// TanStack DB — reactive client store + any sync backend
+import { useLiveQuery } from '@tanstack/vue-db'
+import { eq } from '@tanstack/db'
 
-const ydoc = new Y.Doc()
-const ytodos = ydoc.getArray('todos')
-new WebsocketProvider('ws://localhost:1234', 'room', ydoc)
+// Collection defined elsewhere with createCollection()
+// Supports Electric, PowerSync, or plain TanStack Query
 
-// Bridge to Vue reactivity:
-const todos = ref(ytodos.toArray())
-ytodos.observe(() => { todos.value = ytodos.toArray() })
+// In your component:
+const { data: todos } = useLiveQuery((q) =>
+  q.from({ todo: todoCollection })
+   .where(({ todo }) => eq(todo.completed, false))
+   .orderBy(({ todo }) => todo.createdAt, 'desc')
+)
 
 function addTodo(title: string) {
-  ytodos.push([{ id: crypto.randomUUID(), title, done: false }])
+  todoCollection.insert({ id: crypto.randomUUID(), title, completed: false })
 }
-// ✅ True CRDTs — automatic conflict resolution
-// ✅ P2P possible (y-webrtc), or use y-sweet, y-redis
+// ✅ Differential dataflow — sub-ms reactive updates
+// ✅ Optimistic mutations with automatic rollback
 ```
+
+<!--
+TanStack DB extends TanStack Query with collections and live queries. Plug in Electric, PowerSync, or roll your own sync. Optimistic mutations built in.
+-->
+
+---
+
+# Zero — Server-authoritative Query Sync
+
 ```ts
 // Zero — Server-authoritative query sync
 import { useQuery } from 'zero-vue'
@@ -1096,6 +1027,15 @@ function addTodo(title: string) {
 // ✅ Instant reads from client-side SQLite cache
 // ⚠ Server is source of truth — not truly local-first
 ```
+
+<!--
+Server-authoritative. Postgres on the server, SQLite cache on the client. Great DX. But server owns the data.
+-->
+
+---
+
+# DIY — Nuxt + Nitro WebSocket + Yjs
+
 ```ts
 // DIY — Nuxt + Nitro WebSocket + Yjs
 // server/routes/_ws.ts
@@ -1114,22 +1054,30 @@ ws.onmessage = (e) => Y.applyUpdate(ydoc, new Uint8Array(e.data))
 // ✅ Full control over your sync protocol
 // ⚠ You build and maintain everything yourself
 ```
-````
 
 <!--
-Let magic-move animate each transition. Don't read the code — focus on the KEY DIFFERENCE:
+Nuxt plus Nitro WebSocket. Use Yjs for CRDTs. Full control, full responsibility.
+-->
 
-CLICK → Jazz: "useCoState gives you a reactive reference. push() to write. Auth, permissions, encryption — all included. Zero boilerplate."
+---
 
-CLICK → LiveStore: "Event-sourced. You commit events, they materialize into SQLite state. Like Redux but with a real database."
+# And Many More...
 
-CLICK → Dexie: "Wraps IndexedDB. liveQuery is reactive like computed(). Add DexieCloud later for sync."
+This is still a **new and evolving field** — new engines appear regularly
 
-CLICK → Yjs: "A CRDT library, not a platform. You CHOOSE your transport. WebSocket, WebRTC, peer-to-peer."
+<v-clicks>
 
-CLICK → Zero: "Server-authoritative. Postgres on the server, SQLite cache on the client. Great DX. But server owns the data."
+- **Yjs** — CRDT library, BYO backend (WebSocket, WebRTC, P2P)
+- **Automerge** — Document-based CRDTs with rich text support
+- **Replicache** — Client-side sync with server-authoritative mutations
+- **Triplit** — Full-stack database with real-time sync
+- **PowerSync** — Postgres-to-SQLite sync for offline-first
+- **cr-sqlite** — CRDTs at the SQLite level (Vulcan)
 
-CLICK → DIY: "Nuxt plus Nitro WebSocket. Use Yjs for CRDTs. Full control, full responsibility."
+</v-clicks>
+
+<!--
+Don't try to cover all of them. The landscape is moving fast. New engines launch every few months. The ones we showed are the most mature or most interesting patterns. But keep your eyes open — this space is evolving quickly.
 
 TRANSITION: "So how do we choose?"
 
@@ -1914,7 +1862,6 @@ PAUSE.
 - **Dexie.js** — dexie.org — IndexedDB wrapper + DexieCloud sync
 - **Yjs** — yjs.dev — high-performance CRDT library
 - **Zero** — zero.rocicorp.dev — query-driven sync from Rocicorp
-- **rstore** — rstore.dev — reactive data management for Vue/Nuxt
 - **Sync Engines for Vue Developers** — alexop.dev
 - **A Gentle Introduction to CRDTs** — Matt Wonlaw
 

@@ -32,16 +32,23 @@ interface ArchPanel {
   click?: number
 }
 
+interface DatabasePanel {
+  title?: string
+  label?: string
+  click?: number
+}
+
 interface DuplicatedCallout {
   label: string
   click?: number
   variant?: 'danger' | 'accent' | 'muted'
 }
 
-const { panels, connections, callout, roughness = 1.5, seed = 42, panelWidth = 260, panelGap = 140, itemHeight = 28, warningBoxHeight = 90 } = defineProps<{
+const { panels, connections, callout, database, roughness = 1.5, seed = 42, panelWidth = 260, panelGap = 140, itemHeight = 28, warningBoxHeight = 90 } = defineProps<{
   panels: [ArchPanel, ArchPanel]
   connections: CrossConnection[]
   callout?: DuplicatedCallout
+  database?: DatabasePanel
   roughness?: number
   seed?: number
   panelWidth?: number
@@ -156,7 +163,42 @@ const calloutData = computed(() => {
   }
 })
 
-const svgW = computed(() => panelWidth * 2 + panelGap + 48)
+const dbGap = 80
+const dbWidth = 100
+
+const databaseData = computed(() => {
+  if (!database) return null
+
+  const rightPanel = panelData.value[1]
+  if (!rightPanel) return null
+
+  const dbX = rightPanel.px + panelWidth + dbGap
+  const panelCenterY = panelTopY + rightPanel.panelHeight / 2
+  const dbHeight = 60
+  const dbY = panelCenterY - dbHeight / 2
+
+  return {
+    title: database.title ?? 'DATABASE',
+    label: database.label ?? '',
+    click: database.click,
+    x: dbX,
+    y: dbY,
+    width: dbWidth,
+    height: dbHeight,
+    arrowX1: rightPanel.px + panelWidth + 8,
+    arrowY: panelCenterY,
+    arrowX2: dbX - 8,
+    labelX: rightPanel.px + panelWidth + dbGap / 2,
+    labelY: panelCenterY - 10,
+    seed: seed + 700,
+  }
+})
+
+const svgW = computed(() => {
+  const base = panelWidth * 2 + panelGap + 48
+  if (database) return base + dbGap + dbWidth
+  return base
+})
 const svgH = computed(() => {
   const base = panelTopY + (panelData.value[0]?.panelHeight || 0) + warningGap + warningBoxHeight
   if (callout) return base + calloutGap + arrowHeight + 30
@@ -279,6 +321,56 @@ const viewBox = computed(() => `${-24} ${-8} ${svgW.value} ${svgH.value}`)
         class="arch-diagram__conn-label"
       >
         {{ conn.label }}
+      </text>
+    </g>
+
+    <!-- Database -->
+    <g
+      v-if="databaseData"
+      class="arch-diagram__el"
+      :class="{ '--hidden': !isVisible(databaseData.click) }"
+    >
+      <RoughRect
+        :x="databaseData.x"
+        :y="databaseData.y"
+        :width="databaseData.width"
+        :height="databaseData.height"
+        stroke="rgba(255,255,255,0.2)"
+        fill="rgba(255,255,255,0.03)"
+        :roughness="roughness * 0.8"
+        :seed="databaseData.seed"
+        :stroke-width="1.5"
+        stroke-dasharray="8 6"
+      />
+      <text
+        :x="databaseData.x + databaseData.width / 2"
+        :y="databaseData.y + databaseData.height / 2"
+        text-anchor="middle"
+        dominant-baseline="central"
+        class="arch-diagram__title"
+      >
+        {{ databaseData.title }}
+      </text>
+      <RoughArrow
+        :x1="databaseData.arrowX1"
+        :y1="databaseData.arrowY"
+        :x2="databaseData.arrowX2"
+        :y2="databaseData.arrowY"
+        :stroke="EDGE_STROKE"
+        :roughness="roughness"
+        :seed="databaseData.seed + 10"
+        :arrow-size="10"
+        :start-arrow="true"
+        :end-arrow="true"
+      />
+      <text
+        :x="databaseData.labelX"
+        :y="databaseData.labelY"
+        text-anchor="middle"
+        dominant-baseline="auto"
+        class="arch-diagram__conn-label"
+      >
+        {{ databaseData.label }}
       </text>
     </g>
 
