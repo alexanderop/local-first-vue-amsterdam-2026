@@ -837,24 +837,25 @@ PAUSE — let "independently" land. That's the signal.
 - Server store = durability, authority
 - Sync protocol = minimal deltas between them
 
-HOW EACH TEAM DOES IT:
+HOW EACH TEAM DOES IT (pick 1-2 to elaborate on if time allows):
 
-**Linear** — treats IndexedDB as a real database. Every change is a local DB write first — no network in the hot path. Mutations go to the server via GraphQL; real-time sync comes back over WebSockets as "delta packets" (minimal diffs with monotonically increasing sync IDs). On first load they bootstrap the full object graph into IndexedDB, then use MobX observables so React re-renders automatically. Models support different load strategies: instant (bootstrapped), lazy (loaded all-at-once when needed), or partial (on-demand). Transactions are reversible on the client if the server rejects — this also powers undo/redo. Result: most pages load in <50ms, works fully offline as a PWA.
+- **Linear** — IndexedDB as primary store, writes local-first. WebSocket delta packets for sync. Pages load in <50ms. Full offline PWA.
+- **Figma** — Document tree synced via WebSocket. CRDT-inspired LWW registers (not full CRDTs). Server validates and broadcasts.
+- **Notion** — SQLite on client. Push-based sync on per-page channels. Offline pages migrated to CRDT model for conflict resolution.
 
-**Figma** — the document is a tree of objects (like the DOM: root → pages → layers → shapes). When you open a file, the client opens a WebSocket to the "multiplayer" service, which is the single source of truth. They DON'T use full CRDTs — since they have a central server, they stripped out the crdt protocol overhead. Instead they use "CRDT-inspired" data structures: each property has a last-writer-wins register with Lamport-like timestamps. The server validates, orders, and broadcasts. LiveGraph (their read-path sync engine) handles the non-canvas data (files, teams, projects) — it's a GraphQL-like subscription system that reads from the DB and pushes invalidations in real-time.
-
-**Notion** — every block is a record in SQLite on the client. For years this was "best-effort" caching — if data was missing, just fetch from the server. Their 2025 offline mode upgraded this to a guaranteed persistent store. They track offline pages as a "forest of offline page trees" — each page can be offline for multiple overlapping reasons (toggled, favorited, recent, inherited from parent database). Push-based sync: servers emit on per-page channels, clients subscribe; on reconnect, they compare `lastDownloadedTimestamp` vs server's `lastUpdatedTime` to skip unnecessary refetches. Pages marked offline are dynamically migrated to a CRDT data model for conflict resolution of concurrent edits.
-
-KEY INSIGHT: All three use the same two-box pattern (local store ↔ server store), but the sync protocols differ based on their data models: Linear syncs an object graph of issues, Figma syncs a design document tree, Notion syncs a block tree. The shape of the data determines the sync strategy.
+KEY INSIGHT: Same two-box pattern, but sync protocols differ based on data model shape — object graph (Linear), design tree (Figma), block tree (Notion).
 
 TRANSITION: "Let's look at what's out there. The ecosystem has exploded."
 -->
 
 ---
+layout: statement
 transition: fade
 ---
 
-<PartSlide title="The Sync Engine Landscape" subtitle="Choose Your Weapon" icon="🧭" />
+# The Sync Engine Landscape
+
+<div class="mt-4 text-xl op-70">The ecosystem has exploded. Let's look at what's out there.</div>
 
 <!--
 Energy shift — this is the exciting part!
@@ -867,12 +868,12 @@ BREATHE.
 -->
 
 ---
-clicks: 6
+clicks: 7
 ---
 
 # The Landscape
 
-<div class="grid grid-cols-3 gap-3 mt-4">
+<div class="grid grid-cols-4 gap-3 mt-4">
   <Card v-click="1" variant="muted" size="md">
     <div class="text-sm font-bold text-pink-400">Jazz</div>
     <div class="text-xs text-gray-400 mt-1">Batteries-included. Auth, permissions, E2E encryption, sync — all built in.</div>
@@ -890,10 +891,14 @@ clicks: 6
     <div class="text-xs text-gray-400 mt-1">CRDT library. Bring your own backend. P2P possible. Maximum flexibility.</div>
   </Card>
   <Card v-click="5" variant="muted" size="md">
+    <div class="text-sm font-bold text-pink-400">TanStack DB</div>
+    <div class="text-xs text-gray-400 mt-1">Reactive collections with differential dataflow. Plug in Electric, PowerSync, or TanStack Query.</div>
+  </Card>
+  <Card v-click="6" variant="muted" size="md">
     <div class="text-sm font-bold text-pink-400">Zero</div>
     <div class="text-xs text-gray-400 mt-1">Query-driven sync. Reactive Postgres to client SQLite. Server-authoritative.</div>
   </Card>
-  <Card v-click="6" variant="muted" size="md">
+  <Card v-click="7" variant="muted" size="md" class="col-span-2">
     <div class="text-sm font-bold text-pink-400">DIY: Nuxt + Nitro</div>
     <div class="text-xs text-gray-400 mt-1">Roll your own with WebSockets + CRDTs. Full control. Full responsibility.</div>
   </Card>
@@ -902,17 +907,19 @@ clicks: 6
 <!--
 Build with clicks — one card at a time:
 
-CLICK 1: "Jazz — batteries-included. Auth, permissions, end-to-end encryption, sync — everything built in. You define your data as CoValues and it just works."
+CLICK 1: "Jazz — batteries-included. Auth, permissions, end-to-end encryption, sync — everything built in."
 
-CLICK 2: "LiveStore — event-sourced. SQLite WASM running IN the browser. You define events and tables, it materializes state like a git rebase."
+CLICK 2: "LiveStore — event-sourced. SQLite WASM running IN the browser. Events in, state out."
 
-CLICK 3: "Dexie — wraps IndexedDB with a clean API. Add DexieCloud for sync. Great progressive upgrade path."
+CLICK 3: "Dexie — wraps IndexedDB with a clean API. Add DexieCloud for sync."
 
-CLICK 4: "Yjs — a CRDT library. Not a platform. You bring your own backend. WebSocket, WebRTC, even P2P. Maximum flexibility."
+CLICK 4: "Yjs — a CRDT library. You bring your own backend. WebSocket, WebRTC, even P2P."
 
-CLICK 5: "Zero — query-driven sync from Postgres to client-side SQLite. Instant reads. BUT — server is the source of truth. Not truly local-first."
+CLICK 5: "TanStack DB — reactive collections with differential dataflow. Plug in any sync backend."
 
-CLICK 6: "Or build your own. Nuxt plus Nitro WebSocket plus Yjs. Full control. Full responsibility."
+CLICK 6: "Zero — query-driven sync from Postgres to client-side SQLite. Server is the source of truth."
+
+CLICK 7: "Or build your own. Nuxt plus Nitro WebSocket plus Yjs. Full control. Full responsibility."
 
 TRANSITION: "Let me show you what each looks like in code..."
 -->
@@ -1086,7 +1093,6 @@ This is still a **new and evolving field** — new engines appear regularly
 
 <v-clicks>
 
-- **Yjs** — CRDT library, BYO backend (WebSocket, WebRTC, P2P)
 - **Automerge** — Document-based CRDTs with rich text support
 - **Replicache** — Client-side sync with server-authoritative mutations
 - **Triplit** — Full-stack database with real-time sync
@@ -1104,7 +1110,7 @@ TRANSITION: "So how do we choose?"
 -->
 
 ---
-clicks: 7
+clicks: 8
 ---
 
 # Choosing the Right Engine
@@ -1155,6 +1161,14 @@ clicks: 7
       <td class="py-1.5 px-1 text-xs">DIY composable</td>
     </tr>
     <tr v-click="5" class="border-b border-white/5">
+      <td class="py-1.5 pr-2 font-semibold text-pink-400">TanStack DB</td>
+      <td class="py-1.5 px-1 text-xs">Collections</td>
+      <td class="py-1.5 px-1 text-xs">Electric / PowerSync</td>
+      <td class="py-1.5 px-1 text-xs">Optimistic rollback</td>
+      <td class="py-1.5 px-1 text-xs text-emerald-400">Yes</td>
+      <td class="py-1.5 px-1 text-xs">@tanstack/vue-db</td>
+    </tr>
+    <tr v-click="6" class="border-b border-white/5">
       <td class="py-1.5 pr-2 font-semibold text-pink-400">Zero</td>
       <td class="py-1.5 px-1 text-xs">SQLite (cache)</td>
       <td class="py-1.5 px-1 text-xs">zero-cache server</td>
@@ -1162,7 +1176,7 @@ clicks: 7
       <td class="py-1.5 px-1 text-xs text-red-400">No</td>
       <td class="py-1.5 px-1 text-xs">zero-vue</td>
     </tr>
-    <tr v-click="6" class="border-b border-white/5">
+    <tr v-click="7" class="border-b border-white/5">
       <td class="py-1.5 pr-2 font-semibold text-pink-400">Nuxt DIY</td>
       <td class="py-1.5 px-1 text-xs">Your choice</td>
       <td class="py-1.5 px-1 text-xs">Nitro WebSocket</td>
@@ -1174,9 +1188,9 @@ clicks: 7
 </table>
 </div>
 
-<Callout v-click="7" type="info">
+<Callout v-click="8" type="info">
 
-**No one-size-fits-all.** Jazz and LiveStore are closest to the local-first ideal. Dexie is the easiest entry point. Yjs gives you maximum flexibility. Zero is great DX for server-first apps. DIY when you need full control.
+**No one-size-fits-all.** Jazz and LiveStore are closest to the local-first ideal. Dexie is the easiest entry point. TanStack DB is the reactive layer — plug in any sync backend. Zero is great DX for server-first apps.
 
 </Callout>
 
@@ -1184,13 +1198,14 @@ clicks: 7
 Build the table progressively. Don't read every cell — focus on the KEY DIFFERENTIATOR:
 
 CLICK 1: "Jazz — everything built in. CRDTs, auth, permissions. Closest to the ideal."
-CLICK 2: "LiveStore — event-sourced with SQLite WASM. Events in, state out. Like git rebase for your data."
+CLICK 2: "LiveStore — event-sourced with SQLite WASM. Events in, state out."
 CLICK 3: "Dexie — the easiest entry point. IndexedDB locally, add cloud sync later."
 CLICK 4: "Yjs — a CRDT library. YOU choose the transport. Maximum flexibility."
-CLICK 5: "Zero — great DX, but notice that red No. No offline writes. Server is the authority."
-CLICK 6: "Or DIY with Nuxt and Nitro WebSocket. Full control. Pick your own database and CRDTs."
+CLICK 5: "TanStack DB — reactive collections with differential dataflow. Plug in Electric, PowerSync, or roll your own."
+CLICK 6: "Zero — great DX, but notice that red No. No offline writes. Server is the authority."
+CLICK 7: "Or DIY with Nuxt and Nitro WebSocket. Full control."
 
-CLICK 7 (callout): "No one-size-fits-all. The right choice depends on YOUR app."
+CLICK 8 (callout): "No one-size-fits-all. The right choice depends on YOUR app."
 
 TRANSITION: "But are any of these truly local-first?"
 
@@ -1223,7 +1238,7 @@ CLICK — reveal the sub-question.
 -->
 
 ---
-clicks: 7
+clicks: 8
 ---
 
 # The Local-First Litmus Test
@@ -1271,13 +1286,20 @@ clicks: 7
       <td class="py-1.5 px-1 text-xs">Fully open, P2P possible</td>
     </tr>
     <tr v-click="5" class="border-b border-white/5">
+      <td class="py-1.5 pr-2 font-semibold">TanStack DB</td>
+      <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
+      <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
+      <td class="text-center py-1.5 px-1 text-yellow-400">~</td>
+      <td class="py-1.5 px-1 text-xs">Depends on sync backend choice</td>
+    </tr>
+    <tr v-click="6" class="border-b border-white/5">
       <td class="py-1.5 pr-2 font-semibold">Zero</td>
       <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
       <td class="text-center py-1.5 px-1 text-red-400">No</td>
       <td class="text-center py-1.5 px-1 text-red-400">No</td>
       <td class="py-1.5 px-1 text-xs">Server-authoritative</td>
     </tr>
-    <tr v-click="6" class="border-b border-white/5">
+    <tr v-click="7" class="border-b border-white/5">
       <td class="py-1.5 pr-2 font-semibold">Nuxt DIY</td>
       <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
       <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
@@ -1288,9 +1310,9 @@ clicks: 7
 </table>
 </div>
 
-<Callout v-click="7" type="warn">
+<Callout v-click="8" type="warn">
 
-**The spectrum is real.** Most engines are "local-first-ish." Yjs and DIY can truly survive a vendor disappearing. Jazz and LiveStore get you 90% there. Zero is server-first with a great cache.
+**The spectrum is real.** Most engines are "local-first-ish." Yjs and DIY can truly survive a vendor disappearing. Jazz and LiveStore get you 90% there. TanStack DB inherits the properties of whichever sync backend you plug in. Zero is server-first with a great cache.
 
 </Callout>
 
@@ -1301,10 +1323,11 @@ CLICK 1: "Jazz — open-source, self-hostable. Gets close. But most people will 
 CLICK 2: "LiveStore — same story. Open-source core, but sync infrastructure still needs to run somewhere."
 CLICK 3: "Dexie — sync depends on proprietary DexieCloud. Local data survives, but sync doesn't."
 CLICK 4: "Yjs — fully open-source. CRDTs mean peers can sync without a central server. Closest to truly local-first."
-CLICK 5: "Zero — no offline writes. Server-authoritative. Great DX, but fundamentally not local-first."
-CLICK 6: "DIY — you own everything. If you build it right, it's truly local-first."
+CLICK 5: "TanStack DB — it's a reactive layer, not a sync engine itself. Survival depends on which backend you plug in — Electric, PowerSync, etc."
+CLICK 6: "Zero — no offline writes. Server-authoritative. Great DX, but fundamentally not local-first."
+CLICK 7: "DIY — you own everything. If you build it right, it's truly local-first."
 
-CLICK 7 (callout): "The spectrum is real. No engine perfectly nails all three criteria. But some get much closer than others."
+CLICK 8 (callout): "The spectrum is real. No engine perfectly nails all three criteria. But some get much closer than others."
 
 TRANSITION: "So if surviving the shutdown matters — what would actually work?"
 
@@ -1418,9 +1441,31 @@ CLICK 2: "G-Counter CRDT. Each peer owns a slot. To merge: take the max per key.
 CLICK 3: "Key insight: the SERVER needs zero conflict resolution logic. It just relays bytes."
 - "THIS is what makes true P2P sync possible."
 
-TRANSITION: "Let's update our scorecard..."
+TRANSITION: "But how does this work in practice — with real data?"
 
 [CHECK: ~22:00]
+-->
+
+---
+clicks: 5
+---
+
+# CRDTs in Practice: Field-Level Merging
+
+<CrdtResolutionDiagram :roughness="1.5" :seed="500" />
+
+<!--
+"Let's see how CRDTs handle a more realistic scenario — two users editing the SAME object."
+
+CLICK 1: "User A renames the todo. User B marks it done. Both offline."
+CLICK 2: "They reconnect and sync."
+CLICK 3: "Different fields? Auto-merge. Title from A, completed from B. No conflict."
+CLICK 4: "Same field? Last-write-wins — the most recent timestamp wins."
+CLICK 5: "Delete vs update? Delete wins. This prevents zombie records from coming back."
+
+"Three rules. That's the whole conflict resolution model for most sync engines."
+
+TRANSITION: "Let's update our scorecard..."
 -->
 
 ---
