@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@alexop/slidev-addon-utils": "workspace:*",
-    "@alexop/slidev-theme-brand": "workspace:*"
+    "@alexop/slidev-theme-brand": "workspace:*",
+    "@iconify-json/mdi": "^1.2.3"
   },
   "devDependencies": {
     "@iconify-json/logos": "^1.2.10",

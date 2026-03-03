@@ -2,12 +2,14 @@
 import RoughSvg from './RoughSvg.vue'
 import RoughRect from './RoughRect.vue'
 import RoughArrow from './RoughArrow.vue'
-import ClickGroup from './ClickGroup.vue'
+import { useClickVisibility } from '../composables/useClickVisibility'
 
 const { roughness = 1.5, seed = 42 } = defineProps<{
   roughness?: number
   seed?: number
 }>()
+
+const { isVisible } = useClickVisibility()
 
 // Layout constants
 const W = 760
@@ -44,7 +46,7 @@ const arrowBy2 = mergeY
     <RoughSvg :width="W" :height="H" :roughness="roughness" :seed="seed" :padding="12">
 
       <!-- User A box -->
-      <ClickGroup :click="1">
+      <g class="click-el" :class="{ '--hidden': !isVisible(1) }">
         <RoughRect
           :x="userAX" :y="userAY" :width="userW" :height="userH"
           variant="accent"
@@ -71,10 +73,10 @@ const arrowBy2 = mergeY
           text-anchor="middle" dominant-baseline="central"
           class="label-mono accent"
         >→ "Buy oat milk"</text>
-      </ClickGroup>
+      </g>
 
       <!-- User B box -->
-      <ClickGroup :click="1">
+      <g class="click-el" :class="{ '--hidden': !isVisible(1) }">
         <RoughRect
           :x="userBX" :y="userBY" :width="userW" :height="userH"
           variant="accent"
@@ -96,10 +98,10 @@ const arrowBy2 = mergeY
           text-anchor="middle" dominant-baseline="central"
           class="label-mono"
         >completed: true</text>
-      </ClickGroup>
+      </g>
 
       <!-- Arrows + reconnect label -->
-      <ClickGroup :click="2">
+      <g class="click-el" :class="{ '--hidden': !isVisible(2) }">
         <RoughArrow
           :x1="arrowAx" :y1="arrowAy1"
           :x2="arrowAx" :y2="arrowAy2"
@@ -117,10 +119,10 @@ const arrowBy2 = mergeY
           text-anchor="middle" dominant-baseline="central"
           class="edge-label"
         >reconnect + sync</text>
-      </ClickGroup>
+      </g>
 
       <!-- Merge box + auto-merge rule -->
-      <ClickGroup :click="3">
+      <g class="click-el" :class="{ '--hidden': !isVisible(3) }">
         <RoughRect
           :x="mergeX" :y="mergeY" :width="mergeW" :height="mergeH"
           variant="success"
@@ -139,19 +141,19 @@ const arrowBy2 = mergeY
           dominant-baseline="central"
           class="label-mono"
         >title: "Buy oat milk" + completed: true</text>
-      </ClickGroup>
+      </g>
 
       <!-- Last-write-wins rule -->
-      <ClickGroup :click="4">
+      <g class="click-el" :class="{ '--hidden': !isVisible(4) }">
         <text
           :x="mergeX + 30" :y="mergeY + 110"
           dominant-baseline="central"
           class="rule-text rule-accent"
         >&#x26A1;  Same field → LAST-WRITE-WINS</text>
-      </ClickGroup>
+      </g>
 
       <!-- Delete wins rule -->
-      <ClickGroup :click="5">
+      <g class="click-el" :class="{ '--hidden': !isVisible(5) }">
         <text
           :x="mergeX + 30" :y="mergeY + 156"
           dominant-baseline="central"
@@ -162,7 +164,7 @@ const arrowBy2 = mergeY
           dominant-baseline="central"
           class="label-mono"
         >Prevents "zombie" records</text>
-      </ClickGroup>
+      </g>
 
     </RoughSvg>
   </div>
@@ -234,5 +236,13 @@ const arrowBy2 = mergeY
 
 .rule-danger {
   fill: rgba(248, 113, 113, 0.9);
+}
+
+.click-el {
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.click-el.--hidden {
+  opacity: 0;
 }
 </style>

@@ -8,9 +8,9 @@ mdc: true
 drawings:
   persist: false
 info: |
-  ## How to Build Local-First Apps with Vue 
+  ## How to Build Local-First Apps with Vue
 
-  Local-First is a new community that was created based on the idea of building apps where users have more control over them. It is related to the offline-first concept, but takes it a step further. In this talk, I will explain what Local-First means and how we can build applications with Vue
+  Local-First is a software design philosophy built on the idea of building apps where users have more control over their data. It is related to the offline-first concept, but takes it a step further. In this talk, I will explain what Local-First means and how we can build applications with Vue.
 hideFooter: true
 ---
 
@@ -192,7 +192,7 @@ Kyle Mathews
 <!--
 SLOW DOWN — this is a key quote.
 
-- Kyle Mathews = founder of Gatsby, now CEO of ElectricSQL
+- Kyle Mathews = founder of Gatsby, now CPO and co-founder of ElectricSQL
 - Said this on localfirst.fm podcast
 - "With jQuery, you'd grab a DOM element, tweak text, remove a child... you were fiddling with the DOM constantly. Vue freed us from that."
 - "But we're STILL doing the same imperative dance with DATA — fetch this, cache that, retry this, invalidate that."
@@ -204,7 +204,7 @@ TRANSITION: "Let me show you where we are in this evolution..."
 -->
 
 ---
-clicks: 2
+clicks: 5
 ---
 
 # But Who Solves Data Sync?
@@ -431,6 +431,29 @@ Point at right: "With PWA — Service Worker intercepts, serves from cache. App 
 -->
 
 ---
+layout: center
+class: text-center
+---
+
+# I wrote a blog post about this
+
+<div class="mt-6 mx-auto max-w-lg">
+  <a href="https://alexop.dev/posts/create-pwa-vue3-vite-4-steps/" target="_blank" class="block rounded-xl overflow-hidden border border-gray-700/50 shadow-lg shadow-pink-500/10 hover:shadow-pink-500/20 transition-shadow">
+    <img src="/pwa-blog-post.png" class="w-full" />
+  </a>
+</div>
+
+<div class="mt-4 text-sm text-gray-400">
+  <mdi-open-in-new class="inline-block mr-1 text-xs" /> alexop.dev/posts/create-pwa-vue3-vite-4-steps
+</div>
+
+<!--
+"I actually wrote a blog post on how to convert any Vue app into a PWA in 4 steps — it's up on my site. Feel free to check it out later."
+
+- Quick mention, don't dwell — the audience can scan the page
+-->
+
+---
 clicks: 4
 ---
 
@@ -482,7 +505,7 @@ clicks: 4
         lines: [
           { text: 'API: full SQL queries' },
           { text: 'Storage: OPFS / memory' },
-          { text: 'Bundle: ~500KB WASM' },
+          { text: 'Bundle: ~900KB WASM' },
         ],
         click: 3,
       },
@@ -845,7 +868,236 @@ HOW EACH TEAM DOES IT (pick 1-2 to elaborate on if time allows):
 
 KEY INSIGHT: Same two-box pattern, but sync protocols differ based on data model shape — object graph (Linear), design tree (Figma), block tree (Notion).
 
-TRANSITION: "Let's look at what's out there. The ecosystem has exploded."
+TRANSITION: "Let's look at what's out there. But first — there's one question they all answer differently."
+-->
+
+---
+layout: statement
+transition: fade
+---
+
+# Before We Look at Engines...
+
+<div class="mt-4 text-xl op-70">They all solve the same fundamental problem differently.</div>
+
+<!--
+"Three teams built the same architecture. But there's a critical question they answered DIFFERENTLY."
+
+PAUSE.
+
+"When two devices edit the same data offline and reconnect — WHO decides what happened?"
+
+TRANSITION: "Actually, it's not just two answers — it's a spectrum."
+-->
+
+---
+clicks: 5
+---
+
+# Conflict Resolution: It's a Spectrum
+
+<FlowDiagram
+  :nodes="[
+    { id: 'lww', label: 'Last-Write-Wins', subtitle: 'Simplest', variant: 'danger' },
+    { id: 'server', label: 'Server Authority', subtitle: 'Centralized', click: 1, variant: 'muted' },
+    { id: 'oplog', label: 'Operation Logs', subtitle: 'Replayable', click: 2, variant: 'default' },
+    { id: 'crdt', label: 'CRDTs', subtitle: 'Math-based', click: 3, variant: 'success' },
+    { id: 'hybrid', label: 'Hybrid / Manual', subtitle: 'User decides', click: 4, variant: 'accent' },
+  ]"
+  :edges="[
+    { from: 'lww', to: 'server', click: 1 },
+    { from: 'server', to: 'oplog', click: 2 },
+    { from: 'oplog', to: 'crdt', click: 3 },
+    { from: 'crdt', to: 'hybrid', click: 4 },
+  ]"
+  direction="horizontal"
+  :nodeWidth="140"
+  :nodeHeight="65"
+  :gap="25"
+  :roughness="1.2"
+  :seed="777"
+/>
+
+<Callout v-click="5" type="info">
+
+Most sync engines **combine strategies** — auto-merge where possible, escalate where necessary.
+
+</Callout>
+
+<!--
+SPECTRUM BRIDGE — ~45 seconds. Set the framing before diving into binary choices.
+
+"Before I show you the two main camps, I want you to see the full picture."
+
+LWW (visible immediately): "The simplest approach — last write wins. Whoever saves last, their version sticks. Fast, but you LOSE data."
+
+CLICK 1: "Next step: a server decides. More nuanced — the server can apply business rules. But you need a server."
+
+CLICK 2: "Operation logs — instead of saving STATE, you save every OPERATION. You can replay, reorder, and merge. This is where things get interesting."
+
+CLICK 3: "CRDTs — Conflict-free Replicated Data Types. The math guarantees that independent merges ALWAYS converge. No server needed."
+
+CLICK 4: "And at the far end: hybrid. Surface the conflict to the user, like Git merge conflicts. Or combine multiple strategies depending on the data type."
+
+CLICK 5: "The key insight: most production systems are NOT purely one approach. They combine strategies. Auto-merge names, LWW timestamps, user-prompt for document conflicts."
+
+TRANSITION: "Now let's zoom into the two main camps that matter most for local-first."
+-->
+
+---
+clicks: 4
+---
+
+# The Hardest Problem: Where Do You Resolve Conflicts?
+
+<div class="grid grid-cols-2 gap-8 mt-6">
+
+<div v-click="1">
+
+<Card variant="muted" size="lg">
+
+<div class="text-sm font-bold text-pink-400 mb-2 flex items-center gap-2"><div class="i-ph-cloud-bold" /> Server-Side Resolution</div>
+
+- Server decides who wins
+- Simpler to implement
+- Familiar mental model (Postgres, Rails, etc.)
+- **But:** requires a server you trust & control
+- Client rollback on rejection
+
+<div class="mt-2 text-xs op-50">Zero, Dexie Cloud, traditional APIs</div>
+
+</Card>
+
+</div>
+
+<div v-click="2">
+
+<Card size="lg" glow>
+
+<div class="text-sm font-bold text-pink-400 mb-2 flex items-center gap-2"><div class="i-ph-devices-bold" /> Client-Side Resolution</div>
+
+- Every client merges independently
+- No server authority needed
+- Works offline & P2P
+- **But:** harder — needs math that always converges
+- Server just relays bytes
+
+<div class="mt-2 text-xs op-50">Yjs, Jazz, Automerge (CRDTs)</div>
+
+</Card>
+
+</div>
+
+</div>
+
+<Callout v-click="3" type="info">
+
+Client-side resolution is what makes **true local-first** possible — the server becomes a dumb pipe. But it requires data structures that **mathematically guarantee convergence**: CRDTs.
+
+</Callout>
+
+<div v-click="4" class="mt-4 op-60 text-sm flex items-center gap-2">
+<div class="i-ph-git-merge-bold text-lg text-pink-300" />
+<span>**Third option:** surface conflicts to the user — like Git merge conflicts. Some apps combine all three.</span>
+</div>
+
+<!--
+THIS IS THE KEY CONCEPTUAL SLIDE — go slow.
+
+"Remember the sync protocol arrow? There are exactly two places conflict resolution can live."
+
+CLICK 1: "Option one: the SERVER decides."
+- "This is what you're used to. POST to the API, server validates, server picks a winner."
+- "It's simpler to implement — you have one source of truth. Postgres is great at this."
+- "But the catch: you NEED a server. And your app breaks without it."
+- "Zero and Dexie Cloud work this way."
+
+CLICK 2: "Option two: the CLIENT decides."
+- "Every device resolves conflicts on its own. No central authority."
+- "The advantage: the server is LESS powerful. It's just a relay. A dumb pipe."
+- "You can even go fully P2P — no server at all."
+- "But the hard part: you need data structures where independent merges ALWAYS produce the same result."
+- "Yjs and Jazz do this."
+
+CLICK 3: "Client-side resolution is what makes TRUE local-first possible. But it needs math. It needs CRDTs."
+
+CLICK 4: "But there's a third option hiding in plain sight — let the USER decide."
+- "Think Git merge conflicts. The system detects the conflict but presents BOTH versions to the human."
+- "Notion does this for some block-level conflicts. Figma shows a notification."
+- "In practice, most production apps are HYBRIDS — auto-merge what you can, escalate what you can't."
+
+PAUSE — let it land. This frames everything that follows.
+
+TRANSITION: "So what ARE CRDTs, and how do they work?"
+
+[CHECK: ~14:00]
+-->
+
+---
+clicks: 5
+---
+
+# CRDTs: Merge Without a Server
+
+<CrdtCounterDemo :roughness="1.2" :seed="800" />
+
+<!--
+CLICK-DRIVEN DEMO — each spacebar/arrow press advances one step:
+
+Click 1: Go offline — "Two peers go offline. They can't see each other."
+Click 2: Peer A increments to 1 — "Peer A counts +1 independently."
+Click 3: Peer B increments to 2 — "Peer B counts +2 independently. Neither knows about the other."
+Click 4: Sync — three boxes appear:
+  - LEFT (red): Last-Write-Wins → 2. "LWW picks the highest value. WRONG."
+  - CENTER (pink): G-Counter state { A: 1, B: 2 }. "The CRDT keeps a slot per peer."
+  - RIGHT (green): CRDT → 3. "Sum the slots. 1 + 2 = 3. CORRECT."
+
+DOCTOR ANALOGY (use if audience looks confused):
+"Imagine two doctors editing the same patient record on a flight. Doctor A adds an allergy. Doctor B updates the dosage. With LWW, one edit DISAPPEARS when they land. With CRDTs, both edits survive — because the data structure tracks WHO changed WHAT, not just WHEN."
+
+MATH INTUITION:
+"Think of it like addition: 1 + 2 = 2 + 1. CRDTs design every operation so that merge order never matters. That's the whole trick — commutativity."
+
+"THIS is why CRDTs matter. The server needs ZERO conflict resolution logic — it just relays bytes."
+
+TRANSITION: "That's the math. But what does this look like with real data?"
+
+[CHECK: ~15:30]
+-->
+
+---
+clicks: 5
+---
+
+# CRDTs in Practice: Field-Level Merging
+
+<CrdtResolutionDiagram :roughness="1.5" :seed="500" />
+
+<!--
+"Let's see how CRDTs handle a more realistic scenario — two users editing the SAME object."
+
+CLICK 1: "User A renames the todo. User B marks it done. Both offline."
+CLICK 2: "They reconnect and sync."
+
+CLICK 3 — RULE 1: DIFFERENT FIELDS → auto-merge
+- "Different fields? No conflict at all. Title from A, completed from B — they don't overlap."
+- "This covers roughly 90% of real-world edits. Most of the time, users aren't touching the same field."
+
+CLICK 4 — RULE 2: SAME FIELD → Last-Write-Wins (vector clocks)
+- "Same field? We fall back to LWW — the most recent timestamp wins."
+- "Remember the spectrum slide? This is where we sit: deterministic, automatic, but you CAN lose data."
+- "Vector clocks help — they track causality, not just wall-clock time."
+
+CLICK 5 — RULE 3: DELETE vs UPDATE → delete wins (tombstone)
+- "Delete versus update? Delete wins. Always."
+- "This is the tombstone pattern — you mark something as deleted, and it stays deleted."
+- "It's controversial: some teams prefer update-wins. But delete-wins is safer — it prevents zombie records from coming back."
+
+"Three rules. That's the entire conflict resolution playbook for most CRDT-based engines."
+
+TRANSITION: "Now let's look at the landscape — and you'll immediately see which engines use CRDTs and which don't."
+
+[CHECK: ~17:00]
 -->
 
 ---
@@ -855,16 +1107,16 @@ transition: fade
 
 # The Sync Engine Landscape
 
-<div class="mt-4 text-xl op-70">The ecosystem has exploded. Let's look at four approaches that matter.</div>
+<div class="mt-4 text-xl op-70">Now that you know HOW they differ — let's see what's out there.</div>
 
 <!--
 Energy shift — this is the exciting part!
 
-"Now that we know we need a sync engine, let's look at what's out there. The ecosystem has EXPLODED. I'll focus on four that represent distinct approaches — so you know which direction fits YOUR app."
+"You now understand the two approaches: server decides, or client decides with CRDTs. Let's see how four real engines make that choice — and what it means for your app."
 
 BREATHE.
 
-[CHECK: ~14:00 — landscape section starts]
+[CHECK: ~17:30 — landscape section starts]
 -->
 
 ---
@@ -877,45 +1129,45 @@ clicks: 4
   <Card v-click="1" variant="muted" size="md">
     <div class="flex items-center gap-2">
       <div class="text-sm font-bold text-pink-400">Yjs</div>
-      <div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">Production · 5+ years</div>
+      <div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">Production · 10+ years</div>
     </div>
-    <div class="text-xs text-gray-400 mt-1">CRDT library. Bring your own backend. P2P possible. Used by Notion, VS Code Live Share. Maximum flexibility.</div>
+    <div class="text-xs text-gray-400 mt-1">CRDT library. Client-side conflict resolution. Bring your own backend. P2P possible. Maximum flexibility.</div>
   </Card>
   <Card v-click="2" variant="muted" size="md">
     <div class="flex items-center gap-2">
       <div class="text-sm font-bold text-pink-400">Dexie</div>
-      <div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">Production · 8+ years</div>
+      <div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">Production · 10+ years</div>
     </div>
-    <div class="text-xs text-gray-400 mt-1">IndexedDB wrapper. Add DexieCloud for sync. Progressive upgrade path. Millions of users.</div>
+    <div class="text-xs text-gray-400 mt-1">IndexedDB wrapper. Server-side field-level merge via Dexie Cloud. Progressive upgrade path. Millions of users.</div>
   </Card>
   <Card v-click="3" variant="muted" size="md">
     <div class="flex items-center gap-2">
       <div class="text-sm font-bold text-pink-400">Jazz</div>
       <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Early · Active dev</div>
     </div>
-    <div class="text-xs text-gray-400 mt-1">Batteries-included. Auth, permissions, E2E encryption, sync — all built in. Closest to the local-first ideal.</div>
+    <div class="text-xs text-gray-400 mt-1">Batteries-included. Client-side CRDTs. Auth, permissions, E2E encryption, sync — all built in.</div>
   </Card>
   <Card v-click="4" variant="muted" size="md">
     <div class="flex items-center gap-2">
       <div class="text-sm font-bold text-pink-400">Zero</div>
-      <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Beta · Well-funded</div>
+      <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Alpha · Well-funded</div>
     </div>
-    <div class="text-xs text-gray-400 mt-1">Query-driven sync. Reactive Postgres to client SQLite. Server-authoritative — great DX, but not truly local-first.</div>
+    <div class="text-xs text-gray-400 mt-1">Query-driven sync. Server resolves all conflicts. Reactive Postgres to client SQLite. Great DX, but not truly local-first.</div>
   </Card>
 </div>
 
 <div v-click="4" class="mt-4 text-xs op-50 text-center">Also worth watching: LiveStore, TanStack DB, Automerge, PowerSync, cr-sqlite — full comparison at alexop.dev/vue-amsterdam</div>
 
 <!--
-Four engines, four different philosophies. Ordered by maturity — most battle-tested first.
+Four engines, four different philosophies. Now the audience has the conflict resolution framework — they can immediately classify each one.
 
-CLICK 1: "Yjs — the most mature. 5+ years in production. Used by Notion, VS Code Live Share. It's a CRDT library — YOU bring the backend. WebSocket, WebRTC, even P2P."
+CLICK 1: "Yjs — the most mature. 10+ years in production. CLIENT-side CRDTs — remember the right card? YOU bring the backend. WebSocket, WebRTC, even P2P."
 
-CLICK 2: "Dexie — 8 years, millions of users. Wraps IndexedDB with a clean API. Start local-only, add DexieCloud for sync later. The easiest entry point."
+CLICK 2: "Dexie — 10+ years, millions of users. SERVER-side field-level merge — the left card. Start local-only, add Dexie Cloud for sync later."
 
-CLICK 3: "Jazz — newer, but the most ambitious. Auth, permissions, E2E encryption, real-time sync — everything built in. Closest to the local-first ideal."
+CLICK 3: "Jazz — newer, but the most ambitious. Also client-side CRDTs. Auth, permissions, E2E encryption — everything built in."
 
-CLICK 4: "Zero — great DX, well-funded. But notice: server-authoritative. Postgres on the server, SQLite cache on the client. NOT truly local-first — and that's an important contrast."
+CLICK 4: "Zero — great DX, well-funded. But notice: SERVER resolves all conflicts. Postgres on the server, SQLite cache on the client. NOT truly local-first — and now you know exactly why."
 
 "There are more — LiveStore, TanStack DB, Automerge, PowerSync — I'll link a full comparison at the end. But these four cover the key patterns."
 
@@ -973,11 +1225,11 @@ async function addTodo(title: string) {
   await db.todos.add({ title, done: false, createdAt: new Date() })
 }
 // ✅ Progressive: local-only → npm i dexie-cloud-addon → sync
-// ⚠ Last-write-wins conflict resolution
+// ⚠ Server-side field-level merge (different fields auto-merge, same field = LWW)
 ```
 
 <!--
-Wraps IndexedDB. liveQuery is reactive like computed(). Start local-only, add DexieCloud later for sync. The easiest on-ramp — but DexieCloud is proprietary.
+Wraps IndexedDB. liveQuery is reactive like computed(). Start local-only, add Dexie Cloud later for sync. The easiest on-ramp — but Dexie Cloud is proprietary. Note: Dexie Cloud does field-level merge — different fields on the same object auto-merge, only same-field conflicts use last-write-wins.
 -->
 
 ---
@@ -1012,15 +1264,17 @@ useCoState gives you a reactive reference. push() to write. Auth, permissions, e
 
 ```ts
 // Zero — Server-authoritative query sync
-import { useQuery } from 'zero-vue'
+import { createZeroComposables } from 'zero-vue'
+import { schema } from './schema'
+
+const { useQuery, useZero } = createZeroComposables(schema)
 
 // In your component:
-const { data: todos } = useQuery(
-  z.query.todo.orderBy('createdAt', 'asc')
-)
+const zero = useZero()
+const todos = useQuery((z) => z.query.todo.orderBy('createdAt', 'asc'))
 
 function addTodo(title: string) {
-  z.mutate.todo.insert({
+  zero.value.mutate.todo.insert({
     id: crypto.randomUUID(), title, done: false,
   })
 }
@@ -1029,7 +1283,7 @@ function addTodo(title: string) {
 ```
 
 <!--
-Server-authoritative. Postgres on the server, SQLite cache on the client. Great DX. But server owns the data. I'm showing this because it's important to understand the CONTRAST with true local-first.
+Server-authoritative. Postgres on the server, SQLite cache on the client. Great DX. Reads work offline from the local cache, but writes require the server. I'm showing this because it's important to understand the CONTRAST with true local-first.
 -->
 
 ---
@@ -1044,6 +1298,7 @@ clicks: 5
     <tr class="border-b border-white/20">
       <th class="text-left py-1.5 pr-2"></th>
       <th class="text-center py-1.5 px-1 text-xs">Maturity</th>
+      <th class="text-center py-1.5 px-1 text-xs">Conflicts</th>
       <th class="text-center py-1.5 px-1 text-xs">Offline R/W</th>
       <th class="text-center py-1.5 px-1 text-xs">Vendor-free</th>
       <th class="text-left py-1.5 px-1 text-xs">Vue</th>
@@ -1053,7 +1308,8 @@ clicks: 5
   <tbody>
     <tr v-click="1" class="border-b border-white/5">
       <td class="py-1.5 pr-2 font-semibold text-pink-400">Yjs</td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">5+ yrs</span></td>
+      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">10+ yrs</span></td>
+      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">CRDT</span></td>
       <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
       <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
       <td class="py-1.5 px-1 text-xs">DIY composable</td>
@@ -1061,7 +1317,8 @@ clicks: 5
     </tr>
     <tr v-click="2" class="border-b border-white/5">
       <td class="py-1.5 pr-2 font-semibold text-pink-400">Dexie</td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">8+ yrs</span></td>
+      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">10+ yrs</span></td>
+      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Server merge</span></td>
       <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
       <td class="text-center py-1.5 px-1 text-red-400">No</td>
       <td class="py-1.5 px-1 text-xs">liveQuery + VueUse</td>
@@ -1070,6 +1327,7 @@ clicks: 5
     <tr v-click="3" class="border-b border-white/5">
       <td class="py-1.5 pr-2 font-semibold text-pink-400">Jazz</td>
       <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Early</span></td>
+      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">CRDT</span></td>
       <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
       <td class="text-center py-1.5 px-1 text-yellow-400">~</td>
       <td class="py-1.5 px-1 text-xs">jazz-vue</td>
@@ -1077,8 +1335,9 @@ clicks: 5
     </tr>
     <tr v-click="4" class="border-b border-white/5">
       <td class="py-1.5 pr-2 font-semibold text-pink-400">Zero</td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Beta</span></td>
-      <td class="text-center py-1.5 px-1 text-red-400">No</td>
+      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Alpha</span></td>
+      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-mono">Server</span></td>
+      <td class="text-center py-1.5 px-1 text-yellow-400">Read only</td>
       <td class="text-center py-1.5 px-1 text-red-400">No</td>
       <td class="py-1.5 px-1 text-xs">zero-vue</td>
       <td class="py-1.5 px-1 text-xs">Server-first apps that want speed</td>
@@ -1096,13 +1355,13 @@ clicks: 5
 <!--
 One table, four engines. Sorted by maturity — most proven first.
 
-CLICK 1: "Yjs — 5+ years in production, fully vendor-free. P2P possible. Best if you're building something collaborative like docs or whiteboards."
+CLICK 1: "Yjs — 10+ years in production, fully vendor-free. P2P possible. Best if you're building something collaborative like docs or whiteboards."
 
-CLICK 2: "Dexie — 8 years, battle-tested IndexedDB wrapper. Easiest entry point. But DexieCloud is proprietary — that red No matters."
+CLICK 2: "Dexie — 10+ years, battle-tested IndexedDB wrapper. Easiest entry point. But Dexie Cloud is proprietary — that red No matters."
 
 CLICK 3: "Jazz — early but ambitious. Everything built in. Self-hostable, so you GET close to vendor-free. Best for greenfield apps."
 
-CLICK 4: "Zero — great DX but notice both red marks. No offline writes, no vendor independence. Server-first with a fast cache."
+CLICK 4: "Zero — great DX but notice: reads work offline, but writes require the server. No vendor independence. Server-first with a fast cache."
 
 CLICK 5 (callout): "No one-size-fits-all. The right choice depends on YOUR app."
 
@@ -1120,7 +1379,7 @@ transition: fade-out
 
 <div v-click class="mt-8 text-xl op-80">
 
-Let's test them against Martin Kleppmann's three criteria.
+Martin Kleppmann defines truly local-first with three criteria.
 
 </div>
 
@@ -1131,16 +1390,57 @@ PAUSE — build tension.
 
 CLICK — reveal the sub-question.
 
-"Martin Kleppmann — author of Designing Data-Intensive Applications — defines truly local-first as meeting three criteria."
+"Martin Kleppmann — co-author of the Ink & Switch paper and creator of Automerge — boils it down to three criteria."
 
 [CHECK: ~18:30]
+-->
+
+---
+clicks: 4
+---
+
+# The Three Criteria
+
+<div class="grid gap-3 mt-6">
+  <Card v-click="1" variant="muted">
+    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-pink-400">1.</span> Offline reads <strong>and</strong> writes</div>
+    <p class="text-sm text-gray-400 mt-1 pl-6">Not just cached reads — the app must accept writes while disconnected and reconcile later.</p>
+  </Card>
+  <Card v-click="2" variant="muted">
+    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-pink-400">2.</span> Collaboration across devices</div>
+    <p class="text-sm text-gray-400 mt-1 pl-6">Multiple users and devices can edit concurrently, and changes merge automatically.</p>
+  </Card>
+  <Card v-click="3" glow>
+    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-pink-400">3.</span> Data survives the developer shutting down</div>
+    <p class="text-sm text-gray-400 mt-1 pl-6">If the company disappears, your data and app must keep working. No vendor lock-in.</p>
+  </Card>
+</div>
+
+<div v-click="4" class="mt-4 text-center text-sm text-gray-500">
+
+Criterion 3 is the hardest — and it's what separates **offline-first** from **local-first**.
+
+</div>
+
+<!--
+Build progressively — this is a key conceptual moment.
+
+CLICK 1: "First: the app must work offline — not just reads, but WRITES too."
+CLICK 2: "Second: collaboration. Multiple devices, multiple users, changes merge."
+CLICK 3: "Third — and this is the big one — your data survives the developer shutting down."
+
+PAUSE — let criterion 3 sink in. Point at it.
+
+CLICK 4: "This third criterion is what separates offline-first from truly local-first. It's the dealbreaker."
+
+TRANSITION: "So what would it take to actually satisfy criterion 3?"
 -->
 
 ---
 
 # Surviving the Shutdown
 
-If criterion #3 is the dealbreaker — what would actually satisfy it?
+What would actually satisfy criterion 3?
 
 Ranked **worst → best**:
 
@@ -1189,134 +1489,7 @@ CLICK 4: "File sync — Dropbox, iCloud. Actually the MOST resilient! But real-t
 
 CLICK 5 (callout): "No single approach nails it. But notice the P2P option — it needs conflict resolution WITHOUT a central authority."
 
-TRANSITION: "This is the hardest problem in sync. Where does conflict resolution live?"
--->
-
----
-clicks: 3
----
-
-# The Hardest Problem: Where Do You Resolve Conflicts?
-
-<div class="grid grid-cols-2 gap-8 mt-6">
-
-<div v-click="1">
-
-<Card variant="muted" size="lg">
-
-<div class="text-sm font-bold text-pink-400 mb-2 flex items-center gap-2"><div class="i-ph-cloud-bold" /> Server-Side Resolution</div>
-
-- Server decides who wins
-- Simpler to implement
-- Familiar mental model (Postgres, Rails, etc.)
-- **But:** requires a server you trust & control
-- Client rollback on rejection
-
-<div class="mt-2 text-xs op-50">Zero, Dexie Cloud, traditional APIs</div>
-
-</Card>
-
-</div>
-
-<div v-click="2">
-
-<Card size="lg" glow>
-
-<div class="text-sm font-bold text-pink-400 mb-2 flex items-center gap-2"><div class="i-ph-devices-bold" /> Client-Side Resolution</div>
-
-- Every client merges independently
-- No server authority needed
-- Works offline & P2P
-- **But:** harder — needs math that always converges
-- Server just relays bytes
-
-<div class="mt-2 text-xs op-50">Yjs, Jazz, Automerge (CRDTs)</div>
-
-</Card>
-
-</div>
-
-</div>
-
-<Callout v-click="3" type="info">
-
-Client-side resolution is what makes **true local-first** possible — the server becomes a dumb pipe. But it requires data structures that **mathematically guarantee convergence**: CRDTs.
-
-</Callout>
-
-<!--
-THIS IS THE KEY CONCEPTUAL SLIDE — go slow.
-
-"We've seen the problem: two devices, offline edits, who wins? But there's a deeper question: WHERE does the conflict get resolved?"
-
-CLICK 1: "Option one: the SERVER decides."
-- "This is what you're used to. POST to the API, server validates, server picks a winner."
-- "It's simpler to implement — you have one source of truth. Postgres is great at this."
-- "But the catch: you NEED a server. And your app breaks without it."
-- "Zero and Dexie Cloud work this way."
-
-CLICK 2: "Option two: the CLIENT decides."
-- "Every device resolves conflicts on its own. No central authority."
-- "The advantage: the server is LESS powerful. It's just a relay. A dumb pipe."
-- "You can even go fully P2P — no server at all."
-- "But the hard part: you need data structures where independent merges ALWAYS produce the same result."
-- "Yjs and Jazz do this."
-
-CLICK 3: "Client-side resolution is what makes TRUE local-first possible. But it needs math. It needs CRDTs."
-
-PAUSE — let it land. This frames everything that follows.
-
-TRANSITION: "So what ARE CRDTs, and how do they work?"
-
-[CHECK: ~21:00]
--->
-
----
-clicks: 5
----
-
-# CRDTs: Merge Without a Server
-
-<CrdtCounterDemo :roughness="1.2" :seed="800" />
-
-<!--
-CLICK-DRIVEN DEMO — each spacebar/arrow press advances one step:
-
-Click 1: Go offline — "Two peers go offline. They can't see each other."
-Click 2: Peer A increments to 1 — "Peer A counts +1 independently."
-Click 3: Peer B increments to 2 — "Peer B counts +2 independently. Neither knows about the other."
-Click 4: Sync — three boxes appear:
-  - LEFT (red): Last-Write-Wins → 2. "LWW picks the highest value. WRONG."
-  - CENTER (pink): G-Counter state { A: 1, B: 2 }. "The CRDT keeps a slot per peer."
-  - RIGHT (green): CRDT → 3. "Sum the slots. 1 + 2 = 3. CORRECT."
-
-"THIS is why CRDTs matter. The server needs ZERO conflict resolution logic — it just relays bytes."
-
-TRANSITION: "But how does this work in practice — with real data like a todo app?"
-
-[CHECK: ~22:00]
--->
-
----
-clicks: 5
----
-
-# CRDTs in Practice: Field-Level Merging
-
-<CrdtResolutionDiagram :roughness="1.5" :seed="500" />
-
-<!--
-"Let's see how CRDTs handle a more realistic scenario — two users editing the SAME object."
-
-CLICK 1: "User A renames the todo. User B marks it done. Both offline."
-CLICK 2: "They reconnect and sync."
-CLICK 3: "Different fields? Auto-merge. Title from A, completed from B. No conflict."
-CLICK 4: "Same field? Last-write-wins — the most recent timestamp wins."
-CLICK 5: "Delete vs update? Delete wins. This prevents zombie records from coming back."
-
-"Three rules. That's the whole conflict resolution model for most sync engines."
-
-TRANSITION: "Let's update our scorecard..."
+TRANSITION: "Now let's update our scorecard with what sync engines give us."
 -->
 
 ---
@@ -1638,7 +1811,7 @@ CLICK 3: "Local-first ideals. The pragmatic infrastructure is... being built rig
 
 # What You Can Do Today
 
-<Card v-click variant="muted" size="lg" class="mb-4">
+<Card v-click variant="muted" class="mb-3">
 
 ### <span class="inline-flex items-center gap-2"><span class="i-ph-compass-bold text-pink-400" /> Step 1: Pick your sync engine.</span>
 
@@ -1646,7 +1819,7 @@ CLICK 3: "Local-first ideals. The pragmatic infrastructure is... being built rig
 
 </Card>
 
-<Card v-click variant="muted" size="lg" class="mb-4">
+<Card v-click variant="muted" class="mb-3">
 
 ### <span class="inline-flex items-center gap-2"><span class="i-ph-download-simple-bold text-pink-400" /> Step 2: Let users export their data.</span>
 
@@ -1654,7 +1827,7 @@ JSON, CSV — whatever. Give them a **download button**. This is the simplest lo
 
 </Card>
 
-<Card v-click variant="muted" size="lg">
+<Card v-click variant="muted">
 
 ### <span class="inline-flex items-center gap-2"><span class="i-ph-binoculars-bold text-pink-400" /> Step 3: Watch this space.</span>
 
@@ -1829,35 +2002,3 @@ PAUSE — wait for applause to start.
 
 [TARGET: ~28:00-30:00]
 -->
-
----
-layout: default
-hideFooter: true
-clicks: 6
----
-
-# Rough Primitives Test
-
-<RoughSvg :width="700" :height="280" :seed="99">
-  <ClickGroup :click="1">
-    <RoughRect :x="0" :y="100" :width="160" :height="80" variant="accent" :seed="100" />
-    <text x="80" y="140" text-anchor="middle" dominant-baseline="central" :style="{ fontFamily: 'Geist, sans-serif', fontSize: '16px', fontWeight: 600, fill: 'rgba(234,237,243,0.95)' }">Client</text>
-  </ClickGroup>
-  <ClickGroup :click="2">
-    <RoughArrow :x1="170" :y1="140" :x2="260" :y2="140" :seed="101" />
-  </ClickGroup>
-  <ClickGroup :click="3">
-    <RoughRect :x="270" :y="100" :width="160" :height="80" variant="success" :seed="102" />
-    <text x="350" y="140" text-anchor="middle" dominant-baseline="central" :style="{ fontFamily: 'Geist, sans-serif', fontSize: '16px', fontWeight: 600, fill: 'rgba(234,237,243,0.95)' }">Server</text>
-  </ClickGroup>
-  <ClickGroup :click="4">
-    <RoughLine :x1="270" :y1="185" :x2="430" :y2="185" stroke="rgba(255,255,255,0.3)" :seed="106" />
-  </ClickGroup>
-  <ClickGroup :click="5">
-    <RoughArrow :x1="440" :y1="140" :x2="530" :y2="140" :seed="103" />
-  </ClickGroup>
-  <ClickGroup :click="6">
-    <RoughCircle :x="580" :y="140" :diameter="80" variant="danger" :seed="104" />
-    <text x="580" y="140" text-anchor="middle" dominant-baseline="central" :style="{ fontFamily: 'Geist, sans-serif', fontSize: '14px', fontWeight: 600, fill: 'rgba(234,237,243,0.95)' }">DB</text>
-  </ClickGroup>
-</RoughSvg>

@@ -52,6 +52,9 @@ importers:
       '@alexop/slidev-theme-brand':
         specifier: workspace:*
         version: link:../packages/slidev-theme-brand
+      '@iconify-json/mdi':
+        specifier: ^1.2.3
+        version: 1.2.3
     devDependencies:
       '@iconify-json/logos':
         specifier: ^1.2.10
@@ -589,6 +592,9 @@ packages:
 
   '@iconify-json/logos@1.2.10':
     resolution: {integrity: sha512-qxaXKJ6fu8jzTMPQdHtNxlfx6tBQ0jXRbHZIYy5Ilh8Lx9US9FsAdzZWUR8MXV8PnWTKGDFO4ZZee9VwerCyMA==}
+
+  '@iconify-json/mdi@1.2.3':
+    resolution: {integrity: sha512-O3cLwbDOK7NNDf2ihaQOH5F9JglnulNDFV7WprU2dSoZu3h3cWH//h74uQAB87brHmvFVxIOkuBX2sZSzYhScg==}
 
   '@iconify-json/ph@1.2.2':
     resolution: {integrity: sha512-PgkEZNtqa8hBGjHXQa4pMwZa93hmfu8FUSjs/nv4oUU6yLsgv+gh9nu28Kqi8Fz9CCVu4hj1MZs9/60J57IzFw==}
@@ -3344,6 +3350,10 @@ snapshots:
       '@iconify/types': 2.0.0
 
   '@iconify-json/logos@1.2.10':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/mdi@1.2.3':
     dependencies:
       '@iconify/types': 2.0.0
 
