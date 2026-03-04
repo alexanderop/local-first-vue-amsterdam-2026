@@ -239,6 +239,38 @@ CLICK 3: "Now — who's the sync engine for DATA?" PAUSE. Let them think.
 - "The same pattern repeats, one layer up."
 - "Vue solved rendering. Now we need something to solve data."
 
+TRANSITION: "But wait — what about the tools you're already using?"
+-->
+
+---
+
+# "But I Already Use TanStack Query / Pinia?"
+
+<v-clicks>
+
+- TanStack Query manages **server cache** — what the server said last
+- Pinia manages **client state** — UI state, forms, toggles
+- Sync engines manage **local truth** — the source of truth lives on **your device**
+
+</v-clicks>
+
+<div v-click class="mt-6 text-sm op-70 text-center">
+
+These are different layers. Sync engines replace the **fetch → cache → invalidate** cycle entirely.
+
+</div>
+
+<!--
+~20 seconds. Prevent the main audience objection.
+
+"Some of you are thinking: I already use TanStack Query or Pinia — why do I need another data layer?"
+
+CLICK 1: "TanStack Query is a server cache. It remembers what the server told you."
+CLICK 2: "Pinia is client state. UI toggles, form drafts, ephemeral stuff."
+CLICK 3: "Sync engines are a local source of truth. The data lives on YOUR device."
+
+CLICK 4: "Different layers. Sync engines don't replace Pinia — they replace the fetch-cache-invalidate dance."
+
 TRANSITION: "Let's see where that leaves us on the scorecard..."
 -->
 
@@ -387,6 +419,7 @@ Don't read the diagram — audience can read. Focus on the comparison:
 - Point at the key-value vs table visual: "Object stores vs relational tables — fundamentally different models."
 - Note: PGlite is actually Postgres-in-WASM, not SQLite — mention it as a third option if asked.
 - "Both work. Different tradeoffs. Most sync engines we'll see later pick one for you."
+- Fun fact: "This is the same stack Notion uses — they saw 20% faster page navigation after the switch to SQLite WASM."
 
 TRANSITION: "But how long does that data actually stick around?"
 
@@ -394,104 +427,38 @@ TRANSITION: "But how long does that data actually stick around?"
 -->
 
 ---
-clicks: 4
----
-
-# How SQLite Runs in Your Browser
-
-<SqliteArchDiagram />
-
-<!--
-This slide dives into the SQLite architecture. Don't read boxes — walk through the flow:
-
-CLICK 1: "Your Vue components call a composable — useSQLite(). Simple API."
-
-CLICK 2: "Under the hood, all database work runs in a Web Worker. Your UI never freezes."
-
-CLICK 3: "Inside that Worker: SQLite compiled to WebAssembly. Full SQL engine, ~900KB. One catch — you need Cross-Origin Isolation headers."
-
-CLICK 4: "Data persists via OPFS — Origin Private File System. Unlike IndexedDB, it gives synchronous file I/O, which SQLite needs for performance."
-
-KEY INSIGHT: "This is the same stack Notion uses. They saw 20% faster page navigation after moving to SQLite WASM."
-
-TRANSITION: "Now — how long does that data actually survive?"
--->
-
----
 
 # How Long Does Your Data Survive?
 
-<div class="grid grid-cols-2 gap-8 mt-4">
-
-<div v-click class="border border-gray-600 rounded-xl p-5 bg-gray-800/40">
-  <div class="flex items-center gap-2 mb-3">
-    <logos-chrome class="text-2xl" />
-    <span class="font-bold text-lg">Chrome</span>
+<div class="grid grid-cols-3 gap-4 mt-6">
+  <div v-click class="border border-gray-600 rounded-xl p-4 bg-gray-800/40 text-center">
+    <logos-chrome class="text-2xl mx-auto mb-2" />
+    <div class="font-bold text-sm">Chrome</div>
+    <div class="text-xs text-gray-400 mt-2">Persistent</div>
+    <div class="text-xs text-gray-500 mt-1">Evicted only under storage pressure</div>
   </div>
-  <div class="space-y-2 text-sm">
-    <div class="flex items-center gap-2">
-      <span class="text-green-400">&#x2713;</span> <span>Data persists <strong>indefinitely</strong></span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-yellow-400">&#x26A0;</span> <span>Evicted only under <strong>storage pressure</strong></span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-gray-400">&#x25CF;</span> <span>Up to <strong>60%</strong> of disk per origin</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-gray-400">&#x25CF;</span> <span>LRU eviction — least recently used goes first</span>
-    </div>
+  <div v-click class="border border-red-500/30 rounded-xl p-4 bg-gray-800/40 text-center">
+    <logos-safari class="text-2xl mx-auto mb-2" />
+    <div class="font-bold text-sm">Safari</div>
+    <div class="text-xs text-red-400 mt-2 font-semibold">7-day cap</div>
+    <div class="text-xs text-gray-500 mt-1">PWAs exempt from the cap</div>
   </div>
-</div>
-
-<div v-click class="border border-gray-600 rounded-xl p-5 bg-gray-800/40">
-  <div class="flex items-center gap-2 mb-3">
-    <logos-safari class="text-2xl" />
-    <span class="font-bold text-lg">Safari</span>
-  </div>
-  <div class="space-y-2 text-sm">
-    <div class="flex items-center gap-2">
-      <span class="text-red-400">&#x2717;</span> <span><strong>7-day cap</strong> — no user visit = data deleted</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-yellow-400">&#x26A0;</span> <span>Part of Intelligent Tracking Prevention</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-gray-400">&#x25CF;</span> <span>Affects IndexedDB, Cache API, Service Workers</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-green-400">&#x2713;</span> <span><strong>PWAs exempt</strong> — home screen apps keep data</span>
-    </div>
-  </div>
-</div>
-
-</div>
-
-<div v-click class="mt-6 border border-pink-500/40 rounded-xl p-4 bg-pink-500/5">
-  <div class="font-bold text-pink-400 mb-1">PWA + Storage API = Protection</div>
-  <div class="text-sm text-gray-300">
-
-  ```ts
-  // Request persistent storage — browser won't auto-evict
-  const isPersisted = await navigator.storage.persist() // true = protected
-  ```
-
-  Safari exempts installed PWAs from the 7-day cap. Chrome auto-grants persistence for engaged sites.
+  <div v-click class="border border-pink-500/40 rounded-xl p-4 bg-pink-500/5 text-center">
+    <div class="i-ph-shield-check text-2xl text-pink-400 mx-auto mb-2" />
+    <div class="font-bold text-sm">Fix</div>
+    <div class="text-xs text-gray-300 mt-2 font-mono">navigator.storage.persist()</div>
+    <div class="text-xs text-gray-500 mt-1">One line — browser won't auto-evict</div>
   </div>
 </div>
 
 <!--
-This is a critical gotcha slide — audiences always react to the Safari 7-day rule.
-
-CLICK 1: "Chrome — pretty generous. Your IndexedDB data stays until the disk fills up. Least recently used origins get evicted first."
-
-CLICK 2: "Safari — this is the one that bites. 7-day cap. If the user doesn't visit your site for a week, Safari deletes everything. IndexedDB, Cache API, Service Workers — all gone. This is part of their Intelligent Tracking Prevention. BUT — if your app is installed as a PWA on the home screen, you're exempt."
-
-CLICK 3: "The fix? The Storage API. navigator.storage.persist() tells the browser: don't auto-evict my data. Chrome auto-grants it for sites with high engagement. And for Safari — making your app a PWA is the best protection you have."
+CLICK 1: "Chrome — generous. Data persists until disk fills up."
+CLICK 2: "Safari — the gotcha. 7-day cap. No visit for a week, data gone. BUT PWAs are exempt."
+CLICK 3: "The fix — one line. navigator.storage.persist(). Chrome auto-grants for engaged sites."
 
 TRANSITION: "Now let's see how this all fits together architecturally..."
 
-[CHECK: ~11:00 — if past 11:30, tighten the next two slides]
+[CHECK: ~11:00]
 -->
 
 ---
@@ -593,29 +560,6 @@ Point at left: "Without PWA — dino."
 Point at right: "With PWA — Service Worker intercepts, serves from cache. App loads."
 
 - "The PWA is the FOUNDATION. Data layer sits on top."
--->
-
----
-layout: center
-class: text-center
----
-
-# I wrote a blog post about this
-
-<div class="mt-6 mx-auto max-w-lg">
-  <a href="https://alexop.dev/posts/create-pwa-vue3-vite-4-steps/" target="_blank" class="block rounded-xl overflow-hidden border border-gray-700/50 shadow-lg shadow-pink-500/10 hover:shadow-pink-500/20 transition-shadow">
-    <img src="/pwa-blog-post.png" class="w-full" />
-  </a>
-</div>
-
-<div class="mt-4 text-sm text-gray-400">
-  <mdi-open-in-new class="inline-block mr-1 text-xs" /> alexop.dev/posts/create-pwa-vue3-vite-4-steps
-</div>
-
-<!--
-"I actually wrote a blog post on how to convert any Vue app into a PWA in 4 steps — it's up on my site. Feel free to check it out later."
-
-- Quick mention, don't dwell — the audience can scan the page
 -->
 
 ---
@@ -1070,6 +1014,12 @@ clicks: 5
 
 <CrdtCounterDemo :roughness="1.2" :seed="800" />
 
+<div v-click="5" class="mt-2 text-xs op-70 grid grid-cols-3 gap-2 text-center">
+  <div><strong>Different fields</strong> → auto-merge</div>
+  <div><strong>Same field</strong> → last-write-wins</div>
+  <div><strong>Delete vs update</strong> → delete wins</div>
+</div>
+
 <!--
 CLICK-DRIVEN DEMO — each spacebar/arrow press advances one step:
 
@@ -1084,49 +1034,17 @@ Click 4: Sync — three boxes appear:
 DOCTOR ANALOGY (use if audience looks confused):
 "Imagine two doctors editing the same patient record on a flight. Doctor A adds an allergy. Doctor B updates the dosage. With LWW, one edit DISAPPEARS when they land. With CRDTs, both edits survive — because the data structure tracks WHO changed WHAT, not just WHEN."
 
-MATH INTUITION:
-"Think of it like addition: 1 + 2 = 2 + 1. CRDTs design every operation so that merge order never matters. That's the whole trick — commutativity."
+Click 5: Reveal the 3 merge rules.
+"And with real data — objects, not counters — three rules cover almost everything:"
+RULE 1: "Different fields? Auto-merge. Title from A, done from B — no conflict."
+RULE 2: "Same field? Last-write-wins. Deterministic, but you CAN lose data."
+RULE 3: "Delete vs update? Delete wins — the tombstone pattern."
 
 "THIS is why CRDTs matter. The server needs ZERO conflict resolution logic — it just relays bytes."
 
-TRANSITION: "That's the math. But what does this look like with real data?"
-
-[CHECK: ~15:30]
--->
-
----
-clicks: 5
----
-
-# CRDTs in Practice: Field-Level Merging
-
-<CrdtResolutionDiagram :roughness="1.5" :seed="500" />
-
-<!--
-"Let's see how CRDTs handle a more realistic scenario — two users editing the SAME object."
-
-CLICK 1: "User A renames the todo. User B marks it done. Both offline."
-CLICK 2: "They reconnect and sync."
-
-CLICK 3 — RULE 1: DIFFERENT FIELDS → auto-merge
-- "Different fields? No conflict at all. Title from A, completed from B — they don't overlap."
-- "This covers roughly 90% of real-world edits. Most of the time, users aren't touching the same field."
-
-CLICK 4 — RULE 2: SAME FIELD → Last-Write-Wins (vector clocks)
-- "Same field? We fall back to LWW — the most recent timestamp wins."
-- "Remember the spectrum slide? This is where we sit: deterministic, automatic, but you CAN lose data."
-- "Vector clocks help — they track causality, not just wall-clock time."
-
-CLICK 5 — RULE 3: DELETE vs UPDATE → delete wins (tombstone)
-- "Delete versus update? Delete wins. Always."
-- "This is the tombstone pattern — you mark something as deleted, and it stays deleted."
-- "It's controversial: some teams prefer update-wins. But delete-wins is safer — it prevents zombie records from coming back."
-
-"Three rules. That's the entire conflict resolution playbook for most CRDT-based engines."
-
 TRANSITION: "Now let's look at the landscape — and you'll immediately see which engines use CRDTs and which don't."
 
-[CHECK: ~17:00]
+[CHECK: ~16:00]
 -->
 
 ---
@@ -1316,6 +1234,42 @@ Server-authoritative. Postgres on the server, SQLite cache on the client. Great 
 -->
 
 ---
+layout: center
+class: text-center
+---
+
+# See It In Action
+
+<div class="mt-8 text-6xl">🐱</div>
+
+<div class="mt-4 text-xl op-70">
+Live demo — a cat chat app built with Jazz + Nuxt
+</div>
+
+<div class="mt-4 text-sm op-50 max-w-lg mx-auto">
+PWA · real-time collaboration · offline support · everyone in the room can post
+</div>
+
+<!--
+LIVE DEMO — Cat Chat App (Jazz + Nuxt)
+
+Setup: Open the cat chat PWA on your phone + laptop. Share the URL with the audience.
+
+1. Show the app — a simple chat where anyone can post cat messages
+2. Post a message from your laptop — audience sees it appear instantly on the projected screen
+3. Toggle airplane mode on your phone — keep posting messages
+4. Reconnect — messages sync automatically, no data lost
+5. Invite audience to open the URL on their phones — show real-time collaboration with the whole room
+
+KEY POINTS:
+- "This is Jazz + Nuxt. A PWA. Real-time sync. Offline writes. Zero backend code from me."
+- "Everyone in this room is collaborating right now — and Jazz handles all the conflict resolution we just talked about."
+- "Toggle airplane mode — keep chatting — reconnect — everything merges. That's CRDTs in action."
+
+If demo fails: "Conference WiFi strikes again — but the offline part still works!" Show your phone with queued messages.
+-->
+
+---
 clicks: 5
 ---
 
@@ -1394,9 +1348,49 @@ CLICK 4: "Zero — great DX but notice: reads work offline, but writes require t
 
 CLICK 5 (callout): "No one-size-fits-all. The right choice depends on YOUR app."
 
-TRANSITION: "But are any of these truly local-first? Let's find out."
+TRANSITION: "But before we move on — a quick cheat sheet."
 
 [CHECK: ~18:00]
+-->
+
+---
+clicks: 4
+---
+
+# Quick Decision Guide
+
+<div class="grid gap-3 mt-6">
+  <div v-click="1" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+    <div class="text-pink-400 font-bold text-lg shrink-0">?</div>
+    <div class="text-sm"><strong>Need real-time collab</strong> (docs, whiteboards)?</div>
+    <div class="text-pink-400 font-bold ml-auto shrink-0">→ Yjs</div>
+  </div>
+  <div v-click="2" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+    <div class="text-pink-400 font-bold text-lg shrink-0">?</div>
+    <div class="text-sm"><strong>Adding sync to an existing Vue app</strong>?</div>
+    <div class="text-pink-400 font-bold ml-auto shrink-0">→ Dexie</div>
+  </div>
+  <div v-click="3" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+    <div class="text-pink-400 font-bold text-lg shrink-0">?</div>
+    <div class="text-sm"><strong>Greenfield app</strong>, want everything built-in?</div>
+    <div class="text-pink-400 font-bold ml-auto shrink-0">→ Jazz</div>
+  </div>
+  <div v-click="4" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+    <div class="text-pink-400 font-bold text-lg shrink-0">?</div>
+    <div class="text-sm"><strong>Server-first</strong>, want instant reads?</div>
+    <div class="text-pink-400 font-bold ml-auto shrink-0">→ Zero</div>
+  </div>
+</div>
+
+<!--
+"A quick cheat sheet — match your situation to the engine."
+
+CLICK 1: "Real-time collab? Yjs. Battle-tested, P2P possible."
+CLICK 2: "Existing Vue app? Dexie. Easiest migration path."
+CLICK 3: "Greenfield? Jazz. Everything built in."
+CLICK 4: "Server-first speed? Zero. Great DX, but not truly local-first."
+
+TRANSITION: "But are any of these truly local-first? Let's find out."
 -->
 
 ---
@@ -1469,9 +1463,9 @@ TRANSITION: "So what would it take to actually satisfy criterion 3?"
 
 # Surviving the Shutdown
 
-What would actually satisfy criterion 3?
+Remember Google Reader? Google Inbox? Sunrise Calendar? When they shut down, your data vanished with them.
 
-Ranked **worst → best**:
+What would actually satisfy criterion 3? Ranked **worst → best**:
 
 <div class="text-sm">
 <table class="w-full">
@@ -1844,7 +1838,7 @@ CLICK 3: "Local-first ideals. The pragmatic infrastructure is... being built rig
 
 ### <span class="inline-flex items-center gap-2"><span class="i-ph-compass-bold text-pink-400" /> Step 1: Pick your sync engine.</span>
 
-**Dexie** for the easiest start. **Jazz** for batteries-included. **Yjs** for max flexibility. **LiveStore** for event-sourced SQLite. Match the engine to your app.
+**Dexie** for the easiest start. **Jazz** for batteries-included. **Yjs** for max flexibility. Match the engine to your app.
 
 </Card>
 
@@ -1953,6 +1947,10 @@ class: flex items-center justify-center h-full
   ]"
 />
 
+<div v-click="5" class="text-center mt-4 text-sm op-70">
+Vue's reactivity system was built for this — <code>ref()</code> + sync engine = the reactive data layer Vue never had.
+</div>
+
 <!--
 Let the animation play. Then walk through the timeline:
 
@@ -1980,6 +1978,7 @@ PAUSE.
 - **Yjs** — yjs.dev — high-performance CRDT library
 - **Zero** — zero.rocicorp.dev — query-driven sync from Rocicorp
 - **Sync Engines for Vue Developers** — alexop.dev
+- **PWA in 4 Steps** — alexop.dev/posts/create-pwa-vue3-vite-4-steps
 - **A Gentle Introduction to CRDTs** — Matt Wonlaw
 
 </div>
