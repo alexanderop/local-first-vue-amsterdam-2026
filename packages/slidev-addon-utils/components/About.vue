@@ -33,8 +33,8 @@
 import Card from './Card.vue'
 
 const items = [
-  { icon: 'i-ph-rocket-launch-bold', label: '7 years building with Vue' },
-  { icon: 'i-ph-briefcase-bold', label: 'Developer at Otto Payments' },
+  { icon: 'i-ph-rocket-launch-bold', label: '8 years building with Vue' },
+  { icon: 'i-ph-briefcase-bold', label: 'Developer at Otto Payments 🦞' },
   { icon: 'i-ph-map-pin-bold', label: 'Geretsried, Bavaria' },
   { icon: 'i-ph-pencil-line-bold', label: 'Blogger at alexop.dev' },
   { icon: 'i-ph-microphone-stage-bold', label: 'Speaker & contributor' },

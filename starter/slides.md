@@ -332,6 +332,169 @@ BREATHE.
 -->
 
 ---
+clicks: 4
+---
+
+# Local Storage Options
+
+<LocalStorageDiagram
+  :panels="[
+    {
+      panel: { title: 'IndexedDB', click: 1 },
+      stores: [
+        { label: 'Object Store A', value: '{ key: value }', click: 2 },
+        { label: 'Object Store B', value: '{ key: value }', click: 2 },
+      ],
+      meta: {
+        lines: [
+          { text: 'API: async, callbacks' },
+          { text: 'Storage: native' },
+          { text: 'Since: 2015, everywhere' },
+        ],
+        click: 3,
+      },
+    },
+    {
+      panel: { title: 'SQLite (WebAssembly)', click: 1 },
+      table: {
+        headers: ['id', 'name', 'age'],
+        rows: [['1', 'Alex', '30'], ['2', 'Sara', '25']],
+        click: 2,
+      },
+      meta: {
+        lines: [
+          { text: 'API: full SQL queries' },
+          { text: 'Storage: OPFS (private filesystem) / memory' },
+          { text: 'Bundle: ~900KB WASM' },
+        ],
+        click: 3,
+      },
+    },
+  ]"
+  :libraries="{ items: [
+    { name: 'Dexie' },
+    { name: 'wa-sqlite' },
+    { name: 'SQLite WASM' },
+    { name: 'PGlite' },
+  ], click: 4 }"
+/>
+
+<!--
+Don't read the diagram — audience can read. Focus on the comparison:
+
+- Left: "IndexedDB — native, everywhere. API is rough. Dexie wraps it beautifully."
+- Right: "SQLite WASM — full SQL engine compiled to WebAssembly. The new kid on the block."
+- Point at the key-value vs table visual: "Object stores vs relational tables — fundamentally different models."
+- Note: PGlite is actually Postgres-in-WASM, not SQLite — mention it as a third option if asked.
+- "Both work. Different tradeoffs. Most sync engines we'll see later pick one for you."
+
+TRANSITION: "But how long does that data actually stick around?"
+
+[CHECK: ~10:00]
+-->
+
+---
+clicks: 4
+---
+
+# How SQLite Runs in Your Browser
+
+<SqliteArchDiagram />
+
+<!--
+This slide dives into the SQLite architecture. Don't read boxes — walk through the flow:
+
+CLICK 1: "Your Vue components call a composable — useSQLite(). Simple API."
+
+CLICK 2: "Under the hood, all database work runs in a Web Worker. Your UI never freezes."
+
+CLICK 3: "Inside that Worker: SQLite compiled to WebAssembly. Full SQL engine, ~900KB. One catch — you need Cross-Origin Isolation headers."
+
+CLICK 4: "Data persists via OPFS — Origin Private File System. Unlike IndexedDB, it gives synchronous file I/O, which SQLite needs for performance."
+
+KEY INSIGHT: "This is the same stack Notion uses. They saw 20% faster page navigation after moving to SQLite WASM."
+
+TRANSITION: "Now — how long does that data actually survive?"
+-->
+
+---
+
+# How Long Does Your Data Survive?
+
+<div class="grid grid-cols-2 gap-8 mt-4">
+
+<div v-click class="border border-gray-600 rounded-xl p-5 bg-gray-800/40">
+  <div class="flex items-center gap-2 mb-3">
+    <logos-chrome class="text-2xl" />
+    <span class="font-bold text-lg">Chrome</span>
+  </div>
+  <div class="space-y-2 text-sm">
+    <div class="flex items-center gap-2">
+      <span class="text-green-400">&#x2713;</span> <span>Data persists <strong>indefinitely</strong></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-yellow-400">&#x26A0;</span> <span>Evicted only under <strong>storage pressure</strong></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-gray-400">&#x25CF;</span> <span>Up to <strong>60%</strong> of disk per origin</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-gray-400">&#x25CF;</span> <span>LRU eviction — least recently used goes first</span>
+    </div>
+  </div>
+</div>
+
+<div v-click class="border border-gray-600 rounded-xl p-5 bg-gray-800/40">
+  <div class="flex items-center gap-2 mb-3">
+    <logos-safari class="text-2xl" />
+    <span class="font-bold text-lg">Safari</span>
+  </div>
+  <div class="space-y-2 text-sm">
+    <div class="flex items-center gap-2">
+      <span class="text-red-400">&#x2717;</span> <span><strong>7-day cap</strong> — no user visit = data deleted</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-yellow-400">&#x26A0;</span> <span>Part of Intelligent Tracking Prevention</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-gray-400">&#x25CF;</span> <span>Affects IndexedDB, Cache API, Service Workers</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-green-400">&#x2713;</span> <span><strong>PWAs exempt</strong> — home screen apps keep data</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div v-click class="mt-6 border border-pink-500/40 rounded-xl p-4 bg-pink-500/5">
+  <div class="font-bold text-pink-400 mb-1">PWA + Storage API = Protection</div>
+  <div class="text-sm text-gray-300">
+
+  ```ts
+  // Request persistent storage — browser won't auto-evict
+  const isPersisted = await navigator.storage.persist() // true = protected
+  ```
+
+  Safari exempts installed PWAs from the 7-day cap. Chrome auto-grants persistence for engaged sites.
+  </div>
+</div>
+
+<!--
+This is a critical gotcha slide — audiences always react to the Safari 7-day rule.
+
+CLICK 1: "Chrome — pretty generous. Your IndexedDB data stays until the disk fills up. Least recently used origins get evicted first."
+
+CLICK 2: "Safari — this is the one that bites. 7-day cap. If the user doesn't visit your site for a week, Safari deletes everything. IndexedDB, Cache API, Service Workers — all gone. This is part of their Intelligent Tracking Prevention. BUT — if your app is installed as a PWA on the home screen, you're exempt."
+
+CLICK 3: "The fix? The Storage API. navigator.storage.persist() tells the browser: don't auto-evict my data. Chrome auto-grants it for sites with high engagement. And for Safari — making your app a PWA is the best protection you have."
+
+TRANSITION: "Now let's see how this all fits together architecturally..."
+
+[CHECK: ~11:00 — if past 11:30, tighten the next two slides]
+-->
+
+---
 clicks: 5
 ---
 
@@ -342,7 +505,7 @@ clicks: 5
     {
       title: 'ONLINE',
       nodes: [
-        { id: 'local', label: 'Local Store', subtitle: '(IDB/SQLite)', variant: 'accent', leftLabel: '◀── read', rightLabel: 'write ──▶', click: 1 },
+        { id: 'local', label: 'Local Store', subtitle: '(IndexedDB / SQLite)', variant: 'accent', leftLabel: '◀── read', rightLabel: 'write ──▶', click: 1 },
         { id: 'server', label: 'Server DB', variant: 'success', click: 2 },
       ],
       edges: [
@@ -353,7 +516,7 @@ clicks: 5
       title: 'OFFLINE',
       click: 3,
       nodes: [
-        { id: 'local2', label: 'Local Store', subtitle: '(IDB/SQLite)', variant: 'accent', leftLabel: '◀── read', rightLabel: 'write ──▶', click: 3 },
+        { id: 'local2', label: 'Local Store', subtitle: '(IndexedDB / SQLite)', variant: 'accent', leftLabel: '◀── read', rightLabel: 'write ──▶', click: 3 },
         { id: 'pending', label: 'Pending Writes', variant: 'muted', click: 4 },
       ],
       edges: [
@@ -383,6 +546,8 @@ clicks: 5
 ---
 
 # The PWA Gotcha
+
+**Progressive Web App** — without one, your offline data is useless.
 
 <PwaDiagram
   :panels="[
@@ -468,146 +633,7 @@ clicks: 4
 
 - Mention: vite-plugin-pwa or @vite-pwa/nuxt — easy to add
 
-TRANSITION: "Now which local database should you pick?"
--->
-
----
-clicks: 4
----
-
-# Local Storage Options
-
-<LocalStorageDiagram
-  :panels="[
-    {
-      panel: { title: 'IndexedDB', click: 1 },
-      stores: [
-        { label: 'Object Store A', value: '{ key: value }', click: 2 },
-        { label: 'Object Store B', value: '{ key: value }', click: 2 },
-      ],
-      meta: {
-        lines: [
-          { text: 'API: async, callbacks' },
-          { text: 'Storage: native' },
-          { text: 'Since: 2015, everywhere' },
-        ],
-        click: 3,
-      },
-    },
-    {
-      panel: { title: 'SQLite (WASM)', click: 1 },
-      table: {
-        headers: ['id', 'name', 'age'],
-        rows: [['1', 'Alex', '30'], ['2', 'Sara', '25']],
-        click: 2,
-      },
-      meta: {
-        lines: [
-          { text: 'API: full SQL queries' },
-          { text: 'Storage: OPFS / memory' },
-          { text: 'Bundle: ~900KB WASM' },
-        ],
-        click: 3,
-      },
-    },
-  ]"
-  :libraries="{ items: [
-    { name: 'Dexie' },
-    { name: 'wa-sqlite' },
-    { name: 'SQLite WASM' },
-    { name: 'PGlite' },
-  ], click: 4 }"
-/>
-
-<!--
-Don't read the diagram — audience can read. Focus on the comparison:
-
-- Left: "IndexedDB — native, everywhere. API is rough. Dexie wraps it beautifully."
-- Right: "SQLite WASM — full SQL engine compiled to WebAssembly. The new kid on the block."
-- Point at the key-value vs table visual: "Object stores vs relational tables — fundamentally different models."
-- Note: PGlite is actually Postgres-in-WASM, not SQLite — mention it as a third option if asked.
-- "Both work. Different tradeoffs. Most sync engines we'll see later pick one for you."
-
-TRANSITION: "But how long does that data actually stick around?"
-
-[CHECK: ~10:00]
--->
-
----
-
-# How Long Does Your Data Survive?
-
-<div class="grid grid-cols-2 gap-8 mt-4">
-
-<div v-click class="border border-gray-600 rounded-xl p-5 bg-gray-800/40">
-  <div class="flex items-center gap-2 mb-3">
-    <logos-chrome class="text-2xl" />
-    <span class="font-bold text-lg">Chrome</span>
-  </div>
-  <div class="space-y-2 text-sm">
-    <div class="flex items-center gap-2">
-      <span class="text-green-400">&#x2713;</span> <span>Data persists <strong>indefinitely</strong></span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-yellow-400">&#x26A0;</span> <span>Evicted only under <strong>storage pressure</strong></span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-gray-400">&#x25CF;</span> <span>Up to <strong>60%</strong> of disk per origin</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-gray-400">&#x25CF;</span> <span>LRU eviction — least recently used goes first</span>
-    </div>
-  </div>
-</div>
-
-<div v-click class="border border-gray-600 rounded-xl p-5 bg-gray-800/40">
-  <div class="flex items-center gap-2 mb-3">
-    <logos-safari class="text-2xl" />
-    <span class="font-bold text-lg">Safari</span>
-  </div>
-  <div class="space-y-2 text-sm">
-    <div class="flex items-center gap-2">
-      <span class="text-red-400">&#x2717;</span> <span><strong>7-day cap</strong> — no user visit = data deleted</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-yellow-400">&#x26A0;</span> <span>Part of Intelligent Tracking Prevention</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-gray-400">&#x25CF;</span> <span>Affects IndexedDB, Cache API, Service Workers</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-green-400">&#x2713;</span> <span><strong>PWAs exempt</strong> — home screen apps keep data</span>
-    </div>
-  </div>
-</div>
-
-</div>
-
-<div v-click class="mt-6 border border-pink-500/40 rounded-xl p-4 bg-pink-500/5">
-  <div class="font-bold text-pink-400 mb-1">PWA + Storage API = Protection</div>
-  <div class="text-sm text-gray-300">
-
-  ```ts
-  // Request persistent storage — browser won't auto-evict
-  const isPersisted = await navigator.storage.persist() // true = protected
-  ```
-
-  Safari exempts installed PWAs from the 7-day cap. Chrome auto-grants persistence for engaged sites.
-  </div>
-</div>
-
-<!--
-This is a critical gotcha slide — audiences always react to the Safari 7-day rule.
-
-CLICK 1: "Chrome — pretty generous. Your IndexedDB data stays until the disk fills up. Least recently used origins get evicted first."
-
-CLICK 2: "Safari — this is the one that bites. 7-day cap. If the user doesn't visit your site for a week, Safari deletes everything. IndexedDB, Cache API, Service Workers — all gone. This is part of their Intelligent Tracking Prevention. BUT — if your app is installed as a PWA on the home screen, you're exempt."
-
-CLICK 3: "The fix? The Storage API. navigator.storage.persist() tells the browser: don't auto-evict my data. Chrome auto-grants it for sites with high engagement. And for Safari — making your app a PWA is the best protection you have."
-
-TRANSITION: "So we can store data, and we can keep it around. But the hard part..."
-
-[CHECK: ~11:00 — if past 11:30, tighten the next two slides]
+TRANSITION: "So what does offline-first already give us?"
 -->
 
 ---
@@ -784,89 +810,92 @@ This is the architecture that sync engines give you.
 -->
 
 ---
-clicks: 2
----
 
-# What Is a Sync Engine?
+# Who Uses Sync Engines?
 
-Same pattern as Vue's reactivity, but **bidirectional** and **across the network**.
+<div class="grid grid-cols-4 gap-4 mt-6">
+<v-clicks>
 
-<div class="text-xs op-60 mb-1">Layer 2: DATA SYNC</div>
-<FlowDiagram
-  :nodes="[
-    { id: 'local', label: 'Local Store', variant: 'accent' },
-    { id: 'sync', label: 'Sync Engine', subtitle: 'protocol', click: 1 },
-    { id: 'server', label: 'Server DB', click: 1, variant: 'success' },
-  ]"
-  :edges="[
-    { from: 'local', to: 'sync', click: 1 },
-    { from: 'sync', to: 'server', click: 1 },
-  ]"
-  :nodeHeight="60"
-  :gap="80"
-  :seed="100"
-/>
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Linear</div>
+  <div class="text-xs op-50">Project management</div>
+</div>
 
-<div class="text-xs op-60 mb-1 mt-2">Layer 1: UI SYNC (Vue already solved this)</div>
-<FlowDiagram
-  :nodes="[
-    { id: 'ref', label: 'ref()', variant: 'muted', click: 2 },
-    { id: 'vdom', label: 'Virtual DOM', variant: 'muted', click: 2 },
-    { id: 'dom', label: 'Real DOM', variant: 'muted', click: 2 },
-  ]"
-  :edges="[
-    { from: 'ref', to: 'vdom', click: 2 },
-    { from: 'vdom', to: 'dom', click: 2 },
-  ]"
-  :nodeHeight="60"
-  :gap="80"
-  :seed="200"
-/>
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Figma</div>
+  <div class="text-xs op-50">Design tool</div>
+</div>
+
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Notion</div>
+  <div class="text-xs op-50">Knowledge management</div>
+</div>
+
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Superhuman</div>
+  <div class="text-xs op-50">Email client</div>
+</div>
+
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Excalidraw</div>
+  <div class="text-xs op-50">Whiteboard</div>
+</div>
+
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Google Docs</div>
+  <div class="text-xs op-50">Collaborative editing</div>
+</div>
+
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Pitch</div>
+  <div class="text-xs op-50">Presentations</div>
+</div>
+
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Obsidian</div>
+  <div class="text-xs op-50">Note-taking</div>
+</div>
+
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">AFFiNE</div>
+  <div class="text-xs op-50">Workspace editor</div>
+</div>
+
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Logseq</div>
+  <div class="text-xs op-50">Knowledge graph</div>
+</div>
+
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Tiptap</div>
+  <div class="text-xs op-50">Rich text editor</div>
+</div>
+
+<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
+  <div class="text-lg font-bold text-[#ff6bed]">Anytype</div>
+  <div class="text-xs op-50">Productivity platform</div>
+</div>
+
+</v-clicks>
+</div>
+
+<div v-click class="mt-6 text-lg text-gray-400 text-center">
+
+All chose sync engines for the same reasons: **instant UI**, **offline support**, and **real-time collaboration**.
+
+</div>
 
 <!--
-"Remember the pattern I asked you to remember? Source, reconciler, target."
+"This isn't a niche pattern. Look at this list — project management, design tools, note-taking, email, presentations, collaborative editing. Across every category, the most responsive apps are built on sync engines."
 
-Point at Layer 1: "Vue handles UI sync — we know this."
-Point at Layer 2: "A sync engine is the SAME pattern, but for data across the network."
+WHY they all do it:
 
-- "Two layers. Same idea. Vue solved layer 1. A sync engine solves layer 2."
--->
+1. **Instant UI** — Reads/writes hit a local store. No spinners. Linear loads issues in <50ms because it's filtering a JS array, not waiting for an API.
+2. **Offline support** — Works without network. Changes queue locally and sync when reconnected.
+3. **Real-time collaboration** — Multiple users editing simultaneously. Sync engine handles merging and conflicts.
+4. **Competitive advantage** — Linear's snappiness is their #1 differentiator over Jira. Superhuman's 100ms rule. Figma killed Sketch with real-time multiplayer.
 
----
-
-# The Object Sync Engine Pattern
-
-Three teams — **Linear, Figma, and Notion** — all converged on this independently.
-
-<FlowDiagram
-  :nodes="[
-    { id: 'local', label: 'Local Store', subtitle: 'Instant reads/writes', variant: 'accent' },
-    { id: 'server', label: 'Server Store', subtitle: 'Authority + durability', variant: 'success' },
-  ]"
-  :edges="[
-    { from: 'local', to: 'server', label: 'sync protocol' },
-  ]"
-  :gap="160"
-/>
-
-Three teams built this independently. **Same architecture.** That's a strong signal.
-
-<!--
-"This isn't theoretical. Linear, Figma, Notion — three of the most successful product teams — all independently arrived at the SAME architecture."
-
-PAUSE — let "independently" land. That's the signal.
-
-- Local store = instant reads/writes, no spinners
-- Server store = durability, authority
-- Sync protocol = minimal deltas between them
-
-HOW EACH TEAM DOES IT (pick 1-2 to elaborate on if time allows):
-
-- **Linear** — IndexedDB as primary store, writes local-first. WebSocket delta packets for sync. Pages load in <50ms. Full offline PWA.
-- **Figma** — Document tree synced via WebSocket. CRDT-inspired LWW registers (not full CRDTs). Server validates and broadcasts.
-- **Notion** — SQLite on client. Push-based sync on per-page channels. Offline pages migrated to CRDT model for conflict resolution.
-
-KEY INSIGHT: Same two-box pattern, but sync protocols differ based on data model shape — object graph (Linear), design tree (Figma), block tree (Notion).
+These companies didn't adopt sync engines for fun — they did it because it's the only way to deliver the UX their users demand.
 
 TRANSITION: "Let's look at what's out there. But first — there's one question they all answer differently."
 -->
@@ -901,7 +930,7 @@ clicks: 5
     { id: 'lww', label: 'Last-Write-Wins', subtitle: 'Simplest', variant: 'danger' },
     { id: 'server', label: 'Server Authority', subtitle: 'Centralized', click: 1, variant: 'muted' },
     { id: 'oplog', label: 'Operation Logs', subtitle: 'Replayable', click: 2, variant: 'default' },
-    { id: 'crdt', label: 'CRDTs', subtitle: 'Math-based', click: 3, variant: 'success' },
+    { id: 'crdt', label: 'CRDTs', subtitle: 'Conflict-free Replicated Data Types', click: 3, variant: 'success' },
     { id: 'hybrid', label: 'Hybrid / Manual', subtitle: 'User decides', click: 4, variant: 'accent' },
   ]"
   :edges="[
@@ -978,7 +1007,7 @@ clicks: 4
 
 - Every client merges independently
 - No server authority needed
-- Works offline & P2P
+- Works offline & peer-to-peer (P2P)
 - **But:** harder — needs math that always converges
 - Server just relays bytes
 
@@ -1145,14 +1174,14 @@ clicks: 4
       <div class="text-sm font-bold text-pink-400">Jazz</div>
       <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Early · Active dev</div>
     </div>
-    <div class="text-xs text-gray-400 mt-1">Batteries-included. Client-side CRDTs. Auth, permissions, E2E encryption, sync — all built in.</div>
+    <div class="text-xs text-gray-400 mt-1">Batteries-included. Client-side CRDTs. Auth, permissions, end-to-end encryption (E2E), sync — all built in.</div>
   </Card>
   <Card v-click="4" variant="muted" size="md">
     <div class="flex items-center gap-2">
       <div class="text-sm font-bold text-pink-400">Zero</div>
       <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Alpha · Well-funded</div>
     </div>
-    <div class="text-xs text-gray-400 mt-1">Query-driven sync. Server resolves all conflicts. Reactive Postgres to client SQLite. Great DX, but not truly local-first.</div>
+    <div class="text-xs text-gray-400 mt-1">Query-driven sync. Server resolves all conflicts. Reactive Postgres to client SQLite. Great developer experience (DX), but not truly local-first.</div>
   </Card>
 </div>
 
@@ -1225,7 +1254,7 @@ async function addTodo(title: string) {
   await db.todos.add({ title, done: false, createdAt: new Date() })
 }
 // ✅ Progressive: local-only → npm i dexie-cloud-addon → sync
-// ⚠ Server-side field-level merge (different fields auto-merge, same field = LWW)
+// ⚠ Server-side field-level merge (different fields auto-merge, same field = last-write-wins)
 ```
 
 <!--
@@ -1746,7 +1775,7 @@ Generic sync, multiple backends:
     { id: 'app', label: 'Your App', subtitle: 'ALL biz logic HERE', variant: 'accent' },
     { id: 'aws', label: 'AWS / Cloud' },
     { id: 'self', label: 'Self-hosted' },
-    { id: 'p2p', label: 'P2P / NAS' },
+    { id: 'p2p', label: 'Peer-to-Peer / NAS', subtitle: 'Network-attached storage' },
   ]"
   :edges="[
     { from: 'app', to: 'aws', label: 'open protocol' },
