@@ -5,7 +5,7 @@ import { getVariantColors } from '../constants/colors'
 import type { Variant } from '../constants/colors'
 import RoughPaths from './RoughPaths.vue'
 
-const { x, y, width, height, variant, stroke, fill, roughness, seed, strokeWidth = 2, fillStyle = 'solid', strokeDasharray } = defineProps<{
+const { x, y, width, height, variant, stroke, fill, strokeWidth = 2, fillStyle = 'solid', strokeDasharray, roughness, seed } = defineProps<{
   x: number
   y: number
   width: number
@@ -13,18 +13,18 @@ const { x, y, width, height, variant, stroke, fill, roughness, seed, strokeWidth
   variant?: Variant
   stroke?: string
   fill?: string
-  roughness?: number
-  seed?: number
   strokeWidth?: number
   fillStyle?: string
   strokeDasharray?: string
+  roughness?: number
+  seed?: number
 }>()
 
 const { gen, resolveRoughness, resolveSeed } = useRoughContext()
 
 const paths = computed(() => {
   const colors = getVariantColors(variant)
-  const drawable = gen.rectangle(x, y, width, height, {
+  const drawable = gen.ellipse(x, y, width, height, {
     roughness: resolveRoughness(roughness),
     seed: resolveSeed(seed),
     stroke: stroke ?? colors.stroke,

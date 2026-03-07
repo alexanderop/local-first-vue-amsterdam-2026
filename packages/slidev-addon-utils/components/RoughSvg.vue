@@ -2,20 +2,26 @@
 import { computed, provide } from 'vue'
 import rough from 'roughjs'
 import type { RoughGenerator } from 'roughjs/bin/generator'
+import type { Variant, VariantColor } from '../constants/colors'
+import { ROUGH_GENERATOR_KEY, ROUGHNESS_KEY, SEED_KEY, THEME_KEY } from '../composables/keys'
 
-const { width, height, padding = 24, roughness = 1.0, seed = 42 } = defineProps<{
+const { width, height, padding = 24, roughness = 1.0, seed = 42, theme } = defineProps<{
   width: number
   height: number
   padding?: number
   roughness?: number
   seed?: number
+  theme?: Record<Variant, VariantColor>
 }>()
 
 const gen: RoughGenerator = rough.generator()
 
-provide('roughGenerator', gen)
-provide('roughness', computed(() => roughness))
-provide('seed', computed(() => seed))
+provide(ROUGH_GENERATOR_KEY, gen)
+provide(ROUGHNESS_KEY, computed(() => roughness))
+provide(SEED_KEY, computed(() => seed))
+if (theme) {
+  provide(THEME_KEY, theme)
+}
 
 const svgW = computed(() => width + padding * 2)
 const svgH = computed(() => height + padding * 2)

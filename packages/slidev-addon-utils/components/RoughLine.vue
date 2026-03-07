@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
-import type { Ref } from 'vue'
-import rough from 'roughjs'
-import type { RoughGenerator } from 'roughjs/bin/generator'
+import { computed } from 'vue'
+import { useRoughContext } from '../composables/useRough'
 import { EDGE_STROKE } from '../constants/colors'
+import RoughPaths from './RoughPaths.vue'
 
-const { x1, y1, x2, y2, stroke, strokeWidth = 2, strokeDasharray, roughness, seed } = defineProps<{
+const { x1, y1, x2, y2, stroke, strokeWidth = 2, strokeDasharray, roughness, seed, roughnessFactor = 0.5 } = defineProps<{
   x1: number
   y1: number
   x2: number
@@ -15,21 +14,15 @@ const { x1, y1, x2, y2, stroke, strokeWidth = 2, strokeDasharray, roughness, see
   strokeDasharray?: string
   roughness?: number
   seed?: number
+  roughnessFactor?: number
 }>()
 
-const injectedGen = inject<RoughGenerator>('roughGenerator', null!)
-const injectedRoughness = inject<Ref<number>>('roughness', null!)
-const injectedSeed = inject<Ref<number>>('seed', null!)
-
-const gen = injectedGen || rough.generator()
+const { gen, resolveRoughness, resolveSeed } = useRoughContext()
 
 const paths = computed(() => {
-  const r = roughness ?? ((injectedRoughness?.value ?? 1.0) * 0.5)
-  const s = seed ?? injectedSeed?.value ?? 42
-
   const drawable = gen.line(x1, y1, x2, y2, {
-    roughness: r,
-    seed: s,
+    roughness: resolveRoughness(roughness) * roughnessFactor,
+    seed: resolveSeed(seed),
     stroke: stroke ?? EDGE_STROKE,
     strokeWidth,
   })
@@ -38,13 +31,5 @@ const paths = computed(() => {
 </script>
 
 <template>
-  <path
-    v-for="(p, i) in paths"
-    :key="i"
-    :d="p.d"
-    :stroke="p.stroke || 'none'"
-    :stroke-width="p.strokeWidth"
-    :fill="p.fill || 'none'"
-    :stroke-dasharray="strokeDasharray"
-  />
+  <RoughPaths :paths="paths" :stroke-dasharray="strokeDasharray" />
 </template>

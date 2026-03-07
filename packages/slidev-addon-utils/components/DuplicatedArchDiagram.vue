@@ -6,7 +6,7 @@ import RoughLine from './RoughLine.vue'
 import ShikiCodeLine from './ShikiCodeLine.vue'
 import { useClickVisibility } from '../composables/useClickVisibility'
 import { useShikiTokens } from '../composables/useShikiTokens'
-import { hashId } from '../composables/useRough'
+import { hashId } from '../utils/hash'
 import { EDGE_STROKE } from '../constants/colors'
 
 interface CodeItem {

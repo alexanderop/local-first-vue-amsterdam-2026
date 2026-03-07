@@ -205,7 +205,6 @@ TRANSITION: "Let me show you where we are in this evolution..."
 -->
 
 ---
-clicks: 3
 ---
 
 # But Who Solves Data Sync?
@@ -213,22 +212,18 @@ clicks: 3
 <FlowDiagram
   :nodes="[
     { id: 'jquery', label: 'jQuery Era', subtitle: 'YOU → DOM', variant: 'muted' },
-    { id: 'vue', label: 'Vue Era', subtitle: 'ref() → VDOM → DOM', click: 1 },
-    { id: 'now', label: 'Now', subtitle: '??? → ??? → DB', click: 2, variant: 'accent' },
+    { id: 'vue', label: 'Vue Era', subtitle: 'ref() → VDOM → DOM' },
+    { id: 'now', label: 'Now', subtitle: '??? → ??? → DB', variant: 'accent' },
   ]"
   :edges="[
-    { from: 'jquery', to: 'vue', click: 1 },
-    { from: 'vue', to: 'now', click: 2 },
+    { from: 'jquery', to: 'vue' },
+    { from: 'vue', to: 'now' },
   ]"
 />
-
-<div v-click="3">
 
 - jQuery era: **YOU** were the sync engine for the DOM
 - Vue era: **Vue** became the sync engine for the DOM
 - Now: Who's the sync engine for **DATA**?
-
-</div>
 
 <!--
 Build this progressively with clicks:
@@ -413,62 +408,32 @@ BREATHE.
 -->
 
 ---
-clicks: 4
+clicks: 6
 ---
 
 # Local Storage Options
 
-<LocalStorageDiagram
-  :panels="[
-    {
-      panel: { title: 'IndexedDB', click: 1 },
-      stores: [
-        { label: 'Object Store A', value: '{ key: value }', click: 2 },
-        { label: 'Object Store B', value: '{ key: value }', click: 2 },
-      ],
-      meta: {
-        lines: [
-          { text: 'API: async, callbacks' },
-          { text: 'Storage: native' },
-          { text: 'Since: 2015, everywhere' },
-        ],
-        click: 3,
-      },
-    },
-    {
-      panel: { title: 'SQLite (WebAssembly)', click: 1 },
-      table: {
-        headers: ['id', 'name', 'age'],
-        rows: [['1', 'Alex', '30'], ['2', 'Sara', '25']],
-        click: 2,
-      },
-      meta: {
-        lines: [
-          { text: 'API: full SQL queries' },
-          { text: 'Storage: OPFS (private filesystem) / memory' },
-          { text: 'Bundle: ~900KB WASM' },
-        ],
-        click: 3,
-      },
-    },
+<StorageFunnelDiagram
+  :rejected="[
+    { id: 'ls', label: 'localStorage', subtitles: ['~5 MB limit', 'Sync API (blocks UI)', 'Strings only'], status: 'rejected', click: 1 },
+    { id: 'ss', label: 'sessionStorage', subtitles: ['Tab-scoped only', 'Gone on close', '~5 MB limit'], status: 'rejected', click: 2 },
+    { id: 'ck', label: 'Cookies', subtitles: ['~4 KB limit', 'Sent with every request', 'Not for app data'], status: 'rejected', click: 3 },
   ]"
-  :libraries="{ items: [
-    { name: 'Dexie' },
-    { name: 'wa-sqlite' },
-    { name: 'SQLite WASM' },
-    { name: 'PGlite' },
-  ], click: 4 }"
+  :accepted="[
+    { id: 'idb', label: 'IndexedDB', subtitles: ['Unlimited storage', 'Async API', 'Structured data'], status: 'accepted', click: 4 },
+    { id: 'sql', label: 'SQLite (WASM)', subtitles: ['Full SQL queries', 'OPFS persistence', '~900KB bundle'], status: 'accepted', click: 5 },
+  ]"
+  summary="For local-first: IndexedDB (native, everywhere) or SQLite WASM (full SQL power)"
+  :summary-click="6"
 />
 
 <!--
-Don't read the diagram — audience can read. Focus on the comparison:
-
-- Left: "IndexedDB — native, everywhere. API is rough. Dexie wraps it beautifully."
-- Right: "SQLite WASM — full SQL engine compiled to WebAssembly. The new kid on the block."
-- Point at the key-value vs table visual: "Object stores vs relational tables — fundamentally different models."
-- Note: PGlite is actually Postgres-in-WASM, not SQLite — mention it as a third option if asked.
-- "Both work. Different tradeoffs. Most sync engines we'll see later pick one for you."
-- Fun fact: "This is the same stack Notion uses — they saw 20% faster page navigation after the switch to SQLite WASM."
+Click 1 — "localStorage — we've all used it. But 5 MB, sync API, strings only. Not enough."
+Click 2 — "sessionStorage — even worse, tab-scoped. Close the tab, it's gone."
+Click 3 — "Cookies — 4 KB, sent with every request. Not for app data."
+Click 4 — "IndexedDB — now we're talking. Unlimited storage, async, structured data. The native choice."
+Click 5 — "SQLite WASM — full SQL engine compiled to WebAssembly. This is what Notion uses — 20% faster page navigation after switching."
+Click 6 — "Bottom line: IndexedDB or SQLite WASM. Most sync engines we'll see later pick one for you."
 
 TRANSITION: "But how long does that data actually stick around?"
 
@@ -527,6 +492,7 @@ clicks: 2
   :panels="[
     {
       title: 'ONLINE',
+      click: 1,
       nodes: [
         { id: 'local', label: 'Local Store', subtitle: '(IndexedDB / SQLite)', variant: 'accent', leftLabel: '◀── read', rightLabel: 'write ──▶', click: 1 },
         { id: 'server', label: 'Server DB', variant: 'success', click: 1 },
@@ -575,6 +541,7 @@ clicks: 2
     {
       title: 'WITHOUT PWA',
       titleIcon: '❌',
+      click: 1,
       boxes: [
         { id: 'error', label: '🦕 Chrome Dino', subtitle: 'No Internet', variant: 'danger', click: 1 },
       ],
@@ -588,6 +555,7 @@ clicks: 2
     {
       title: 'WITH PWA',
       titleIcon: '✅',
+      click: 2,
       boxes: [
         { id: 'sw', label: 'Service Worker', subtitle: 'intercepts fetch', variant: 'accent', click: 2 },
         { id: 'cache', label: 'Cache Storage', subtitle: 'HTML, JS, CSS, WASM', variant: 'default', click: 2 },
@@ -615,6 +583,26 @@ Point at left: "Without PWA — dino."
 Point at right: "With PWA — Service Worker intercepts, serves from cache. App loads."
 
 - "The PWA is the FOUNDATION. Data layer sits on top."
+-->
+
+---
+
+# Want to Learn More About PWAs?
+
+<div class="grid grid-cols-2 gap-8 mt-8 items-center">
+  <div class="flex flex-col items-center">
+    <img src="/pwa-blog-post.png" class="rounded-lg shadow-xl border border-gray-700" />
+  </div>
+  <div class="flex flex-col items-center">
+    <img src="/pwa-blog-qr.png" class="w-60 rounded-lg" />
+    <div class="mt-4 text-sm op-50">
+      Scan to read the post
+    </div>
+  </div>
+</div>
+
+<!--
+"If you want a step-by-step guide on setting up a PWA with Vue 3 and Vite — I wrote a blog post that walks you through it in 4 steps. Check it out later."
 -->
 
 ---

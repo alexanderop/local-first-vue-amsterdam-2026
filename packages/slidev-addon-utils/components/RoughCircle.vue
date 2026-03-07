@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
-import type { Ref } from 'vue'
-import rough from 'roughjs'
-import type { RoughGenerator } from 'roughjs/bin/generator'
+import { computed } from 'vue'
+import { useRoughContext } from '../composables/useRough'
 import { getVariantColors } from '../constants/colors'
 import type { Variant } from '../constants/colors'
+import RoughPaths from './RoughPaths.vue'
 
 const { x, y, diameter, variant, stroke, fill, strokeWidth = 2, fillStyle = 'solid', strokeDasharray, roughness, seed } = defineProps<{
   x: number
@@ -20,20 +19,13 @@ const { x, y, diameter, variant, stroke, fill, strokeWidth = 2, fillStyle = 'sol
   seed?: number
 }>()
 
-const injectedGen = inject<RoughGenerator>('roughGenerator', null!)
-const injectedRoughness = inject<Ref<number>>('roughness', null!)
-const injectedSeed = inject<Ref<number>>('seed', null!)
-
-const gen = injectedGen || rough.generator()
+const { gen, resolveRoughness, resolveSeed } = useRoughContext()
 
 const paths = computed(() => {
   const colors = getVariantColors(variant)
-  const r = roughness ?? injectedRoughness?.value ?? 1.0
-  const s = seed ?? injectedSeed?.value ?? 42
-
   const drawable = gen.circle(x, y, diameter, {
-    roughness: r,
-    seed: s,
+    roughness: resolveRoughness(roughness),
+    seed: resolveSeed(seed),
     stroke: stroke ?? colors.stroke,
     fill: fill ?? colors.fill,
     fillStyle,
@@ -44,13 +36,5 @@ const paths = computed(() => {
 </script>
 
 <template>
-  <path
-    v-for="(p, i) in paths"
-    :key="i"
-    :d="p.d"
-    :stroke="p.stroke || 'none'"
-    :stroke-width="p.strokeWidth"
-    :fill="p.fill || 'none'"
-    :stroke-dasharray="strokeDasharray"
-  />
+  <RoughPaths :paths="paths" :stroke-dasharray="strokeDasharray" />
 </template>

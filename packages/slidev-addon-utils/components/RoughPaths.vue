@@ -1,10 +1,5 @@
 <script setup lang="ts">
-interface PathInfo {
-  d: string
-  stroke?: string
-  strokeWidth?: number
-  fill?: string
-}
+import type { PathInfo } from '../composables/useRough'
 
 const { paths, strokeDasharray } = defineProps<{
   paths: PathInfo[]

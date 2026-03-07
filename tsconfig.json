@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": [
+    "env.d.ts",
+    "slidev-shims.d.ts",
+    "packages/**/*.ts",
+    "packages/**/*.vue"
+  ],
+  "exclude": ["node_modules", "**/node_modules", "**/dist"]
+}

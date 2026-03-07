@@ -1,3 +1,6 @@
+import { inject } from 'vue'
+import { THEME_KEY } from '../composables/keys'
+
 export interface VariantColor {
   stroke: string
   fill: string
@@ -15,6 +18,7 @@ export const VARIANT_COLORS: Record<Variant, VariantColor> = {
 
 export const EDGE_STROKE = 'rgba(255, 107, 237, 0.5)'
 
-export function getVariantColors(variant?: Variant): VariantColor {
-  return VARIANT_COLORS[variant ?? 'default']
+export function getVariantColors(variant?: Variant, theme?: Record<Variant, VariantColor>): VariantColor {
+  const resolved = theme ?? inject(THEME_KEY, null!) ?? VARIANT_COLORS
+  return resolved[variant ?? 'default']
 }

@@ -1,5 +1,7 @@
+import { inject } from 'vue'
 import rough from 'roughjs'
 import type { RoughGenerator } from 'roughjs/bin/generator'
+import { ROUGH_GENERATOR_KEY, ROUGHNESS_KEY, SEED_KEY } from './keys'
 
 export interface PathInfo {
   d: string
@@ -8,20 +10,29 @@ export interface PathInfo {
   fill?: string
 }
 
-export function hashId(id: string): number {
-  let h = 0
-  for (let i = 0; i < id.length; i++) {
-    h = ((h << 5) - h + id.charCodeAt(i)) | 0
+export function useRoughContext() {
+  const injectedGen = inject(ROUGH_GENERATOR_KEY, null!)
+  const injectedRoughness = inject(ROUGHNESS_KEY, null!)
+  const injectedSeed = inject(SEED_KEY, null!)
+  const gen = injectedGen || rough.generator()
+
+  function resolveRoughness(explicit?: number): number {
+    return explicit ?? injectedRoughness?.value ?? 1.0
   }
-  return Math.abs(h)
+
+  function resolveSeed(explicit?: number): number {
+    return explicit ?? injectedSeed?.value ?? 42
+  }
+
+  return { gen, resolveRoughness, resolveSeed }
 }
 
 export function useRough() {
-  const gen: RoughGenerator = rough.generator()
+  const { gen, resolveRoughness, resolveSeed } = useRoughContext()
 
   function toPaths(drawable: ReturnType<RoughGenerator['rectangle']>): PathInfo[] {
     return gen.toPaths(drawable) as PathInfo[]
   }
 
-  return { gen, hashId, toPaths }
+  return { gen, resolveRoughness, resolveSeed, toPaths }
 }

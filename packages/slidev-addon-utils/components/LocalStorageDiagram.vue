@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import RoughRect from './RoughRect.vue'
 import RoughLine from './RoughLine.vue'
 import { useClickVisibility } from '../composables/useClickVisibility'
-import { hashId } from '../composables/useRough'
+import { hashId } from '../utils/hash'
 import type { Variant } from '../constants/colors'
 
 interface StoragePanel {

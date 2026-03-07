@@ -216,9 +216,6 @@ const cbY = cardY + (cardH - cbSize) / 2
       <foreignObject v-if="!offline" :x="svgW / 2 - 140" :y="devY + devH + 20" width="280" height="40">
         <div class="hint">Press next to go offline</div>
       </foreignObject>
-      <foreignObject v-else-if="!conflict" :x="svgW / 2 - 160" :y="devY + devH + 20" width="320" height="40">
-        <div class="hint">Press next to continue</div>
-      </foreignObject>
     </RoughSvg>
   </div>
 </template>

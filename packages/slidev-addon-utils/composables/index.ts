@@ -1,4 +1,6 @@
-export { useRough, hashId } from './useRough'
+export { useRough, useRoughContext } from './useRough'
 export type { PathInfo } from './useRough'
+export { ROUGH_GENERATOR_KEY, ROUGHNESS_KEY, SEED_KEY, THEME_KEY } from './keys'
+export { hashId } from '../utils/hash'
 export { useClickVisibility } from './useClickVisibility'
 export { useShikiTokens } from './useShikiTokens'

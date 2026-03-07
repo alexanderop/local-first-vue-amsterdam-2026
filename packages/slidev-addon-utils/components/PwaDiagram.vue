@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import RoughRect from './RoughRect.vue'
 import RoughArrow from './RoughArrow.vue'
 import { useClickVisibility } from '../composables/useClickVisibility'
-import { hashId } from '../composables/useRough'
+import { hashId } from '../utils/hash'
 import { EDGE_STROKE } from '../constants/colors'
 import type { Variant } from '../constants/colors'
 

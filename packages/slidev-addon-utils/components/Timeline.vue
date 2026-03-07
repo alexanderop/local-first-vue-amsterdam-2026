@@ -4,7 +4,7 @@ import RoughArrow from './RoughArrow.vue'
 import RoughCircle from './RoughCircle.vue'
 import RoughLine from './RoughLine.vue'
 import { useClickVisibility } from '../composables/useClickVisibility'
-import { hashId } from '../composables/useRough'
+import { hashId } from '../utils/hash'
 import { getVariantColors } from '../constants/colors'
 
 interface TimelineItem {
