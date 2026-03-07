@@ -88,6 +88,7 @@ TRANSITION: "Here's the roadmap for the next 25 minutes..."
   { title: 'The Status Quo', subtitle: 'Vue abstracts the DOM, not the data' },
   { title: 'Offline-First', subtitle: 'The app that never stops working' },
   { title: 'Sync Engines', subtitle: 'The new data layer' },
+  { title: 'Jazz', subtitle: 'The database that syncs' },
   { title: 'Local-First', subtitle: `It's about values, not just technology` }
 ]" />
 
@@ -118,7 +119,7 @@ SLOW DOWN — this is a section transition. Let it land.
 -->
 
 ---
-clicks: 6
+clicks: 2
 ---
 
 <div class="flex items-center justify-center h-full">
@@ -128,43 +129,43 @@ clicks: 6
       title: 'FRONTEND',
       click: 1,
       items: [
-        { id: 'ref', label: 'ref([])', click: 2 },
-        { id: 'loading', label: 'loading = true', click: 2 },
-        { id: 'try', label: 'try { ... }', click: 2 },
-        { id: 'catch', label: 'catch { ... }', click: 2 },
-        { id: 'finally', label: 'finally { ... }', click: 2 },
-        { id: 'cache', label: 'invalidateCache()', click: 2 },
+        { id: 'ref', label: 'ref([])', click: 1 },
+        { id: 'loading', label: 'loading = true', click: 1 },
+        { id: 'try', label: 'try { ... }', click: 1 },
+        { id: 'catch', label: 'catch { ... }', click: 1 },
+        { id: 'finally', label: 'finally { ... }', click: 1 },
+        { id: 'cache', label: 'invalidateCache()', click: 1 },
       ],
       warnings: [
         { text: '⚠ validation' },
         { text: '⚠ auth checks' },
         { text: '⚠ error types' },
       ],
-      warningClick: 5,
+      warningClick: 2,
     },
     {
       title: 'BACKEND',
       click: 1,
       items: [
-        { id: 'get', label: 'app.get(\'/todos\')', click: 4 },
-        { id: 'validate', label: 'validate(...)', click: 4 },
-        { id: 'insert', label: 'db.insert(...)', click: 4 },
-        { id: 'auth', label: 'authorize(...)', click: 4 },
+        { id: 'get', label: 'app.get(\'/todos\')', click: 1 },
+        { id: 'validate', label: 'validate(...)', click: 1 },
+        { id: 'insert', label: 'db.insert(...)', click: 1 },
+        { id: 'auth', label: 'authorize(...)', click: 1 },
       ],
       warnings: [
         { text: '⚠ validation' },
         { text: '⚠ auth checks' },
         { text: '⚠ error types' },
       ],
-      warningClick: 5,
+      warningClick: 2,
     },
   ]"
   :connections="[
-    { label: 'GET', click: 3 },
-    { label: 'POST', click: 3 },
+    { label: 'GET', click: 1 },
+    { label: 'POST', click: 1 },
   ]"
-  :database="{ label: 'query / write', click: 4 }"
-  :callout="{ label: 'DUPLICATED', click: 6, variant: 'danger' }"
+  :database="{ label: 'query / write', click: 1 }"
+  :callout="{ label: 'DUPLICATED', click: 2, variant: 'danger' }"
   :seed="150"
 />
 </div>
@@ -185,9 +186,9 @@ layout: quote
 transition: fade
 ---
 
-# "We're in the <span v-mark="{ type: 'circle', color: '#ff6bed' }">jQuery era of data</span>."
-
-Kyle Mathews
+<QuoteCard author="Kyle Mathews — Co-founder of ElectricSQL, creator of Gatsby" highlight="jQuery era of data">
+  We're in the jQuery era of data.
+</QuoteCard>
 
 <!--
 SLOW DOWN — this is a key quote.
@@ -204,7 +205,7 @@ TRANSITION: "Let me show you where we are in this evolution..."
 -->
 
 ---
-clicks: 5
+clicks: 3
 ---
 
 # But Who Solves Data Sync?
@@ -221,13 +222,13 @@ clicks: 5
   ]"
 />
 
-<v-clicks>
+<div v-click="3">
 
 - jQuery era: **YOU** were the sync engine for the DOM
 - Vue era: **Vue** became the sync engine for the DOM
 - Now: Who's the sync engine for **DATA**?
 
-</v-clicks>
+</div>
 
 <!--
 Build this progressively with clicks:
@@ -246,30 +247,64 @@ TRANSITION: "But wait — what about the tools you're already using?"
 
 # "But I Already Use TanStack Query / Pinia?"
 
-<v-clicks>
+<div class="grid grid-cols-2 gap-4 mt-3">
 
-- TanStack Query manages **server cache** — what the server said last
-- Pinia manages **client state** — UI state, forms, toggles
-- Sync engines manage **local truth** — the source of truth lives on **your device**
+<div v-click>
+<div class="font-bold text-brand mb-2 text-sm">TanStack Query — server cache</div>
 
-</v-clicks>
+```ts
+const { data } = useQuery({
+  queryKey: ['todos'],
+  queryFn: fetchTodos,
+})
+// edit a todo → mutate → refetch
+await updateTodo(1, body)
+client.invalidateQueries(['todos'])
+```
 
-<div v-click class="mt-6 text-sm op-70 text-center">
+</div>
 
-These are different layers. Sync engines replace the **fetch → cache → invalidate** cycle entirely.
+<div v-click>
+<div class="font-bold text-brand mb-2 text-sm">Pinia — client state</div>
+
+```ts
+const ui = useUiStore()
+ui.sidebarOpen = true
+ui.formDraft = 'Buy milk'
+ui.theme = 'dark'
+// page refresh?
+// formDraft is gone
+// no persistence, no sync
+```
+
+</div>
+
+</div>
+
+<div v-click class="mt-3 mx-auto w-2/3">
+<div class="font-bold text-brand mb-2 text-sm">Sync engine — local truth</div>
+
+```ts
+const todos = useQuery(db.todos)
+db.todos.insert({ text: 'Buy milk' })
+// instant — local DB write | works offline | syncs to all devices
+```
+
+</div>
+
+<div v-click class="mt-3 text-sm op-70 text-center">
+
+Different layers. Sync engines replace the **fetch → cache → invalidate** cycle entirely.
 
 </div>
 
 <!--
-~20 seconds. Prevent the main audience objection.
+~25 seconds. Prevent the main audience objection.
 
-"Some of you are thinking: I already use TanStack Query or Pinia — why do I need another data layer?"
-
-CLICK 1: "TanStack Query is a server cache. It remembers what the server told you."
-CLICK 2: "Pinia is client state. UI toggles, form drafts, ephemeral stuff."
-CLICK 3: "Sync engines are a local source of truth. The data lives on YOUR device."
-
-CLICK 4: "Different layers. Sync engines don't replace Pinia — they replace the fetch-cache-invalidate dance."
+CLICK 1: "TanStack Query — server cache. Fetch, cache, invalidate, fetch again."
+CLICK 2: "Pinia — client state. Great for toggles, but refresh and it's gone."
+CLICK 3: "Sync engine — write locally, instant, offline, syncs. No spinners."
+CLICK 4: "Different layers. Sync engines replace the fetch-cache-invalidate cycle."
 
 TRANSITION: "Let's see where that leaves us on the scorecard..."
 -->
@@ -279,44 +314,58 @@ TRANSITION: "Let's see where that leaves us on the scorecard..."
 # The Status Quo Scorecard
 
 <div class="grid grid-cols-4 gap-3 mt-6">
-  <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
-    <div class="i-ph-lightning text-2xl text-pink-400/50" />
-    <div class="text-sm font-semibold text-gray-300">Fast</div>
-    <div class="text-xs text-gray-500 leading-tight">No spinners. Instant response.</div>
-  </div>
-  <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
-    <div class="i-ph-devices text-2xl text-pink-400/50" />
-    <div class="text-sm font-semibold text-gray-300">Multi-device</div>
-    <div class="text-xs text-gray-500 leading-tight">Your work on any device.</div>
-  </div>
-  <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
-    <div class="i-ph-wifi-slash text-2xl text-pink-400/50" />
-    <div class="text-sm font-semibold text-gray-300">Works offline</div>
-    <div class="text-xs text-gray-500 leading-tight">The network is optional.</div>
-  </div>
-  <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
-    <div class="i-ph-users-three text-2xl text-pink-400/50" />
-    <div class="text-sm font-semibold text-gray-300">Collaboration</div>
-    <div class="text-xs text-gray-500 leading-tight">Seamless real-time teamwork.</div>
-  </div>
+  <Card variant="muted" size="sm">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-lightning text-2xl text-brand/50" />
+      <div class="text-sm font-semibold text-gray-300">Fast</div>
+      <div class="text-xs text-gray-500 leading-tight">No spinners. Instant response.</div>
+    </div>
+  </Card>
+  <Card variant="muted" size="sm">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-devices text-2xl text-brand/50" />
+      <div class="text-sm font-semibold text-gray-300">Multi-device</div>
+      <div class="text-xs text-gray-500 leading-tight">Your work on any device.</div>
+    </div>
+  </Card>
+  <Card variant="muted" size="sm">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-wifi-slash text-2xl text-brand/50" />
+      <div class="text-sm font-semibold text-gray-300">Works offline</div>
+      <div class="text-xs text-gray-500 leading-tight">The network is optional.</div>
+    </div>
+  </Card>
+  <Card variant="muted" size="sm">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-users-three text-2xl text-brand/50" />
+      <div class="text-sm font-semibold text-gray-300">Collaboration</div>
+      <div class="text-xs text-gray-500 leading-tight">Seamless real-time teamwork.</div>
+    </div>
+  </Card>
 </div>
 
 <div class="flex justify-center gap-3 mt-3">
-  <div class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
-    <div class="i-ph-clock-countdown text-2xl text-pink-400/50" />
-    <div class="text-sm font-semibold text-gray-300">Longevity</div>
-    <div class="text-xs text-gray-500 leading-tight">Your data outlives the app.</div>
-  </div>
-  <div class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
-    <div class="i-ph-shield-check text-2xl text-pink-400/50" />
-    <div class="text-sm font-semibold text-gray-300">Privacy</div>
-    <div class="text-xs text-gray-500 leading-tight">Security and privacy by default.</div>
-  </div>
-  <div class="w-[calc(25%-9px)] p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center gap-2 text-center">
-    <div class="i-ph-key text-2xl text-pink-400/50" />
-    <div class="text-sm font-semibold text-gray-300">User control</div>
-    <div class="text-xs text-gray-500 leading-tight">You retain ownership and control.</div>
-  </div>
+  <Card variant="muted" size="sm" class="w-[calc(25%-9px)]">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-clock-countdown text-2xl text-brand/50" />
+      <div class="text-sm font-semibold text-gray-300">Longevity</div>
+      <div class="text-xs text-gray-500 leading-tight">Your data outlives the app.</div>
+    </div>
+  </Card>
+  <Card variant="muted" size="sm" class="w-[calc(25%-9px)]">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-shield-check text-2xl text-brand/50" />
+      <div class="text-sm font-semibold text-gray-300">Privacy</div>
+      <div class="text-xs text-gray-500 leading-tight">Security and privacy by default.</div>
+    </div>
+  </Card>
+  <Card variant="muted" size="sm" class="w-[calc(25%-9px)]">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-key text-2xl text-brand/50" />
+      <div class="text-sm font-semibold text-gray-300">User control</div>
+      <div class="text-xs text-gray-500 leading-tight">You retain ownership and control.</div>
+    </div>
+  </Card>
 </div>
 
 <div v-click="1" class="mt-6 text-center">
@@ -430,7 +479,7 @@ TRANSITION: "But how long does that data actually stick around?"
 
 # How Long Does Your Data Survive?
 
-<div class="grid grid-cols-3 gap-4 mt-6">
+<div class="grid grid-cols-2 gap-4 mt-4">
   <div v-click class="border border-gray-600 rounded-xl p-4 bg-gray-800/40 text-center">
     <logos-chrome class="text-2xl mx-auto mb-2" />
     <div class="font-bold text-sm">Chrome</div>
@@ -443,12 +492,19 @@ TRANSITION: "But how long does that data actually stick around?"
     <div class="text-xs text-red-400 mt-2 font-semibold">7-day cap</div>
     <div class="text-xs text-gray-500 mt-1">PWAs exempt from the cap</div>
   </div>
-  <div v-click class="border border-pink-500/40 rounded-xl p-4 bg-pink-500/5 text-center">
-    <div class="i-ph-shield-check text-2xl text-pink-400 mx-auto mb-2" />
+</div>
+
+<div v-click class="mt-4 mx-auto w-2/3 border border-pink-500/40 rounded-xl p-4 bg-pink-500/5">
+  <div class="flex items-center justify-center gap-2 mb-2">
+    <div class="i-ph-shield-check text-xl text-brand" />
     <div class="font-bold text-sm">Fix</div>
-    <div class="text-xs text-gray-300 mt-2 font-mono">navigator.storage.persist()</div>
-    <div class="text-xs text-gray-500 mt-1">One line — browser won't auto-evict</div>
   </div>
+
+```ts
+await navigator.storage.persist()
+// one line — browser won't auto-evict your data
+```
+
 </div>
 
 <!--
@@ -462,7 +518,7 @@ TRANSITION: "Now let's see how this all fits together architecturally..."
 -->
 
 ---
-clicks: 5
+clicks: 2
 ---
 
 # The Offline-First Architecture
@@ -473,25 +529,25 @@ clicks: 5
       title: 'ONLINE',
       nodes: [
         { id: 'local', label: 'Local Store', subtitle: '(IndexedDB / SQLite)', variant: 'accent', leftLabel: '◀── read', rightLabel: 'write ──▶', click: 1 },
-        { id: 'server', label: 'Server DB', variant: 'success', click: 2 },
+        { id: 'server', label: 'Server DB', variant: 'success', click: 1 },
       ],
       edges: [
-        { from: 'local', to: 'server', label: 'sync ↕', click: 2 },
+        { from: 'local', to: 'server', label: 'sync ↕', click: 1 },
       ],
     },
     {
       title: 'OFFLINE',
-      click: 3,
+      click: 2,
       nodes: [
-        { id: 'local2', label: 'Local Store', subtitle: '(IndexedDB / SQLite)', variant: 'accent', leftLabel: '◀── read', rightLabel: 'write ──▶', click: 3 },
-        { id: 'pending', label: 'Pending Writes', variant: 'muted', click: 4 },
+        { id: 'local2', label: 'Local Store', subtitle: '(IndexedDB / SQLite)', variant: 'accent', leftLabel: '◀── read', rightLabel: 'write ──▶', click: 2 },
+        { id: 'pending', label: 'Pending Writes', variant: 'muted', click: 2 },
       ],
       edges: [
-        { from: 'local2', to: 'pending', label: 'queued', click: 4 },
+        { from: 'local2', to: 'pending', label: 'queued', click: 2 },
       ],
       badges: [
-        { text: '✗ no network', position: 'inline', variant: 'danger', click: 4 },
-        { text: 'Still works!', position: 'bottom', variant: 'success', click: 5 },
+        { text: '✗ no network', position: 'inline', variant: 'danger', click: 2 },
+        { text: 'Still works!', position: 'bottom', variant: 'success', click: 2 },
       ],
     },
   ]"
@@ -509,12 +565,10 @@ TRANSITION: "But there's a gotcha most people miss..."
 -->
 
 ---
-clicks: 5
+clicks: 2
 ---
 
 # The PWA Gotcha
-
-**Progressive Web App** — without one, your offline data is useless.
 
 <PwaDiagram
   :panels="[
@@ -526,29 +580,30 @@ clicks: 5
       ],
       arrows: [],
       annotations: [
-        { text: 'IndexedDB has data...', variant: 'muted', click: 2 },
-        { text: 'but who cares?', variant: 'muted', click: 2 },
-        { text: 'App cannot even load.', variant: 'danger', click: 2 },
+        { text: 'IndexedDB has data...', variant: 'muted', click: 1 },
+        { text: 'but who cares?', variant: 'muted', click: 1 },
+        { text: 'App cannot even load.', variant: 'danger', click: 1 },
       ],
     },
     {
       title: 'WITH PWA',
       titleIcon: '✅',
       boxes: [
-        { id: 'sw', label: 'Service Worker', subtitle: 'intercepts fetch', variant: 'accent', click: 3 },
-        { id: 'cache', label: 'Cache Storage', subtitle: 'HTML, JS, CSS, WASM', variant: 'default', click: 4 },
+        { id: 'sw', label: 'Service Worker', subtitle: 'intercepts fetch', variant: 'accent', click: 2 },
+        { id: 'cache', label: 'Cache Storage', subtitle: 'HTML, JS, CSS, WASM', variant: 'default', click: 2 },
       ],
       arrows: [
-        { from: 'sw', to: 'cache', click: 4 },
+        { from: 'sw', to: 'cache', click: 2 },
       ],
       annotations: [],
       resultText: 'App loads!',
       resultIcon: '🚀',
       resultVariant: 'success',
-      resultClick: 5,
+      resultClick: 2,
     },
   ]"
   :seed="300"
+  :panelHeight="280"
 />
 
 <!--
@@ -562,8 +617,6 @@ Point at right: "With PWA — Service Worker intercepts, serves from cache. App 
 - "The PWA is the FOUNDATION. Data layer sits on top."
 -->
 
----
-clicks: 4
 ---
 
 <OfflineStackDiagram />
@@ -634,47 +687,25 @@ TRANSITION: "So what's holding us back?"
 -->
 
 ---
-clicks: 3
+clicks: 5
 ---
 
 # The Missing Piece: How Do You Sync?
 
-Storing data locally is the **easy part**.
-
-<FlowDiagram
-  :nodes="[
-    { id: 'a', label: 'Device A', subtitle: 'title: Buy milk', variant: 'accent' },
-    { id: 'conflict', label: '???', subtitle: 'conflict', click: 2, variant: 'danger' },
-    { id: 'b', label: 'Device B', subtitle: 'title: Buy oats', click: 1, variant: 'accent' },
-  ]"
-  :edges="[
-    { from: 'a', to: 'conflict', click: 2 },
-    { from: 'b', to: 'conflict', click: 2 },
-  ]"
-  :nodeHeight="60"
-  :gap="80"
-  :roughness="1.0"
-  :seed="150"
-/>
-
-<div v-click="3" class="text-center mt-4 text-gray-400">
-
-This is a **distributed systems** problem. It needs a **sync engine**.
-
-</div>
+<TodoSyncConflictDemo :roughness="1.2" :seed="900" />
 
 <!--
-"Storing data locally? Easy. We just did it."
+"We've stored data locally. Great. But now imagine two devices editing the same todo."
 
-CLICK 1: "But now imagine two devices editing the same todo offline."
-CLICK 2: "They both come back online. Who wins?" Point at the ??? conflict node.
-CLICK 3: "This is a distributed systems problem. And it needs a sync engine."
+CLICK 1: "Both devices go offline. They can't see each other."
+CLICK 2: "Device A edits the todo - 'Buy oat milk'."
+CLICK 3: "Device B also edits it - 'Buy almond milk'. Neither knows about the other."
+CLICK 4: "They reconnect. Now what? Which version is correct?" Point at the ??? conflict.
+CLICK 5: "This is a distributed systems problem. And it needs a sync engine."
 
-PAUSE — let the problem statement hang. This is the cliffhanger into Part 2.
+PAUSE - let the problem statement hang. This is the cliffhanger into Part 2.
 
-TRANSITION: "That something is a sync engine."
-
-[CHECK: ~12:00 — entering Part 2]
+[CHECK: ~12:00 - entering Part 2]
 -->
 
 ---
@@ -758,8 +789,6 @@ This is the architecture that sync engines give you.
 # Who Uses Sync Engines?
 
 <div class="grid grid-cols-4 gap-4 mt-6">
-<v-clicks>
-
 <div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
   <div class="text-lg font-bold text-[#ff6bed]">Linear</div>
   <div class="text-xs op-50">Project management</div>
@@ -820,10 +849,9 @@ This is the architecture that sync engines give you.
   <div class="text-xs op-50">Productivity platform</div>
 </div>
 
-</v-clicks>
 </div>
 
-<div v-click class="mt-6 text-lg text-gray-400 text-center">
+<div class="mt-6 text-lg text-gray-400 text-center">
 
 All chose sync engines for the same reasons: **instant UI**, **offline support**, and **real-time collaboration**.
 
@@ -869,24 +897,14 @@ clicks: 5
 
 # Conflict Resolution: It's a Spectrum
 
-<FlowDiagram
-  :nodes="[
-    { id: 'lww', label: 'Last-Write-Wins', subtitle: 'Simplest', variant: 'danger' },
-    { id: 'server', label: 'Server Authority', subtitle: 'Centralized', click: 1, variant: 'muted' },
-    { id: 'oplog', label: 'Operation Logs', subtitle: 'Replayable', click: 2, variant: 'default' },
-    { id: 'crdt', label: 'CRDTs', subtitle: 'Conflict-free Replicated Data Types', click: 3, variant: 'success' },
-    { id: 'hybrid', label: 'Hybrid / Manual', subtitle: 'User decides', click: 4, variant: 'accent' },
+<ConflictSpectrumDiagram
+  :items="[
+    { id: 'lww', label: 'Last-Write-Wins', subtitle: 'Fastest', pro: 'Simple & fast', con: 'Loses data', variant: 'danger', weight: 1 },
+    { id: 'server', label: 'Server Authority', subtitle: 'Centralized', pro: 'Biz rules', con: 'Needs server', variant: 'muted', click: 1, weight: 2 },
+    { id: 'oplog', label: 'Operation Logs', subtitle: 'Replayable', pro: 'Full history', con: 'Storage cost', variant: 'default', click: 2, weight: 3 },
+    { id: 'crdt', label: 'CRDTs', subtitle: 'Auto-converge', pro: 'No server', con: 'Complex types', variant: 'success', click: 3, weight: 4 },
+    { id: 'hybrid', label: 'Hybrid / Manual', subtitle: 'User decides', pro: 'Full control', con: 'UX complexity', variant: 'accent', click: 4, weight: 5 },
   ]"
-  :edges="[
-    { from: 'lww', to: 'server', click: 1 },
-    { from: 'server', to: 'oplog', click: 2 },
-    { from: 'oplog', to: 'crdt', click: 3 },
-    { from: 'crdt', to: 'hybrid', click: 4 },
-  ]"
-  direction="horizontal"
-  :nodeWidth="140"
-  :nodeHeight="65"
-  :gap="25"
   :roughness="1.2"
   :seed="777"
 />
@@ -929,13 +947,11 @@ clicks: 4
 
 <Card variant="muted" size="lg">
 
-<div class="text-sm font-bold text-pink-400 mb-2 flex items-center gap-2"><div class="i-ph-cloud-bold" /> Server-Side Resolution</div>
+<div class="text-sm font-bold text-brand mb-2 flex items-center gap-2"><div class="i-ph-cloud-bold" /> Server-Side Resolution</div>
 
 - Server decides who wins
-- Simpler to implement
-- Familiar mental model (Postgres, Rails, etc.)
-- **But:** requires a server you trust & control
-- Client rollback on rejection
+- Simpler, familiar mental model
+- **But:** requires a trusted server
 
 <div class="mt-2 text-xs op-50">Zero, Dexie Cloud, traditional APIs</div>
 
@@ -947,13 +963,11 @@ clicks: 4
 
 <Card size="lg" glow>
 
-<div class="text-sm font-bold text-pink-400 mb-2 flex items-center gap-2"><div class="i-ph-devices-bold" /> Client-Side Resolution</div>
+<div class="text-sm font-bold text-brand mb-2 flex items-center gap-2"><div class="i-ph-devices-bold" /> Client-Side Resolution</div>
 
 - Every client merges independently
-- No server authority needed
-- Works offline & peer-to-peer (P2P)
-- **But:** harder — needs math that always converges
-- Server just relays bytes
+- Works offline & peer-to-peer
+- **But:** needs math that always converges
 
 <div class="mt-2 text-xs op-50">Yjs, Jazz, Automerge (CRDTs)</div>
 
@@ -965,14 +979,11 @@ clicks: 4
 
 <Callout v-click="3" type="info">
 
-Client-side resolution is what makes **true local-first** possible — the server becomes a dumb pipe. But it requires data structures that **mathematically guarantee convergence**: CRDTs.
+Client-side resolution makes **true local-first** possible — but requires **CRDTs** to guarantee convergence.
 
 </Callout>
 
-<div v-click="4" class="mt-4 op-60 text-sm flex items-center gap-2">
-<div class="i-ph-git-merge-bold text-lg text-pink-300" />
-<span>**Third option:** surface conflicts to the user — like Git merge conflicts. Some apps combine all three.</span>
-</div>
+
 
 <!--
 THIS IS THE KEY CONCEPTUAL SLIDE — go slow.
@@ -1075,28 +1086,28 @@ clicks: 4
 <div class="grid grid-cols-2 gap-4 mt-4">
   <Card v-click="1" variant="muted" size="md">
     <div class="flex items-center gap-2">
-      <div class="text-sm font-bold text-pink-400">Yjs</div>
+      <div class="text-sm font-bold text-brand">Yjs</div>
       <div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">Production · 10+ years</div>
     </div>
     <div class="text-xs text-gray-400 mt-1">CRDT library. Client-side conflict resolution. Bring your own backend. P2P possible. Maximum flexibility.</div>
   </Card>
   <Card v-click="2" variant="muted" size="md">
     <div class="flex items-center gap-2">
-      <div class="text-sm font-bold text-pink-400">Dexie</div>
+      <div class="text-sm font-bold text-brand">Dexie</div>
       <div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">Production · 10+ years</div>
     </div>
     <div class="text-xs text-gray-400 mt-1">IndexedDB wrapper. Server-side field-level merge via Dexie Cloud. Progressive upgrade path. Millions of users.</div>
   </Card>
   <Card v-click="3" variant="muted" size="md">
     <div class="flex items-center gap-2">
-      <div class="text-sm font-bold text-pink-400">Jazz</div>
+      <div class="text-sm font-bold text-brand">Jazz</div>
       <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Early · Active dev</div>
     </div>
     <div class="text-xs text-gray-400 mt-1">Batteries-included. Client-side CRDTs. Auth, permissions, end-to-end encryption (E2E), sync — all built in.</div>
   </Card>
   <Card v-click="4" variant="muted" size="md">
     <div class="flex items-center gap-2">
-      <div class="text-sm font-bold text-pink-400">Zero</div>
+      <div class="text-sm font-bold text-brand">Zero</div>
       <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Alpha · Well-funded</div>
     </div>
     <div class="text-xs text-gray-400 mt-1">Query-driven sync. Server resolves all conflicts. Reactive Postgres to client SQLite. Great developer experience (DX), but not truly local-first.</div>
@@ -1290,7 +1301,7 @@ clicks: 5
   </thead>
   <tbody>
     <tr v-click="1" class="border-b border-white/5">
-      <td class="py-1.5 pr-2 font-semibold text-pink-400">Yjs</td>
+      <td class="py-1.5 pr-2 font-semibold text-brand">Yjs</td>
       <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">10+ yrs</span></td>
       <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">CRDT</span></td>
       <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
@@ -1299,7 +1310,7 @@ clicks: 5
       <td class="py-1.5 px-1 text-xs">Collab-first apps (docs, whiteboards)</td>
     </tr>
     <tr v-click="2" class="border-b border-white/5">
-      <td class="py-1.5 pr-2 font-semibold text-pink-400">Dexie</td>
+      <td class="py-1.5 pr-2 font-semibold text-brand">Dexie</td>
       <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">10+ yrs</span></td>
       <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Server merge</span></td>
       <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
@@ -1308,7 +1319,7 @@ clicks: 5
       <td class="py-1.5 px-1 text-xs">Adding sync to existing apps</td>
     </tr>
     <tr v-click="3" class="border-b border-white/5">
-      <td class="py-1.5 pr-2 font-semibold text-pink-400">Jazz</td>
+      <td class="py-1.5 pr-2 font-semibold text-brand">Jazz</td>
       <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Early</span></td>
       <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">CRDT</span></td>
       <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
@@ -1317,7 +1328,7 @@ clicks: 5
       <td class="py-1.5 px-1 text-xs">New apps that want everything built-in</td>
     </tr>
     <tr v-click="4" class="border-b border-white/5">
-      <td class="py-1.5 pr-2 font-semibold text-pink-400">Zero</td>
+      <td class="py-1.5 pr-2 font-semibold text-brand">Zero</td>
       <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Alpha</span></td>
       <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-mono">Server</span></td>
       <td class="text-center py-1.5 px-1 text-yellow-400">Read only</td>
@@ -1361,24 +1372,24 @@ clicks: 4
 
 <div class="grid gap-3 mt-6">
   <div v-click="1" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-    <div class="text-pink-400 font-bold text-lg shrink-0">?</div>
+    <div class="text-brand font-bold text-lg shrink-0">?</div>
     <div class="text-sm"><strong>Need real-time collab</strong> (docs, whiteboards)?</div>
-    <div class="text-pink-400 font-bold ml-auto shrink-0">→ Yjs</div>
+    <div class="text-brand font-bold ml-auto shrink-0">→ Yjs</div>
   </div>
   <div v-click="2" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-    <div class="text-pink-400 font-bold text-lg shrink-0">?</div>
+    <div class="text-brand font-bold text-lg shrink-0">?</div>
     <div class="text-sm"><strong>Adding sync to an existing Vue app</strong>?</div>
-    <div class="text-pink-400 font-bold ml-auto shrink-0">→ Dexie</div>
+    <div class="text-brand font-bold ml-auto shrink-0">→ Dexie</div>
   </div>
   <div v-click="3" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-    <div class="text-pink-400 font-bold text-lg shrink-0">?</div>
+    <div class="text-brand font-bold text-lg shrink-0">?</div>
     <div class="text-sm"><strong>Greenfield app</strong>, want everything built-in?</div>
-    <div class="text-pink-400 font-bold ml-auto shrink-0">→ Jazz</div>
+    <div class="text-brand font-bold ml-auto shrink-0">→ Jazz</div>
   </div>
   <div v-click="4" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-    <div class="text-pink-400 font-bold text-lg shrink-0">?</div>
+    <div class="text-brand font-bold text-lg shrink-0">?</div>
     <div class="text-sm"><strong>Server-first</strong>, want instant reads?</div>
-    <div class="text-pink-400 font-bold ml-auto shrink-0">→ Zero</div>
+    <div class="text-brand font-bold ml-auto shrink-0">→ Zero</div>
   </div>
 </div>
 
@@ -1426,15 +1437,15 @@ clicks: 4
 
 <div class="grid gap-3 mt-6">
   <Card v-click="1" variant="muted">
-    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-pink-400">1.</span> Offline reads <strong>and</strong> writes</div>
+    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">1.</span> Offline reads <strong>and</strong> writes</div>
     <p class="text-sm text-gray-400 mt-1 pl-6">Not just cached reads — the app must accept writes while disconnected and reconcile later.</p>
   </Card>
   <Card v-click="2" variant="muted">
-    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-pink-400">2.</span> Collaboration across devices</div>
+    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">2.</span> Collaboration across devices</div>
     <p class="text-sm text-gray-400 mt-1 pl-6">Multiple users and devices can edit concurrently, and changes merge automatically.</p>
   </Card>
   <Card v-click="3" glow>
-    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-pink-400">3.</span> Data survives the developer shutting down</div>
+    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">3.</span> Data survives the developer shutting down</div>
     <p class="text-sm text-gray-400 mt-1 pl-6">If the company disappears, your data and app must keep working. No vendor lock-in.</p>
   </Card>
 </div>
@@ -1533,10 +1544,10 @@ TRANSITION: "Now let's update our scorecard with what sync engines give us."
     <div class="flex items-center justify-center gap-1 text-xs"><div class="i-ph-check-circle-fill text-emerald-400 text-sm" /> Offline</div>
   </Card>
   <Card size="sm" glow>
-    <div class="flex items-center justify-center gap-1 text-xs"><div class="i-ph-star-fill text-pink-400 text-sm" /> Multi-device</div>
+    <div class="flex items-center justify-center gap-1 text-xs"><div class="i-ph-star-fill text-brand text-sm" /> Multi-device</div>
   </Card>
   <Card size="sm" glow>
-    <div class="flex items-center justify-center gap-1 text-xs"><div class="i-ph-star-fill text-pink-400 text-sm" /> Collab</div>
+    <div class="flex items-center justify-center gap-1 text-xs"><div class="i-ph-star-fill text-brand text-sm" /> Collab</div>
   </Card>
   <Card variant="muted" dashed dimmed size="sm">
     <div class="flex items-center justify-center gap-1 text-xs"><div class="i-ph-question text-sm" /> Longevity</div>
@@ -1552,8 +1563,8 @@ TRANSITION: "Now let's update our scorecard with what sync engines give us."
 <div v-click="3" class="mt-6 grid grid-cols-2 gap-x-8 gap-y-1 text-sm max-w-xl mx-auto">
   <div class="text-emerald-400/80">Fast — already had this</div>
   <div class="text-emerald-400/80">Works offline — already had this</div>
-  <div class="text-pink-400 font-semibold">Multi-device — NEW! Sync engine</div>
-  <div class="text-pink-400 font-semibold">Collaboration — NEW! Real-time</div>
+  <div class="text-brand font-semibold">Multi-device — NEW! Sync engine</div>
+  <div class="text-brand font-semibold">Collaboration — NEW! Real-time</div>
   <div class="text-white/30">Longevity? Still not addressed.</div>
   <div class="text-white/30">Privacy? Still not addressed.</div>
   <div class="text-white/30 col-span-2 text-center">User control? Still not addressed.</div>
@@ -1598,10 +1609,10 @@ From the Ink & Switch essay on local-first software (2019):
 **Technology:**
 
 <div class="grid gap-1.5 ml-1">
-  <div class="flex items-center gap-2"><div class="i-ph-lightning-bold text-pink-400" /> <span><strong>Fast</strong> — No spinners. Data is local.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-devices-bold text-pink-400" /> <span><strong>Multi-device</strong> — Sync across all your devices.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-wifi-slash-bold text-pink-400" /> <span><strong>Works offline</strong> — Network is optional.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-users-bold text-pink-400" /> <span><strong>Collaboration</strong> — Real-time co-editing.</span></div>
+  <div class="flex items-center gap-2"><div class="i-ph-lightning-bold text-brand" /> <span><strong>Fast</strong> — No spinners. Data is local.</span></div>
+  <div class="flex items-center gap-2"><div class="i-ph-devices-bold text-brand" /> <span><strong>Multi-device</strong> — Sync across all your devices.</span></div>
+  <div class="flex items-center gap-2"><div class="i-ph-wifi-slash-bold text-brand" /> <span><strong>Works offline</strong> — Network is optional.</span></div>
+  <div class="flex items-center gap-2"><div class="i-ph-users-bold text-brand" /> <span><strong>Collaboration</strong> — Real-time co-editing.</span></div>
 </div>
 
 </div>
@@ -1611,9 +1622,9 @@ From the Ink & Switch essay on local-first software (2019):
 **Values:**
 
 <div class="grid gap-1.5 ml-1">
-  <div class="flex items-center gap-2"><div class="i-ph-clock-bold text-pink-400" /> <span><strong>Longevity</strong> — Data accessible forever. Survives the developer shutting down.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-lock-bold text-pink-400" /> <span><strong>Privacy</strong> — End-to-end encryption. The server never sees your data.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-user-bold text-pink-400" /> <span><strong>User control</strong> — You own your data. Full stop. Export it. Delete it. Script against it.</span></div>
+  <div class="flex items-center gap-2"><div class="i-ph-clock-bold text-brand" /> <span><strong>Longevity</strong> — Data accessible forever. Survives the developer shutting down.</span></div>
+  <div class="flex items-center gap-2"><div class="i-ph-lock-bold text-brand" /> <span><strong>Privacy</strong> — End-to-end encryption. The server never sees your data.</span></div>
+  <div class="flex items-center gap-2"><div class="i-ph-user-bold text-brand" /> <span><strong>User control</strong> — You own your data. Full stop. Export it. Delete it. Script against it.</span></div>
 </div>
 
 </div>
@@ -1836,7 +1847,7 @@ CLICK 3: "Local-first ideals. The pragmatic infrastructure is... being built rig
 
 <Card v-click variant="muted" class="mb-3">
 
-### <span class="inline-flex items-center gap-2"><span class="i-ph-compass-bold text-pink-400" /> Step 1: Pick your sync engine.</span>
+### <span class="inline-flex items-center gap-2"><span class="i-ph-compass-bold text-brand" /> Step 1: Pick your sync engine.</span>
 
 **Dexie** for the easiest start. **Jazz** for batteries-included. **Yjs** for max flexibility. Match the engine to your app.
 
@@ -1844,7 +1855,7 @@ CLICK 3: "Local-first ideals. The pragmatic infrastructure is... being built rig
 
 <Card v-click variant="muted" class="mb-3">
 
-### <span class="inline-flex items-center gap-2"><span class="i-ph-download-simple-bold text-pink-400" /> Step 2: Let users export their data.</span>
+### <span class="inline-flex items-center gap-2"><span class="i-ph-download-simple-bold text-brand" /> Step 2: Let users export their data.</span>
 
 JSON, CSV — whatever. Give them a **download button**. This is the simplest local-first gesture.
 
@@ -1852,7 +1863,7 @@ JSON, CSV — whatever. Give them a **download button**. This is the simplest lo
 
 <Card v-click variant="muted">
 
-### <span class="inline-flex items-center gap-2"><span class="i-ph-binoculars-bold text-pink-400" /> Step 3: Watch this space.</span>
+### <span class="inline-flex items-center gap-2"><span class="i-ph-binoculars-bold text-brand" /> Step 3: Watch this space.</span>
 
 The generic sync engine is coming. When it arrives, upgrading from offline-first to local-first will be a **configuration change**, not a rewrite.
 
@@ -1888,14 +1899,14 @@ TRANSITION: "Let's see the full scorecard..."
     </tr>
   </thead>
   <tbody>
-    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-lightning-bold text-pink-400 text-xs" /> Fast</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
-    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-devices-bold text-pink-400 text-xs" /> Multi-device</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
-    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-wifi-slash-bold text-pink-400 text-xs" /> Works offline</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
-    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-users-bold text-pink-400 text-xs" /> Collaboration</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
-    <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-clock-bold text-pink-400 text-xs" /> Longevity</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
-    <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-lock-bold text-pink-400 text-xs" /> Privacy</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
-    <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-user-bold text-pink-400 text-xs" /> User control</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-pink-400 mx-auto" /></td></tr>
-    <tr v-click="3"><td class="py-1.5 pr-4 font-bold">Score</td><td class="text-center font-bold">0/7</td><td class="text-center font-bold">2/7</td><td class="text-center font-bold">4/7</td><td class="text-center font-bold text-pink-400">7/7</td></tr>
+    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-lightning-bold text-brand text-xs" /> Fast</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
+    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-devices-bold text-brand text-xs" /> Multi-device</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
+    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-wifi-slash-bold text-brand text-xs" /> Works offline</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
+    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-users-bold text-brand text-xs" /> Collaboration</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
+    <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-clock-bold text-brand text-xs" /> Longevity</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
+    <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-lock-bold text-brand text-xs" /> Privacy</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
+    <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-user-bold text-brand text-xs" /> User control</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
+    <tr v-click="3"><td class="py-1.5 pr-4 font-bold">Score</td><td class="text-center font-bold">0/7</td><td class="text-center font-bold">2/7</td><td class="text-center font-bold">4/7</td><td class="text-center font-bold text-brand">7/7</td></tr>
   </tbody>
 </table>
 </div>

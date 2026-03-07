@@ -26,19 +26,19 @@ defineProps<{
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 20px;
+  gap: 12px;
   width: 100%;
   height: 100%;
   position: absolute;
   inset: 0;
-  padding: 60px 80px;
+  padding: 40px 80px;
 }
 
 .outline__item {
   display: flex;
   align-items: baseline;
   gap: 20px;
-  padding: 16px 0;
+  padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }

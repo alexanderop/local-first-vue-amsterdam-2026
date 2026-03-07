@@ -24,6 +24,14 @@
   "dependencies": {
     "roughjs": "^4.6.6"
   },
+  "peerDependencies": {
+    "shiki": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "shiki": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@iconify-json/ph": "^1.2.2",
     "@slidev/cli": "^52.13.0"

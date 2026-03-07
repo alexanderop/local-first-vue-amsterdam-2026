@@ -3,13 +3,16 @@ import { computed } from 'vue'
 import RoughRect from './RoughRect.vue'
 import RoughArrow from './RoughArrow.vue'
 import RoughLine from './RoughLine.vue'
+import ShikiCodeLine from './ShikiCodeLine.vue'
 import { useClickVisibility } from '../composables/useClickVisibility'
+import { useShikiTokens } from '../composables/useShikiTokens'
 import { hashId } from '../composables/useRough'
 import { EDGE_STROKE } from '../constants/colors'
 
 interface CodeItem {
   id: string
   label: string
+  lang?: string
   click?: number
 }
 
@@ -58,6 +61,14 @@ const { panels, connections, callout, database, roughness = 1.5, seed = 42, pane
 }>()
 
 const { isVisible } = useClickVisibility()
+
+// Resolve Shiki tokens for all code items at setup time
+const tokenMap = new Map<string, ReturnType<typeof useShikiTokens>>()
+for (const panel of panels) {
+  for (const item of panel.items) {
+    tokenMap.set(item.id, useShikiTokens(item.label, item.lang ?? 'javascript'))
+  }
+}
 
 const titleY = 16
 const panelTopY = 32
@@ -201,7 +212,7 @@ const svgW = computed(() => {
 })
 const svgH = computed(() => {
   const base = panelTopY + (panelData.value[0]?.panelHeight || 0) + warningGap + warningBoxHeight
-  if (callout) return base + calloutGap + arrowHeight + 30
+  if (callout) return base + calloutGap + arrowHeight + 46
   return base + 24
 })
 
@@ -256,14 +267,12 @@ const viewBox = computed(() => `${-24} ${-8} ${svgW.value} ${svgH.value}`)
         class="arch-diagram__el"
         :class="{ '--hidden': !isVisible(item.click, panel.click) }"
       >
-        <text
+        <ShikiCodeLine
+          :tokens="tokenMap.get(item.id)?.tokens.value ?? null"
+          :fallback-text="item.label"
           :x="item.x"
           :y="item.y + itemHeight / 2"
-          dominant-baseline="central"
-          class="arch-diagram__code"
-        >
-          {{ item.label }}
-        </text>
+        />
       </g>
 
       <!-- Warning box -->
@@ -416,7 +425,7 @@ const viewBox = computed(() => `${-24} ${-8} ${svgW.value} ${svgH.value}`)
       <!-- Left label -->
       <text
         :x="calloutData.leftCenterX"
-        :y="calloutData.calloutY + 18"
+        :y="calloutData.calloutY + 28"
         text-anchor="middle"
         dominant-baseline="central"
         class="arch-diagram__callout-label"
@@ -427,7 +436,7 @@ const viewBox = computed(() => `${-24} ${-8} ${svgW.value} ${svgH.value}`)
       <!-- Right label -->
       <text
         :x="calloutData.rightCenterX"
-        :y="calloutData.calloutY + 18"
+        :y="calloutData.calloutY + 28"
         text-anchor="middle"
         dominant-baseline="central"
         class="arch-diagram__callout-label"
@@ -464,7 +473,7 @@ const viewBox = computed(() => `${-24} ${-8} ${svgW.value} ${svgH.value}`)
   text-transform: uppercase;
 }
 
-.arch-diagram__code {
+:deep(.arch-diagram__code) {
   font-family: 'Geist Mono', monospace;
   font-size: 13px;
   font-weight: 400;
