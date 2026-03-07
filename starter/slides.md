@@ -408,7 +408,7 @@ BREATHE.
 -->
 
 ---
-clicks: 6
+clicks: 7
 ---
 
 # Local Storage Options
@@ -422,9 +422,10 @@ clicks: 6
   :accepted="[
     { id: 'idb', label: 'IndexedDB', subtitles: ['Unlimited storage', 'Async API', 'Structured data'], status: 'accepted', click: 4 },
     { id: 'sql', label: 'SQLite (WASM)', subtitles: ['Full SQL queries', 'OPFS persistence', '~900KB bundle'], status: 'accepted', click: 5 },
+    { id: 'pg', label: 'PGlite (Postgres WASM)', subtitles: ['Full Postgres in the browser', 'pgvector & extensions', '<3MB gzipped'], status: 'accepted', click: 6 },
   ]"
-  summary="For local-first: IndexedDB (native, everywhere) or SQLite WASM (full SQL power)"
-  :summary-click="6"
+  summary="For local-first: IndexedDB (native), SQLite WASM (SQL power), or PGlite (full Postgres)"
+  :summary-click="7"
 />
 
 <!--
@@ -433,7 +434,8 @@ Click 2 — "sessionStorage — even worse, tab-scoped. Close the tab, it's gone
 Click 3 — "Cookies — 4 KB, sent with every request. Not for app data."
 Click 4 — "IndexedDB — now we're talking. Unlimited storage, async, structured data. The native choice."
 Click 5 — "SQLite WASM — full SQL engine compiled to WebAssembly. This is what Notion uses — 20% faster page navigation after switching."
-Click 6 — "Bottom line: IndexedDB or SQLite WASM. Most sync engines we'll see later pick one for you."
+Click 6 — "PGlite by ElectricSQL — full Postgres compiled to WASM, under 3MB gzipped. Supports dynamic extensions including pgvector. Reactive, with live sync built in."
+Click 7 — "Bottom line: IndexedDB, SQLite WASM, or even PGlite. Most sync engines we'll see later pick one for you."
 
 TRANSITION: "But how long does that data actually stick around?"
 
@@ -1013,11 +1015,6 @@ clicks: 5
 
 <CrdtCounterDemo :roughness="1.2" :seed="800" />
 
-<div v-click="5" class="mt-2 text-xs op-70 grid grid-cols-3 gap-2 text-center">
-  <div><strong>Different fields</strong> → auto-merge</div>
-  <div><strong>Same field</strong> → last-write-wins</div>
-  <div><strong>Delete vs update</strong> → delete wins</div>
-</div>
 
 <!--
 CLICK-DRIVEN DEMO — each spacebar/arrow press advances one step:

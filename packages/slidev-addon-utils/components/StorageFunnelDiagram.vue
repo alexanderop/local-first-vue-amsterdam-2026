@@ -42,6 +42,7 @@ const rejGap = 40
 const accW = 200
 const accH = 100
 const accGap = 30
+const accHGap = 24
 const arrowLen = rejGap
 const turnGap = 40
 const padding = 24
@@ -62,21 +63,30 @@ const turnCornerX = computed(() => {
 })
 const turnCornerY = computed(() => rejH / 2)
 
-// Accepted nodes: vertical stack below turn corner, centered on turnCornerX
+// Accepted nodes: first centered, rest in horizontal row below
 const accPositions = computed(() => {
+  if (accepted.length === 0) return []
   const startY = turnCornerY.value + turnGap
-  return accepted.map((node, i) => ({
+  const first = { ...accepted[0], x: turnCornerX.value - accW / 2, y: startY }
+  if (accepted.length === 1) return [first]
+  const rest = accepted.slice(1)
+  const rowY = startY + accH + accGap
+  const totalW = rest.length * accW + (rest.length - 1) * accHGap
+  const rowStartX = turnCornerX.value - totalW / 2
+  return [first, ...rest.map((node, i) => ({
     ...node,
-    x: turnCornerX.value - accW / 2,
-    y: startY + i * (accH + accGap),
-  }))
+    x: rowStartX + i * (accW + accHGap),
+    y: rowY,
+  }))]
 })
 
 // SVG dimensions
 const contentWidth = computed(() => {
   const rejRight = rejected.length * (rejW + rejGap) - rejGap + rejW
   const accRight = turnCornerX.value + accW / 2
-  return Math.max(rejRight, accRight) + turnGap
+  const rest = accepted.length > 1 ? accepted.length - 1 : 0
+  const rowRight = rest > 0 ? turnCornerX.value + (rest * accW + (rest - 1) * accHGap) / 2 : accRight
+  return Math.max(rejRight, accRight, rowRight) + turnGap
 })
 
 const contentHeight = computed(() => {
@@ -130,15 +140,16 @@ const turnArrow = computed(() => {
   }
 })
 
-// Arrows between accepted nodes
+// Arrows from first accepted to each subsequent item (fan-out)
 const accArrows = computed(() => {
   const arrows: Array<{
     x1: number; y1: number; x2: number; y2: number
     click?: number; seed: number
   }> = []
-  for (let i = 0; i < accepted.length - 1; i++) {
-    const from = accPositions.value[i]
-    const to = accPositions.value[i + 1]
+  if (accepted.length <= 1) return arrows
+  const from = accPositions.value[0]
+  for (let i = 1; i < accepted.length; i++) {
+    const to = accPositions.value[i]
     arrows.push({
       x1: from.x + accW / 2,
       y1: from.y + accH,
