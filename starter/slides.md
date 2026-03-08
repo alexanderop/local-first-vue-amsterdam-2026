@@ -23,14 +23,11 @@ hideFooter: true
 <PartSlide title="How to Build Local-First Apps with Vue" subtitle="Vue Amsterdam 2026 — Alexander Opalic" />
 
 <!--
-BREATHE. Smile. Make eye contact.
+Hello everyone, I am really excited to have the opportunity to give a talk about one of my favorite tech topics — local first — and of course also Vue.
 
-"Hey everyone — thanks for being here. Today I want to take you on a journey: from the jQuery days of manual DOM manipulation, through the reactive revolution that Vue gave us, all the way to a fundamentally different way of thinking about data in web applications."
+Local first is a newer and trendier community that gets slowly more and more traction.
 
-- By the end: what local-first means, why it matters, how to start with Vue TODAY
-- Promise: you'll leave with code you can use on Monday
-
-[CHECK: 0:00 — starting]
+This will be an introductory talk and I hope by the end of it you have a good understanding of the topic and are motivated to build your own local first apps.
 -->
 
 ---
@@ -40,11 +37,15 @@ BREATHE. Smile. Make eye contact.
 <About />
 
 <!--
-- Name, company, role — keep it to 15 seconds
-- Mention: blog at alexop.dev, article comparing 7 sync engines for Vue
-- "Enough about me — let's talk about you."
+Now before we dive deeper into local first, a quick introduction from my side.
 
-TRANSITION: "Quick show of hands..."
+My name is Alexander Opalic. I have been a Vue developer for more than 8 years and also worked on backend.
+
+I live in Germany and I work for OTTO Payments, a German e-commerce marketplace.
+
+What I also do is write blog posts or give talks about the tech topics that interest me.
+
+TRANSITION: Quick show of hands...
 -->
 
 ---
@@ -52,17 +53,14 @@ layout: statement
 transition: fade-out
 ---
 
-# Raise your hand if you've heard of local-first
+# Raise your hand if you've ever built an app that works offline
 
 <!--
-EYE CONTACT — scan the room.
+Ok now a quick survey so that I know how familiar you are all with local first.
 
-"Raise your hand if you've heard of local-first."
+Raise your hand if you've ever built an app that works offline.
 
-- Wait 3 full seconds. Let hands go up.
-- "Great — a good number. For those who haven't, don't worry. By the end you'll know exactly what it means."
-
-TRANSITION: "Now keep those hands up..."
+TRANSITION: Now keep those hands up...
 -->
 
 ---
@@ -70,16 +68,12 @@ layout: statement
 transition: fade-out
 ---
 
-# Keep it up if you've built an offline-capable app
+# Keep it up if you've heard of local-first
 
 <!--
-"...keep your hand up if you've actually BUILT an app that works offline."
+Now keep your hand up if you've also heard the term local-first.
 
-PAUSE — watch hands drop. Smile.
-
-"Yeah — way fewer hands. That gap is exactly why we're here today."
-
-TRANSITION: "Here's the roadmap for the next 25 minutes..."
+Yeah — way fewer hands. That gap is exactly why we're here today.
 -->
 
 ---
@@ -93,14 +87,15 @@ TRANSITION: "Here's the roadmap for the next 25 minutes..."
 ]" />
 
 <!--
-"Four parts, each building on the last."
+Now my goal of this talk is to give you an overview. The local-first universe is quite big, this is why I decided to structure my talk like this:
 
-- Point at pyramid as you name each: status quo → offline-first → sync engines → local-first
-- "Each level adds capabilities. By the end we'll have a full scorecard."
+- Status quo — how most apps are built
+- Offline-first — how we give any Vue app the ability to work offline
+- Sync engines
+- Deep dive into one concrete library
+- And at the end, with all the knowledge we gained before, we define the local-first term
 
-TRANSITION: "Let's start at the bottom — the status quo."
-
-[CHECK: ~2:00 — if past 3:00 you're slow, pick up pace]
+TRANSITION: Let's start at the bottom — the status quo.
 -->
 
 ---
@@ -110,12 +105,7 @@ transition: fade
 <PartSlide part="0" title="The Status Quo" subtitle="Vue Abstracts the DOM, Not the Data" />
 
 <!--
-SLOW DOWN — this is a section transition. Let it land.
-
-"Before we talk about where we're going, let's be honest about where we are."
-
-- WHY IT MATTERS: The audience needs to feel the pain before you offer the cure
-- "Vue gave us reactive rendering — but the data layer? That's still entirely on us."
+Now let's begin where we are at the moment and how most Vue applications are built nowadays.
 -->
 
 ---
@@ -171,12 +161,20 @@ clicks: 2
 </div>
 
 <!--
-Point at the diagram. Let them read it for 3 seconds.
+If you think about the classical architecture, we always follow a 3-tier approach where state is duplicated in two places:
+- Frontend has its own state — refs, Pinia, etc.
+- Database also has the state
 
-- "Look at all this duplicated logic — validation on both sides, auth checks on both sides, error types on both sides."
-- "We solved rendering. But we're still manually wiring the data plumbing. Over and over."
+Even if CRUD functionality is simple, we always have to add a lot of code to achieve something.
 
-PAUSE — let them nod. They know this pain.
+CLICK
+
+Many things are often duplicated:
+- Validation logic
+- Auth
+- Error types
+
+Sometimes the frontend is even doing too much, which can also lead to bugs.
 
 TRANSITION: "Kyle Mathews has a great analogy for this..."
 -->
@@ -191,17 +189,15 @@ transition: fade
 </QuoteCard>
 
 <!--
-SLOW DOWN — this is a key quote.
+This is a quote from Kyle Mathews, the founder of Gatsby and now co-founder of ElectricSQL. He said this on the localfirst.fm podcast.
 
-- Kyle Mathews = founder of Gatsby, now CPO and co-founder of ElectricSQL
-- Said this on localfirst.fm podcast
-- "With jQuery, you'd grab a DOM element, tweak text, remove a child... you were fiddling with the DOM constantly. Vue freed us from that."
-- "But we're STILL doing the same imperative dance with DATA — fetch this, cache that, retry this, invalidate that."
-- "We're in the jQuery era of data. History is repeating."
+With jQuery, you would grab a DOM element, tweak text, remove a child — you were fiddling with the DOM constantly. Vue freed us from that.
 
-PAUSE — let the analogy sink in.
+But we are still doing the same imperative dance with data — fetch this, cache that, retry this, invalidate that.
 
-TRANSITION: "Let me show you where we are in this evolution..."
+We are in the jQuery era of data. History is repeating.
+
+TRANSITION: Let me show you where we are in this evolution...
 -->
 
 ---
@@ -226,16 +222,15 @@ TRANSITION: "Let me show you where we are in this evolution..."
 - Now: Who's the sync engine for **DATA**?
 
 <!--
-Build this progressively with clicks:
+In the jQuery era, you were the sync engine. getElementById, appendChild, manual everything.
 
-CLICK 1: "jQuery era — YOU were the sync engine. getElementById. appendChild. Manual everything."
-CLICK 2: "Vue era — Vue became the sync engine for the DOM. Declarative. Reactive."
-CLICK 3: "Now — who's the sync engine for DATA?" PAUSE. Let them think.
+Then Vue came along and Vue became the sync engine for the DOM. Declarative. Reactive.
 
-- "The same pattern repeats, one layer up."
-- "Vue solved rendering. Now we need something to solve data."
+But now — who is the sync engine for data?
 
-TRANSITION: "But wait — what about the tools you're already using?"
+The same pattern repeats, one layer up. Vue solved rendering. Now we need something to solve data.
+
+TRANSITION: But wait — what about the tools you are already using?
 -->
 
 ---
@@ -294,14 +289,17 @@ Different layers. Sync engines replace the **fetch → cache → invalidate** cy
 </div>
 
 <!--
-~25 seconds. Prevent the main audience objection.
+Now some of you might think — I already use TanStack Query or Pinia, why do I need something else?
 
-CLICK 1: "TanStack Query — server cache. Fetch, cache, invalidate, fetch again."
-CLICK 2: "Pinia — client state. Great for toggles, but refresh and it's gone."
-CLICK 3: "Sync engine — write locally, instant, offline, syncs. No spinners."
-CLICK 4: "Different layers. Sync engines replace the fetch-cache-invalidate cycle."
+CLICK — TanStack Query is a server cache. You fetch, cache, invalidate, fetch again.
 
-TRANSITION: "Let's see where that leaves us on the scorecard..."
+CLICK — Pinia is client state. Great for toggles, but refresh and it is gone.
+
+CLICK — A sync engine is different. You write locally, it is instant, works offline, and syncs to all devices.
+
+CLICK — These are different layers. Sync engines replace the fetch-cache-invalidate cycle entirely.
+
+TRANSITION: Let's see where that leaves us on the scorecard...
 -->
 
 ---
@@ -376,21 +374,18 @@ Vue solved **rendering**. But the data layer? Still the jQuery era. **0 out of 7
 </div>
 
 <!--
-All 7 ideal cards are visible immediately — let the audience read them for a beat.
+These are the seven ideals we will be looking at throughout the talk:
+- Fast — no spinners, your work at your fingertips
+- Multi-device — your work is not trapped on one device
+- Works offline — the network is optional
+- Collaboration — seamless collaboration with your colleagues
+- Longevity — the long now
+- Privacy — security and privacy by default
+- User control — you retain ultimate ownership and control
 
-"Fast. Multi-device. Works offline. Collaboration. Longevity. Privacy. User control."
+CLICK — These are not random criteria. These are the seven ideals from the Local-First Software paper by Ink and Switch from 2019.
 
-Sweep through them verbally — don't linger on each one.
-
-CLICK 1 — reveal the Ink & Switch attribution.
-"These aren't random criteria. These are the seven ideals from the Local-First Software paper by Ink & Switch, 2019."
-
-CLICK 2 — reveal the verdict.
-"And right now, with the typical Vue app? Zero out of seven. The rendering layer is solved. The data layer hasn't started. Let's change that."
-
-TRANSITION: "What if we flipped the model?"
-
-[CHECK: ~5:00 — entering Part 1]
+CLICK — And right now, with the typical Vue app? Zero out of seven. The rendering layer is solved. The data layer has not started. Let's change that.
 -->
 
 ---
@@ -400,11 +395,7 @@ transition: fade
 <PartSlide part="1" title="Offline-First" subtitle="The App That Works Without WiFi" />
 
 <!--
-Section transition — let the slide breathe for a moment.
-
-"What if we flip the model? What if data lives on the client FIRST, and syncs to the server when it can?"
-
-BREATHE.
+What if we flip the model? What if data lives on the client first, and syncs to the server when it can?
 -->
 
 ---
@@ -429,17 +420,23 @@ clicks: 7
 />
 
 <!--
-Click 1 — "localStorage — we've all used it. But 5 MB, sync API, strings only. Not enough."
-Click 2 — "sessionStorage — even worse, tab-scoped. Close the tab, it's gone."
-Click 3 — "Cookies — 4 KB, sent with every request. Not for app data."
-Click 4 — "IndexedDB — now we're talking. Unlimited storage, async, structured data. The native choice."
-Click 5 — "SQLite WASM — full SQL engine compiled to WebAssembly. This is what Notion uses — 20% faster page navigation after switching."
-Click 6 — "PGlite by ElectricSQL — full Postgres compiled to WASM, under 3MB gzipped. Supports dynamic extensions including pgvector. Reactive, with live sync built in."
-Click 7 — "Bottom line: IndexedDB, SQLite WASM, or even PGlite. Most sync engines we'll see later pick one for you."
+If we want to store data locally, what are our options?
 
-TRANSITION: "But how long does that data actually stick around?"
+CLICK — localStorage — we have all used it. But 5 MB, sync API, strings only. Not enough.
 
-[CHECK: ~10:00]
+CLICK — sessionStorage — even worse, tab-scoped. Close the tab, it is gone.
+
+CLICK — Cookies — 4 KB, sent with every request. Not for app data.
+
+CLICK — IndexedDB — now we are talking. Unlimited storage, async, structured data. The native choice.
+
+CLICK — SQLite WASM — a full SQL engine compiled to WebAssembly. This is what Notion uses — they got 20% faster page navigation after switching.
+
+CLICK — PGlite by ElectricSQL — full Postgres compiled to WASM, under 3MB gzipped. Supports dynamic extensions including pgvector.
+
+CLICK — Bottom line: IndexedDB, SQLite WASM, or PGlite. Most sync engines we will see later pick one for you.
+
+TRANSITION: But how long does that data actually stick around?
 -->
 
 ---
@@ -475,13 +472,13 @@ await navigator.storage.persist()
 </div>
 
 <!--
-CLICK 1: "Chrome — generous. Data persists until disk fills up."
-CLICK 2: "Safari — the gotcha. 7-day cap. No visit for a week, data gone. BUT PWAs are exempt."
-CLICK 3: "The fix — one line. navigator.storage.persist(). Chrome auto-grants for engaged sites."
+CLICK — Chrome is generous. Data persists until disk fills up.
 
-TRANSITION: "Now let's see how this all fits together architecturally..."
+CLICK — Safari is the gotcha. There is a 7-day cap. If you do not visit for a week, data is gone. But PWAs are exempt from this cap.
 
-[CHECK: ~11:00]
+CLICK — The fix is one line. navigator.storage.persist(). Chrome auto-grants for engaged sites.
+
+TRANSITION: Now let's see how this all fits together architecturally...
 -->
 
 ---
@@ -523,13 +520,13 @@ clicks: 2
 />
 
 <!--
-Point at ONLINE side: "Reads and writes go to local store. Syncs in the background."
-Point at OFFLINE side: "Network drops? App doesn't care. Writes queue up, sync when it returns."
+On the online side, reads and writes go to the local store. Syncing happens in the background.
 
-- Key phrase: "The app never stops working."
-- "Still works!" — point at the bottom right
+On the offline side, the network drops and the app does not care. Writes queue up and sync when the network returns.
 
-TRANSITION: "But there's a gotcha most people miss..."
+The app never stops working.
+
+TRANSITION: But there is a gotcha most people miss...
 -->
 
 ---
@@ -577,14 +574,13 @@ clicks: 2
 />
 
 <!--
-WHY IT MATTERS: Most people skip this — it's the #1 gotcha.
+You can put all your data in IndexedDB. But if the app shell itself cannot load offline, none of it matters. You get the Chrome dinosaur.
 
-"You can put all your data in IndexedDB. But if the app shell itself can't load offline — none of it matters. You get the Chrome dinosaur."
+Without a PWA — you see the dino.
 
-Point at left: "Without PWA — dino."
-Point at right: "With PWA — Service Worker intercepts, serves from cache. App loads."
+With a PWA — the Service Worker intercepts the request, serves from cache, and the app loads.
 
-- "The PWA is the FOUNDATION. Data layer sits on top."
+The PWA is the foundation. The data layer sits on top.
 -->
 
 ---
@@ -604,7 +600,7 @@ Point at right: "With PWA — Service Worker intercepts, serves from cache. App 
 </div>
 
 <!--
-"If you want a step-by-step guide on setting up a PWA with Vue 3 and Vite — I wrote a blog post that walks you through it in 4 steps. Check it out later."
+If you want a step-by-step guide on setting up a PWA with Vue 3 and Vite, I wrote a blog post that walks you through it in 4 steps. Check it out later.
 -->
 
 ---
@@ -612,15 +608,16 @@ Point at right: "With PWA — Service Worker intercepts, serves from cache. App 
 <OfflineStackDiagram />
 
 <!--
-- Top: Vue/Nuxt components — your app
+Three layers:
+- Top: Vue or Nuxt components — your app
 - Middle: Data layer — IndexedDB or SQLite WASM
 - Bottom: Service Worker — caches the shell
 
-"Three layers. Vue for rendering, a local database for data, and a Service Worker to make the whole thing load offline."
+Vue for rendering, a local database for data, and a Service Worker to make the whole thing load offline.
 
-- Mention: vite-plugin-pwa or @vite-pwa/nuxt — easy to add
+You can use vite-plugin-pwa or @vite-pwa/nuxt — easy to add.
 
-TRANSITION: "So what does offline-first already give us?"
+TRANSITION: So what does offline-first already give us?
 -->
 
 ---
@@ -661,19 +658,13 @@ TRANSITION: "So what does offline-first already give us?"
 </div>
 
 <!--
-CLICK 1 — reveal the 2 green cards.
+CLICK — Offline-first gives us two things for free: speed, because data is local and reads are instant, and offline capability.
 
-"Offline-first gives us two things for free: speed — because data is local, reads are instant — and offline capability."
+CLICK — But five question marks are still open. We need something more.
 
-CLICK 2 — reveal the 5 question marks.
+CLICK — That is 2 out of 7 local-first principles. Good progress, but not enough.
 
-"But five question marks are still open. We need something more."
-
-CLICK 3 — reveal the counter.
-
-"That's 2 out of 7 local-first principles. Good progress — but not enough."
-
-TRANSITION: "So what's holding us back?"
+TRANSITION: So what is holding us back?
 -->
 
 ---
@@ -685,17 +676,17 @@ clicks: 5
 <TodoSyncConflictDemo :roughness="1.2" :seed="900" />
 
 <!--
-"We've stored data locally. Great. But now imagine two devices editing the same todo."
+We have stored data locally. Great. But now imagine two devices editing the same todo.
 
-CLICK 1: "Both devices go offline. They can't see each other."
-CLICK 2: "Device A edits the todo - 'Buy oat milk'."
-CLICK 3: "Device B also edits it - 'Buy almond milk'. Neither knows about the other."
-CLICK 4: "They reconnect. Now what? Which version is correct?" Point at the ??? conflict.
-CLICK 5: "This is a distributed systems problem. And it needs a sync engine."
+CLICK — Both devices go offline. They cannot see each other.
 
-PAUSE - let the problem statement hang. This is the cliffhanger into Part 2.
+CLICK — Device A edits the todo to "Buy oat milk".
 
-[CHECK: ~12:00 - entering Part 2]
+CLICK — Device B also edits it to "Buy almond milk". Neither knows about the other.
+
+CLICK — They reconnect. Now what? Which version is correct?
+
+CLICK — This is a distributed systems problem. And it needs a sync engine.
 -->
 
 ---
@@ -705,11 +696,7 @@ transition: fade
 <PartSlide part="2" title="Sync Engines" subtitle="The New Data Layer" />
 
 <!--
-Section transition — energy up! This is the exciting part.
-
-"This is where things get really interesting."
-
-BREATHE.
+This is where things get really interesting.
 -->
 
 ---
@@ -848,18 +835,17 @@ All chose sync engines for the same reasons: **instant UI**, **offline support**
 </div>
 
 <!--
-"This isn't a niche pattern. Look at this list — project management, design tools, note-taking, email, presentations, collaborative editing. Across every category, the most responsive apps are built on sync engines."
+This is not a niche pattern. Look at this list — project management, design tools, note-taking, email, presentations, collaborative editing. Across every category, the most responsive apps are built on sync engines.
 
-WHY they all do it:
+Why they all do it:
+- Instant UI — reads and writes hit a local store, no spinners
+- Offline support — works without network, changes queue and sync when reconnected
+- Real-time collaboration — multiple users editing simultaneously
+- Competitive advantage — Linear's snappiness is their number one differentiator over Jira, Figma killed Sketch with real-time multiplayer
 
-1. **Instant UI** — Reads/writes hit a local store. No spinners. Linear loads issues in <50ms because it's filtering a JS array, not waiting for an API.
-2. **Offline support** — Works without network. Changes queue locally and sync when reconnected.
-3. **Real-time collaboration** — Multiple users editing simultaneously. Sync engine handles merging and conflicts.
-4. **Competitive advantage** — Linear's snappiness is their #1 differentiator over Jira. Superhuman's 100ms rule. Figma killed Sketch with real-time multiplayer.
+These companies did not adopt sync engines for fun — they did it because it is the only way to deliver the UX their users demand.
 
-These companies didn't adopt sync engines for fun — they did it because it's the only way to deliver the UX their users demand.
-
-TRANSITION: "Let's look at what's out there. But first — there's one question they all answer differently."
+TRANSITION: Let's look at what is out there. But first — there is one question they all answer differently.
 -->
 
 ---
@@ -872,13 +858,11 @@ transition: fade
 <div class="mt-4 text-xl op-70">They all solve the same fundamental problem differently.</div>
 
 <!--
-"Three teams built the same architecture. But there's a critical question they answered DIFFERENTLY."
+Three teams built the same architecture. But there is a critical question they answered differently.
 
-PAUSE.
+When two devices edit the same data offline and reconnect — who decides what happened?
 
-"When two devices edit the same data offline and reconnect — WHO decides what happened?"
-
-TRANSITION: "Actually, it's not just two answers — it's a spectrum."
+Actually, it is not just two answers — it is a spectrum.
 -->
 
 ---
@@ -906,23 +890,21 @@ Most sync engines **combine strategies** — auto-merge where possible, escalate
 </Callout>
 
 <!--
-SPECTRUM BRIDGE — ~45 seconds. Set the framing before diving into binary choices.
+Before I show you the two main camps, I want you to see the full picture.
 
-"Before I show you the two main camps, I want you to see the full picture."
+The simplest approach is last write wins. Whoever saves last, their version sticks. Fast, but you lose data.
 
-LWW (visible immediately): "The simplest approach — last write wins. Whoever saves last, their version sticks. Fast, but you LOSE data."
+CLICK — Next step: a server decides. More nuanced — the server can apply business rules. But you need a server.
 
-CLICK 1: "Next step: a server decides. More nuanced — the server can apply business rules. But you need a server."
+CLICK — Operation logs — instead of saving state, you save every operation. You can replay, reorder, and merge.
 
-CLICK 2: "Operation logs — instead of saving STATE, you save every OPERATION. You can replay, reorder, and merge. This is where things get interesting."
+CLICK — CRDTs — Conflict-free Replicated Data Types. The math guarantees that independent merges always converge. No server needed.
 
-CLICK 3: "CRDTs — Conflict-free Replicated Data Types. The math guarantees that independent merges ALWAYS converge. No server needed."
+CLICK — And at the far end: hybrid. Surface the conflict to the user, like Git merge conflicts. Or combine multiple strategies depending on the data type.
 
-CLICK 4: "And at the far end: hybrid. Surface the conflict to the user, like Git merge conflicts. Or combine multiple strategies depending on the data type."
+CLICK — The key insight: most production systems are not purely one approach. They combine strategies. Auto-merge names, LWW for timestamps, user-prompt for document conflicts.
 
-CLICK 5: "The key insight: most production systems are NOT purely one approach. They combine strategies. Auto-merge names, LWW timestamps, user-prompt for document conflicts."
-
-TRANSITION: "Now let's zoom into the two main camps that matter most for local-first."
+TRANSITION: Now let's zoom into the two main camps that matter most for local-first.
 -->
 
 ---
@@ -976,35 +958,17 @@ Client-side resolution makes **true local-first** possible — but requires **CR
 
 
 <!--
-THIS IS THE KEY CONCEPTUAL SLIDE — go slow.
+There are exactly two places conflict resolution can live.
 
-"Remember the sync protocol arrow? There are exactly two places conflict resolution can live."
+CLICK — Option one: the server decides. This is what you are used to. POST to the API, server validates, server picks a winner. It is simpler to implement — you have one source of truth. But the catch: you need a server. And your app breaks without it. Zero and Dexie Cloud work this way.
 
-CLICK 1: "Option one: the SERVER decides."
-- "This is what you're used to. POST to the API, server validates, server picks a winner."
-- "It's simpler to implement — you have one source of truth. Postgres is great at this."
-- "But the catch: you NEED a server. And your app breaks without it."
-- "Zero and Dexie Cloud work this way."
+CLICK — Option two: the client decides. Every device resolves conflicts on its own. No central authority. The server is just a relay, a dumb pipe. You can even go fully peer-to-peer. But the hard part: you need data structures where independent merges always produce the same result. Yjs and Jazz do this.
 
-CLICK 2: "Option two: the CLIENT decides."
-- "Every device resolves conflicts on its own. No central authority."
-- "The advantage: the server is LESS powerful. It's just a relay. A dumb pipe."
-- "You can even go fully P2P — no server at all."
-- "But the hard part: you need data structures where independent merges ALWAYS produce the same result."
-- "Yjs and Jazz do this."
+CLICK — Client-side resolution is what makes true local-first possible. But it needs math. It needs CRDTs.
 
-CLICK 3: "Client-side resolution is what makes TRUE local-first possible. But it needs math. It needs CRDTs."
+CLICK — But there is a third option hiding in plain sight — let the user decide. Think Git merge conflicts. The system detects the conflict but presents both versions to the human. In practice, most production apps are hybrids — auto-merge what you can, escalate what you cannot.
 
-CLICK 4: "But there's a third option hiding in plain sight — let the USER decide."
-- "Think Git merge conflicts. The system detects the conflict but presents BOTH versions to the human."
-- "Notion does this for some block-level conflicts. Figma shows a notification."
-- "In practice, most production apps are HYBRIDS — auto-merge what you can, escalate what you can't."
-
-PAUSE — let it land. This frames everything that follows.
-
-TRANSITION: "So what ARE CRDTs, and how do they work?"
-
-[CHECK: ~14:00]
+TRANSITION: So what are CRDTs, and how do they work?
 -->
 
 ---
@@ -1017,30 +981,72 @@ clicks: 5
 
 
 <!--
-CLICK-DRIVEN DEMO — each spacebar/arrow press advances one step:
+CLICK — Two peers go offline. They cannot see each other.
 
-Click 1: Go offline — "Two peers go offline. They can't see each other."
-Click 2: Peer A increments to 1 — "Peer A counts +1 independently."
-Click 3: Peer B increments to 2 — "Peer B counts +2 independently. Neither knows about the other."
-Click 4: Sync — three boxes appear:
-  - LEFT (red): Last-Write-Wins → 2. "LWW picks the highest value. WRONG."
-  - CENTER (pink): G-Counter state { A: 1, B: 2 }. "The CRDT keeps a slot per peer."
-  - RIGHT (green): CRDT → 3. "Sum the slots. 1 + 2 = 3. CORRECT."
+CLICK — Peer A counts plus 1 independently.
 
-DOCTOR ANALOGY (use if audience looks confused):
-"Imagine two doctors editing the same patient record on a flight. Doctor A adds an allergy. Doctor B updates the dosage. With LWW, one edit DISAPPEARS when they land. With CRDTs, both edits survive — because the data structure tracks WHO changed WHAT, not just WHEN."
+CLICK — Peer B counts plus 2 independently. Neither knows about the other.
 
-Click 5: Reveal the 3 merge rules.
-"And with real data — objects, not counters — three rules cover almost everything:"
-RULE 1: "Different fields? Auto-merge. Title from A, done from B — no conflict."
-RULE 2: "Same field? Last-write-wins. Deterministic, but you CAN lose data."
-RULE 3: "Delete vs update? Delete wins — the tombstone pattern."
+CLICK — They sync. With last-write-wins, you get 2. That is wrong. But the CRDT keeps a slot per peer — A: 1, B: 2. Sum the slots. 1 + 2 = 3. That is correct.
 
-"THIS is why CRDTs matter. The server needs ZERO conflict resolution logic — it just relays bytes."
+Think of two doctors editing the same patient record on a flight. Doctor A adds an allergy, Doctor B updates the dosage. With LWW, one edit disappears when they land. With CRDTs, both edits survive — because the data structure tracks who changed what, not just when.
 
-TRANSITION: "Now let's look at the landscape — and you'll immediately see which engines use CRDTs and which don't."
+CLICK — With real data — objects, not counters — three rules cover almost everything:
+- Different fields? Auto-merge. Title from A, done from B — no conflict.
+- Same field? Last-write-wins. Deterministic, but you can lose data.
+- Delete vs update? Delete wins — the tombstone pattern.
 
-[CHECK: ~16:00]
+This is why CRDTs matter. The server needs zero conflict resolution logic — it just relays bytes.
+
+TRANSITION: Now let's look at the landscape.
+-->
+
+---
+---
+
+# The Sync Engine Landscape
+
+<div class="grid grid-cols-2 gap-4 mt-4">
+  <Card variant="muted" size="md">
+    <div class="flex items-center gap-2">
+      <div class="text-sm font-bold text-brand">Yjs</div>
+      <div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">Production · 10+ years</div>
+    </div>
+    <div class="text-xs text-gray-400 mt-1">CRDT library. Client-side conflict resolution. Bring your own backend. P2P possible. Maximum flexibility.</div>
+  </Card>
+  <Card variant="muted" size="md">
+    <div class="flex items-center gap-2">
+      <div class="text-sm font-bold text-brand">Dexie</div>
+      <div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">Production · 10+ years</div>
+    </div>
+    <div class="text-xs text-gray-400 mt-1">IndexedDB wrapper. Server-side field-level merge via Dexie Cloud. Progressive upgrade path. Millions of users.</div>
+  </Card>
+  <Card variant="muted" size="md">
+    <div class="flex items-center gap-2">
+      <div class="text-sm font-bold text-brand">Jazz</div>
+      <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Early · Active dev</div>
+    </div>
+    <div class="text-xs text-gray-400 mt-1">Batteries-included. Client-side CRDTs. Auth, permissions, E2E encryption, sync — all built in. <strong>Official Vue bindings via jazz-vue.</strong></div>
+  </Card>
+  <Card variant="muted" size="md">
+    <div class="flex items-center gap-2">
+      <div class="text-sm font-bold text-brand">Zero</div>
+      <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Alpha · Well-funded</div>
+    </div>
+    <div class="text-xs text-gray-400 mt-1">Query-driven sync. Server resolves all conflicts. Reactive Postgres to client SQLite. Great DX, but not truly local-first.</div>
+  </Card>
+</div>
+
+<div class="mt-4 text-xs op-50 text-center">Also worth watching: LiveStore, TanStack DB, Automerge, PowerSync, cr-sqlite — full comparison at alexop.dev</div>
+
+<!--
+Four engines, four philosophies — a quick sweep:
+- Yjs — most mature, CRDTs, bring your own backend
+- Dexie — IndexedDB wrapper, server-side merge, easiest on-ramp
+- Jazz — batteries-included, CRDTs, everything built in, and crucially: official Vue community bindings via jazz-vue
+- Zero — great DX, server-first, not truly local-first
+
+Today we are going deep on Jazz — because it is the most complete vision for local-first Vue apps.
 -->
 
 ---
@@ -1048,185 +1054,336 @@ layout: statement
 transition: fade
 ---
 
-# The Sync Engine Landscape
+# Why Jazz?
 
-<div class="mt-4 text-xl op-70">Now that you know HOW they differ — let's see what's out there.</div>
+<div class="mt-4 text-xl op-70">The most batteries-included option — with official Vue community bindings.</div>
 
 <!--
-Energy shift — this is the exciting part!
+Of all the engines we just saw, Jazz is the most ambitious — and the only one with first-class Vue support via jazz-vue on their GitHub.
 
-"You now understand the two approaches: server decides, or client decides with CRDTs. Let's see how four real engines make that choice — and what it means for your app."
-
-BREATHE.
-
-[CHECK: ~17:30 — landscape section starts]
+Let me show you what you get out of the box.
 -->
 
 ---
-clicks: 4
+clicks: 6
 ---
 
-# The Landscape
+# Jazz — What You Get Out of the Box
 
-<div class="grid grid-cols-2 gap-4 mt-4">
-  <Card v-click="1" variant="muted" size="md">
-    <div class="flex items-center gap-2">
-      <div class="text-sm font-bold text-brand">Yjs</div>
-      <div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">Production · 10+ years</div>
+<div class="grid grid-cols-3 gap-3 mt-6">
+  <Card v-click="1" size="sm">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-database text-2xl text-brand" />
+      <div class="text-sm font-semibold">CoValues</div>
+      <div class="text-xs text-gray-400 leading-tight">Collaborative JSON-like values that sync automatically via CRDTs.</div>
     </div>
-    <div class="text-xs text-gray-400 mt-1">CRDT library. Client-side conflict resolution. Bring your own backend. P2P possible. Maximum flexibility.</div>
   </Card>
-  <Card v-click="2" variant="muted" size="md">
-    <div class="flex items-center gap-2">
-      <div class="text-sm font-bold text-brand">Dexie</div>
-      <div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">Production · 10+ years</div>
+  <Card v-click="2" size="sm">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-user-circle text-2xl text-brand" />
+      <div class="text-sm font-semibold">Built-in Auth</div>
+      <div class="text-xs text-gray-400 leading-tight">Passkeys, demo auth, or custom. No third-party auth service needed.</div>
     </div>
-    <div class="text-xs text-gray-400 mt-1">IndexedDB wrapper. Server-side field-level merge via Dexie Cloud. Progressive upgrade path. Millions of users.</div>
   </Card>
-  <Card v-click="3" variant="muted" size="md">
-    <div class="flex items-center gap-2">
-      <div class="text-sm font-bold text-brand">Jazz</div>
-      <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Early · Active dev</div>
+  <Card v-click="3" size="sm">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-users-three text-2xl text-brand" />
+      <div class="text-sm font-semibold">Groups & Permissions</div>
+      <div class="text-xs text-gray-400 leading-tight">Role-based access: admin, writer, reader. Built into the data model.</div>
     </div>
-    <div class="text-xs text-gray-400 mt-1">Batteries-included. Client-side CRDTs. Auth, permissions, end-to-end encryption (E2E), sync — all built in.</div>
   </Card>
-  <Card v-click="4" variant="muted" size="md">
-    <div class="flex items-center gap-2">
-      <div class="text-sm font-bold text-brand">Zero</div>
-      <div class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Alpha · Well-funded</div>
+  <Card v-click="4" size="sm">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-shield-check text-2xl text-brand" />
+      <div class="text-sm font-semibold">E2E Encryption</div>
+      <div class="text-xs text-gray-400 leading-tight">BLAKE3 + Ed25519 + XSalsa20. Server never sees your data.</div>
     </div>
-    <div class="text-xs text-gray-400 mt-1">Query-driven sync. Server resolves all conflicts. Reactive Postgres to client SQLite. Great developer experience (DX), but not truly local-first.</div>
+  </Card>
+  <Card v-click="5" size="sm">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-image text-2xl text-brand" />
+      <div class="text-sm font-semibold">File & Image Uploads</div>
+      <div class="text-xs text-gray-400 leading-tight">FileStream & progressive image loading — built into the schema.</div>
+    </div>
+  </Card>
+  <Card v-click="6" size="sm">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <div class="i-ph-cloud-arrow-up text-2xl text-brand" />
+      <div class="text-sm font-semibold">Jazz Cloud / Self-Host</div>
+      <div class="text-xs text-gray-400 leading-tight">Managed cloud or run your own sync server. Fully open-source.</div>
+    </div>
   </Card>
 </div>
 
-<div v-click="4" class="mt-4 text-xs op-50 text-center">Also worth watching: LiveStore, TanStack DB, Automerge, PowerSync, cr-sqlite — full comparison at alexop.dev/vue-amsterdam</div>
-
 <!--
-Four engines, four different philosophies. Now the audience has the conflict resolution framework — they can immediately classify each one.
+CLICK — CoValues — collaborative values. Think reactive JSON that syncs automatically via CRDTs.
 
-CLICK 1: "Yjs — the most mature. 10+ years in production. CLIENT-side CRDTs — remember the right card? YOU bring the backend. WebSocket, WebRTC, even P2P."
+CLICK — Built-in auth — passkeys, demo auth, custom. No Auth0 needed.
 
-CLICK 2: "Dexie — 10+ years, millions of users. SERVER-side field-level merge — the left card. Start local-only, add Dexie Cloud for sync later."
+CLICK — Groups and permissions — admin, writer, reader. Built into the data model, not bolted on.
 
-CLICK 3: "Jazz — newer, but the most ambitious. Also client-side CRDTs. Auth, permissions, E2E encryption — everything built in."
+CLICK — End-to-end encryption — BLAKE3, Ed25519, XSalsa20. The server never sees your data in plaintext.
 
-CLICK 4: "Zero — great DX, well-funded. But notice: SERVER resolves all conflicts. Postgres on the server, SQLite cache on the client. NOT truly local-first — and now you know exactly why."
+CLICK — File and image uploads — including progressive loading. Part of the schema.
 
-"There are more — LiveStore, TanStack DB, Automerge, PowerSync — I'll link a full comparison at the end. But these four cover the key patterns."
+CLICK — Jazz Cloud for managed hosting, or self-host. It is open-source.
 
-TRANSITION: "Let me show you what each looks like in code..."
+All of this — zero boilerplate. No glue code. Let me show you the code.
+
+TRANSITION: Let's start with the schema...
 -->
 
 ---
 
-# Yjs — CRDT Library (BYO Backend)
+# Jazz + Vue — Define Your Schema
 
 ```ts
-// Yjs — CRDT library with Nuxt + Nitro WebSocket
-// server/routes/_ws.ts
-export default defineWebSocketHandler({
-  message(peer, message) {
-    for (const p of peer.peers) p.send(message.rawData)
+// schema.ts — define your data model
+import { co, z } from 'jazz-tools'
+
+// CoMap = collaborative object (like a reactive record)
+const Todo = co.map({
+  title: z.string(),
+  done: z.boolean(),
+  priority: z.number().optional(),
+})
+
+// CoList = collaborative array (ordered, synced)
+const TodoList = co.list(Todo)
+
+// Account with root data — runs migration on first login
+const MyAccount = co.account({
+  profile: co.profile(),
+  root: co.map({
+    todos: TodoList,
+  }),
+}).withMigration(async (account) => {
+  if (!account.$jazz.has('root')) {
+    account.$jazz.set('root', { todos: [] })
+  }
+})
+```
+
+<!--
+Jazz uses a schema-first approach. co.map and co.list — reactive objects and arrays that sync.
+
+- co.map is a collaborative object, like a row in a database
+- co.list is a collaborative array, ordered and synced
+- z.string(), z.boolean() — that is Zod. Jazz uses Zod for validation
+- The account schema runs a migration on first login — initializes your data
+
+This schema is your database. No migrations file. No ORM. The schema drives everything.
+
+TRANSITION: Now let's wire it up in Vue...
+-->
+
+---
+
+# Jazz + Vue — Provider Setup
+
+```ts
+// main.ts — wire up JazzProvider
+import { JazzProvider, useDemoAuth } from 'jazz-vue'
+import { MyAccount } from './schema'
+import { createApp, defineComponent, h } from 'vue'
+import App from './App.vue'
+
+const RootComponent = defineComponent({
+  setup() {
+    const { authMethod, state } = useDemoAuth()
+    return () => h(
+      JazzProvider,
+      {
+        AccountSchema: MyAccount,
+        auth: authMethod.value,
+        peer: 'wss://cloud.jazz.tools/?key=your-app@example.com',
+      },
+      { default: () => h(App) },
+    )
   },
 })
 
-// composables/useSync.ts
-const ydoc = new Y.Doc()
-const todos = ydoc.getArray<Todo>('todos')
-const ws = new WebSocket('/_ws')
-ydoc.on('update', (update) => ws.send(update))
-ws.onmessage = (e) => Y.applyUpdate(ydoc, new Uint8Array(e.data))
-
-function addTodo(title: string) {
-  todos.push([{ title, done: false }])
+// Register for full TypeScript inference
+declare module 'jazz-vue' {
+  interface Register { Account: typeof MyAccount }
 }
-// ✅ Fully open-source, P2P possible — truly local-first
-// ✅ You choose the transport: WebSocket, WebRTC, file sync
+
+createApp(RootComponent).mount('#app')
 ```
 
 <!--
-Yjs gives you CRDTs. You bring the backend. Here we're using Nuxt + Nitro WebSocket — but you could use WebRTC for peer-to-peer, or even file sync via Dropbox. Maximum flexibility, full ownership.
+jazz-vue gives you JazzProvider — wrap your app, pass the schema and auth method.
+
+- useDemoAuth for prototyping — swap to passkeys for production
+- peer points to Jazz Cloud — or your own sync server
+- The Register interface gives you full TypeScript inference everywhere
+
+That is it. Your app is now syncing.
+
+TRANSITION: Now the fun part — using it in components...
 -->
 
 ---
 
-# Dexie — IndexedDB + Optional Cloud
+# Jazz + Vue — Reactive Data
 
-```ts
-// Dexie — IndexedDB wrapper + optional cloud
-import { liveQuery } from 'dexie'
-import { useObservable } from '@vueuse/rxjs'
-import { from } from 'rxjs'
-import { db } from './db'
+```vue
+<script setup lang="ts">
+import { useCoState, useAccount } from 'jazz-vue'
+import { Todo, TodoList } from './schema'
 
-// In your component:
-const todos = useObservable(
-  from(liveQuery(() => db.todos.orderBy('createdAt').toArray()))
-)
+// Get current user
+const { me } = useAccount()
 
-async function addTodo(title: string) {
-  await db.todos.add({ title, done: false, createdAt: new Date() })
-}
-// ✅ Progressive: local-only → npm i dexie-cloud-addon → sync
-// ⚠ Server-side field-level merge (different fields auto-merge, same field = last-write-wins)
-```
+// Load a CoValue reactively — auto-subscribes to changes
+const todos = useCoState(TodoList, me.value?.root?.todos?.id)
 
-<!--
-Wraps IndexedDB. liveQuery is reactive like computed(). Start local-only, add Dexie Cloud later for sync. The easiest on-ramp — but Dexie Cloud is proprietary. Note: Dexie Cloud does field-level merge — different fields on the same object auto-merge, only same-field conflicts use last-write-wins.
--->
-
----
-
-# Jazz — Batteries-included
-
-```ts
-// Jazz — Batteries-included
-import { co, z } from 'jazz-tools'
-import { useCoState } from 'jazz-vue'
-
-const Todo = co.map({ title: z.string(), done: z.boolean() })
-const TodoList = co.list(Todo)
-
-// In your component:
-const todos = useCoState(TodoList, listId)
-
+// Write = just mutate. Jazz syncs it.
 function addTodo(title: string) {
   todos.value?.push(Todo.create({ title, done: false }))
 }
-// ✅ Auth, permissions, E2E encryption — all included
-// ✅ Real-time sync via Jazz Cloud or self-host
+
+function toggleTodo(todo: Todo) {
+  todo.done = !todo.done  // ← that's it. Synced. Offline-ready.
+}
+</script>
 ```
 
+<Callout type="info">
+
+`useCoState` returns a **reactive ref** that auto-subscribes to remote changes. Writes are local-first — instant, offline-capable, and synced via CRDTs.
+
+</Callout>
+
 <!--
-useCoState gives you a reactive reference. push() to write. Auth, permissions, encryption — all included. Zero boilerplate. The most ambitious vision — but still early.
+useCoState is the core composable. Give it a schema and an ID, you get a reactive ref.
+
+- It auto-subscribes. Remote changes appear instantly.
+- Writing? Just mutate the object. todo.done = !todo.done. That is it.
+- No fetch. No mutate. No invalidate. No loading state.
+- It works offline. It syncs when you reconnect. CRDTs handle conflicts.
+
+This is what the jQuery era of data being over actually looks like.
+
+TRANSITION: But what about access control?
+-->
+
+---
+clicks: 3
+---
+
+# Jazz — Permissions & Groups
+
+<div class="grid grid-cols-2 gap-6 mt-4">
+
+<div>
+
+```ts
+import { Group } from 'jazz-tools'
+
+// Create a group — you're admin
+const team = Group.create()
+
+// Add members with roles
+team.addMember(bob, 'writer')
+team.addMember(alice, 'reader')
+
+// Make something public
+team.addMember('everyone', 'reader')
+
+// Create data owned by the group
+const doc = Document.create(
+  { title: 'Shared Doc' },
+  { owner: team },
+)
+```
+
+</div>
+
+<div>
+
+<Card v-click="1" variant="muted" size="sm" class="mb-3">
+<div class="flex items-center gap-2 text-sm"><div class="i-ph-crown text-brand" /> <strong>admin</strong> — add/remove members, delete</div>
+</Card>
+
+<Card v-click="2" variant="muted" size="sm" class="mb-3">
+<div class="flex items-center gap-2 text-sm"><div class="i-ph-pencil text-brand" /> <strong>writer</strong> — create and edit content</div>
+</Card>
+
+<Card v-click="3" variant="muted" size="sm">
+<div class="flex items-center gap-2 text-sm"><div class="i-ph-eye text-brand" /> <strong>reader</strong> — view only</div>
+</Card>
+
+</div>
+
+</div>
+
+<!--
+Permissions in Jazz are not bolted on — they are part of the data model.
+
+- Group.create() — you are automatically admin
+- addMember with a role: admin, writer, reader
+- Create data with owner: team — the group controls access
+
+CLICK — Admin — full control. Add members, remove members, delete.
+
+CLICK — Writer — create and edit. Cannot change membership.
+
+CLICK — Reader — view only. Cannot modify anything.
+
+And here is the kicker: these permissions are enforced cryptographically. Not by a server — by the encryption itself. Remove a member? Keys rotate automatically.
 -->
 
 ---
 
-# Zero — Server-authoritative Query Sync
+# Jazz — E2E Encryption & Security
 
-```ts
-// Zero — Server-authoritative query sync
-import { createZeroComposables } from 'zero-vue'
-import { schema } from './schema'
+<div class="grid grid-cols-2 gap-6 mt-6">
 
-const { useQuery, useZero } = createZeroComposables(schema)
+<div>
 
-// In your component:
-const zero = useZero()
-const todos = useQuery((z) => z.query.todo.orderBy('createdAt', 'asc'))
+<div class="grid gap-3">
+  <Card variant="muted" size="sm">
+    <div class="flex items-center gap-2 text-sm"><div class="i-ph-hash text-brand" /> <strong>BLAKE3</strong> — content-addressed hashing</div>
+  </Card>
+  <Card variant="muted" size="sm">
+    <div class="flex items-center gap-2 text-sm"><div class="i-ph-signature text-brand" /> <strong>Ed25519</strong> — every change is signed</div>
+  </Card>
+  <Card variant="muted" size="sm">
+    <div class="flex items-center gap-2 text-sm"><div class="i-ph-lock-key text-brand" /> <strong>XSalsa20</strong> — stream cipher encryption</div>
+  </Card>
+</div>
 
-function addTodo(title: string) {
-  zero.value.mutate.todo.insert({
-    id: crypto.randomUUID(), title, done: false,
-  })
-}
-// ✅ Instant reads from client-side SQLite cache
-// ⚠ Server is source of truth — not truly local-first
-```
+</div>
+
+<div>
+
+<div class="grid gap-3">
+  <div class="flex items-center gap-2 text-sm"><div class="i-ph-check-circle text-emerald-400" /> Privacy by default — encrypted even on Jazz Cloud</div>
+  <div class="flex items-center gap-2 text-sm"><div class="i-ph-check-circle text-emerald-400" /> Automatic key rotation when members are removed</div>
+  <div class="flex items-center gap-2 text-sm"><div class="i-ph-check-circle text-emerald-400" /> Every transaction cryptographically signed</div>
+  <div class="flex items-center gap-2 text-sm"><div class="i-ph-check-circle text-emerald-400" /> Zero-trust architecture — server is just a relay</div>
+</div>
+
+</div>
+
+</div>
+
+<Callout type="info">
+
+The server **never** sees your data in plaintext. It relays encrypted bytes — nothing more. This is what makes criterion 3 (data survives the developer) architecturally possible.
+
+</Callout>
 
 <!--
-Server-authoritative. Postgres on the server, SQLite cache on the client. Great DX. Reads work offline from the local cache, but writes require the server. I'm showing this because it's important to understand the CONTRAST with true local-first.
+Jazz does not just encrypt in transit — it encrypts at rest, even on their own servers.
+
+- BLAKE3 for content hashing, Ed25519 for signatures, XSalsa20 for encryption
+- Every single change is cryptographically signed — you can verify who wrote what
+- Remove a member from a group? Keys rotate automatically, they lose access to future data
+- The server is just a relay. Zero-trust.
+
+Remember criterion 3 — data survives the developer shutting down? With E2E encryption and open-source sync, that becomes architecturally real.
 -->
 
 ---
@@ -1247,146 +1404,18 @@ PWA · real-time collaboration · offline support · everyone in the room can po
 </div>
 
 <!--
-LIVE DEMO — Cat Chat App (Jazz + Nuxt)
+This is a cat chat app built with Jazz and Nuxt. A PWA with real-time sync, offline writes, and zero backend code from me.
 
-Setup: Open the cat chat PWA on your phone + laptop. Share the URL with the audience.
+Demo steps:
+- Show the app — a simple chat where anyone can post cat messages
+- Post a message from your laptop — audience sees it appear instantly
+- Toggle airplane mode on your phone — keep posting messages
+- Reconnect — messages sync automatically, no data lost
+- Invite audience to open the URL on their phones
 
-1. Show the app — a simple chat where anyone can post cat messages
-2. Post a message from your laptop — audience sees it appear instantly on the projected screen
-3. Toggle airplane mode on your phone — keep posting messages
-4. Reconnect — messages sync automatically, no data lost
-5. Invite audience to open the URL on their phones — show real-time collaboration with the whole room
+Schema, JazzProvider, useCoState — that is the entire data layer you just saw. Everyone in this room is collaborating right now — Jazz handles all the conflict resolution via CRDTs.
 
-KEY POINTS:
-- "This is Jazz + Nuxt. A PWA. Real-time sync. Offline writes. Zero backend code from me."
-- "Everyone in this room is collaborating right now — and Jazz handles all the conflict resolution we just talked about."
-- "Toggle airplane mode — keep chatting — reconnect — everything merges. That's CRDTs in action."
-
-If demo fails: "Conference WiFi strikes again — but the offline part still works!" Show your phone with queued messages.
--->
-
----
-clicks: 5
----
-
-# Choosing the Right Engine
-
-<div class="text-sm mt-2">
-<table class="w-full">
-  <thead>
-    <tr class="border-b border-white/20">
-      <th class="text-left py-1.5 pr-2"></th>
-      <th class="text-center py-1.5 px-1 text-xs">Maturity</th>
-      <th class="text-center py-1.5 px-1 text-xs">Conflicts</th>
-      <th class="text-center py-1.5 px-1 text-xs">Offline R/W</th>
-      <th class="text-center py-1.5 px-1 text-xs">Vendor-free</th>
-      <th class="text-left py-1.5 px-1 text-xs">Vue</th>
-      <th class="text-left py-1.5 px-1 text-xs">Best for</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-click="1" class="border-b border-white/5">
-      <td class="py-1.5 pr-2 font-semibold text-brand">Yjs</td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">10+ yrs</span></td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">CRDT</span></td>
-      <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
-      <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
-      <td class="py-1.5 px-1 text-xs">DIY composable</td>
-      <td class="py-1.5 px-1 text-xs">Collab-first apps (docs, whiteboards)</td>
-    </tr>
-    <tr v-click="2" class="border-b border-white/5">
-      <td class="py-1.5 pr-2 font-semibold text-brand">Dexie</td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">10+ yrs</span></td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Server merge</span></td>
-      <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
-      <td class="text-center py-1.5 px-1 text-red-400">No</td>
-      <td class="py-1.5 px-1 text-xs">liveQuery + VueUse</td>
-      <td class="py-1.5 px-1 text-xs">Adding sync to existing apps</td>
-    </tr>
-    <tr v-click="3" class="border-b border-white/5">
-      <td class="py-1.5 pr-2 font-semibold text-brand">Jazz</td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Early</span></td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">CRDT</span></td>
-      <td class="text-center py-1.5 px-1 text-emerald-400">Yes</td>
-      <td class="text-center py-1.5 px-1 text-yellow-400">~</td>
-      <td class="py-1.5 px-1 text-xs">jazz-vue</td>
-      <td class="py-1.5 px-1 text-xs">New apps that want everything built-in</td>
-    </tr>
-    <tr v-click="4" class="border-b border-white/5">
-      <td class="py-1.5 pr-2 font-semibold text-brand">Zero</td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">Alpha</span></td>
-      <td class="text-center py-1.5 px-1"><span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-mono">Server</span></td>
-      <td class="text-center py-1.5 px-1 text-yellow-400">Read only</td>
-      <td class="text-center py-1.5 px-1 text-red-400">No</td>
-      <td class="py-1.5 px-1 text-xs">zero-vue</td>
-      <td class="py-1.5 px-1 text-xs">Server-first apps that want speed</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<Callout v-click="5" type="info">
-
-**No one-size-fits-all.** Yjs is the most battle-tested and truly vendor-free. Dexie is the easiest on-ramp. Jazz is the most ambitious vision. Zero is great DX but server-first. Pick based on your app's needs.
-
-</Callout>
-
-<!--
-One table, four engines. Sorted by maturity — most proven first.
-
-CLICK 1: "Yjs — 10+ years in production, fully vendor-free. P2P possible. Best if you're building something collaborative like docs or whiteboards."
-
-CLICK 2: "Dexie — 10+ years, battle-tested IndexedDB wrapper. Easiest entry point. But Dexie Cloud is proprietary — that red No matters."
-
-CLICK 3: "Jazz — early but ambitious. Everything built in. Self-hostable, so you GET close to vendor-free. Best for greenfield apps."
-
-CLICK 4: "Zero — great DX but notice: reads work offline, but writes require the server. No vendor independence. Server-first with a fast cache."
-
-CLICK 5 (callout): "No one-size-fits-all. The right choice depends on YOUR app."
-
-TRANSITION: "But before we move on — a quick cheat sheet."
-
-[CHECK: ~18:00]
--->
-
----
-clicks: 4
----
-
-# Quick Decision Guide
-
-<div class="grid gap-3 mt-6">
-  <div v-click="1" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-    <div class="text-brand font-bold text-lg shrink-0">?</div>
-    <div class="text-sm"><strong>Need real-time collab</strong> (docs, whiteboards)?</div>
-    <div class="text-brand font-bold ml-auto shrink-0">→ Yjs</div>
-  </div>
-  <div v-click="2" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-    <div class="text-brand font-bold text-lg shrink-0">?</div>
-    <div class="text-sm"><strong>Adding sync to an existing Vue app</strong>?</div>
-    <div class="text-brand font-bold ml-auto shrink-0">→ Dexie</div>
-  </div>
-  <div v-click="3" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-    <div class="text-brand font-bold text-lg shrink-0">?</div>
-    <div class="text-sm"><strong>Greenfield app</strong>, want everything built-in?</div>
-    <div class="text-brand font-bold ml-auto shrink-0">→ Jazz</div>
-  </div>
-  <div v-click="4" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-    <div class="text-brand font-bold text-lg shrink-0">?</div>
-    <div class="text-sm"><strong>Server-first</strong>, want instant reads?</div>
-    <div class="text-brand font-bold ml-auto shrink-0">→ Zero</div>
-  </div>
-</div>
-
-<!--
-"A quick cheat sheet — match your situation to the engine."
-
-CLICK 1: "Real-time collab? Yjs. Battle-tested, P2P possible."
-CLICK 2: "Existing Vue app? Dexie. Easiest migration path."
-CLICK 3: "Greenfield? Jazz. Everything built in."
-CLICK 4: "Server-first speed? Zero. Great DX, but not truly local-first."
-
-TRANSITION: "But are any of these truly local-first? Let's find out."
+TRANSITION: But are any of these truly local-first? Let's find out.
 -->
 
 ---
@@ -1403,15 +1432,9 @@ Martin Kleppmann defines truly local-first with three criteria.
 </div>
 
 <!--
-PAUSE — build tension.
+We have seen the landscape. But which of these are actually local-first?
 
-"We've seen the landscape. But which of these are actually local-first?"
-
-CLICK — reveal the sub-question.
-
-"Martin Kleppmann — co-author of the Ink & Switch paper and creator of Automerge — boils it down to three criteria."
-
-[CHECK: ~18:30]
+CLICK — Martin Kleppmann, the co-author of the Ink and Switch paper and creator of Automerge, boils it down to three criteria.
 -->
 
 ---
@@ -1442,17 +1465,15 @@ Criterion 3 is the hardest — and it's what separates **offline-first** from **
 </div>
 
 <!--
-Build progressively — this is a key conceptual moment.
+CLICK — First: the app must work offline — not just reads, but writes too.
 
-CLICK 1: "First: the app must work offline — not just reads, but WRITES too."
-CLICK 2: "Second: collaboration. Multiple devices, multiple users, changes merge."
-CLICK 3: "Third — and this is the big one — your data survives the developer shutting down."
+CLICK — Second: collaboration. Multiple devices, multiple users, changes merge.
 
-PAUSE — let criterion 3 sink in. Point at it.
+CLICK — Third — and this is the big one — your data survives the developer shutting down.
 
-CLICK 4: "This third criterion is what separates offline-first from truly local-first. It's the dealbreaker."
+CLICK — This third criterion is what separates offline-first from truly local-first. It is the dealbreaker.
 
-TRANSITION: "So what would it take to actually satisfy criterion 3?"
+TRANSITION: So what would it take to actually satisfy criterion 3?
 -->
 
 ---
@@ -1499,16 +1520,17 @@ Each step improves resilience, but none is the full answer. Notice: the P2P opti
 </Callout>
 
 <!--
-Build the table progressively — worst to best:
+CLICK — Proprietary servers — zero protection. They shut down, you are done.
 
-CLICK 1: "Proprietary servers — zero protection. They shut down, you're done."
-CLICK 2: "Open-source self-hostable — better. But who runs a server for your grandma?"
-CLICK 3: "Peer-to-peer — no central server! But... offline peers can't find each other."
-CLICK 4: "File sync — Dropbox, iCloud. Actually the MOST resilient! But real-time collab breaks."
+CLICK — Open-source self-hostable — better. But who runs a server for your grandma?
 
-CLICK 5 (callout): "No single approach nails it. But notice the P2P option — it needs conflict resolution WITHOUT a central authority."
+CLICK — Peer-to-peer — no central server! But offline peers cannot find each other.
 
-TRANSITION: "Now let's update our scorecard with what sync engines give us."
+CLICK — File sync — Dropbox, iCloud. Actually the most resilient! But real-time collaboration breaks.
+
+CLICK — No single approach nails it. But notice the P2P option — it needs conflict resolution without a central authority.
+
+TRANSITION: Now let's update our scorecard with what sync engines give us.
 -->
 
 ---
@@ -1556,15 +1578,13 @@ TRANSITION: "Now let's update our scorecard with what sync engines give us."
 </div>
 
 <!--
-CLICK 1: "From 2 to 4. Sync engines add multi-device and collaboration."
-CLICK 2: Point at the 7 cards — "Two green from before, two new pink stars."
-CLICK 3: "But three question marks remain."
+CLICK — From 2 to 4. Sync engines add multi-device and collaboration.
 
-PAUSE.
+CLICK — Two green from before, two new pink stars.
 
-"Turns out — they're not technology problems at all."
+CLICK — But three question marks remain.
 
-TRANSITION: "They're values."
+Turns out — they are not technology problems at all. They are values.
 -->
 
 ---
@@ -1574,13 +1594,7 @@ transition: fade
 <PartSlide part="3" title="Local-First" subtitle="It's About Values, Not Just Technology" />
 
 <!--
-Section transition — this is the philosophical turn. Slow down.
-
-"We've been tracking a scorecard. 0, then 2, then 4. Now let's reveal what those 7 actually are."
-
-BREATHE.
-
-[CHECK: ~23:00 — if past 25:00, speed up closing slides]
+We have been tracking a scorecard. 0, then 2, then 4. Now let's reveal what those 7 actually are.
 -->
 
 ---
@@ -1615,15 +1629,13 @@ From the Ink & Switch essay on local-first software (2019):
 </div>
 
 <!--
-From the Ink & Switch essay (2019) — the foundational text.
+These come from the Ink and Switch essay from 2019, the foundational text.
 
-CLICK 1 — Technology: "The first four we already know. Fast, multi-device, offline, collaboration. Technology."
+CLICK — The first four we already know. Fast, multi-device, offline, collaboration. These are technology.
 
-CLICK 2 — Values: "But THESE three — longevity, privacy, user control..."
+CLICK — But these three — longevity, privacy, user control...
 
-PAUSE.
-
-"These are VALUES. Not features. That's what makes local-first fundamentally different from just another architecture pattern. It's a philosophy about who owns the data."
+These are values. Not features. That is what makes local-first fundamentally different from just another architecture pattern. It is a philosophy about who owns the data.
 -->
 
 ---
@@ -1677,15 +1689,11 @@ Server can't reject your write → it just relays
 </div>
 
 <!--
-Point left: "Offline-first asks: how do I keep working without a server? The server is still the OWNER. Client is a cache."
+Offline-first asks: how do I keep working without a server? The server is still the owner. The client is a cache.
 
-Point right: "Local-first asks a different question entirely: why does the server own my data AT ALL?"
+Local-first asks a different question entirely: why does the server own my data at all?
 
-PAUSE — let the contrast land.
-
-"YOU are the owner. Server is a utility. It can't reject your writes. It just relays them."
-
-- This is the single most important conceptual shift in the talk
+You are the owner. The server is a utility. It cannot reject your writes. It just relays them.
 -->
 
 ---
@@ -1711,14 +1719,13 @@ The app that comes closest to nailing all 7 ideals? **Obsidian.**
 </Callout>
 
 <!--
-"The app that comes closest to all 7? Obsidian."
+The app that comes closest to all 7? Obsidian.
 
-- Don't read the list — audience can read
-- Key point: "It works because it's just markdown files on your disk."
-- "But on the WEB? We don't have a filesystem. We need IndexedDB or SQLite plus a sync layer."
-- "And every sync engine today ties you to their cloud."
+It works because it is just markdown files on your disk.
 
-TRANSITION: "So what's missing?"
+But on the web? We do not have a filesystem. We need IndexedDB or SQLite plus a sync layer. And every sync engine today ties you to their cloud.
+
+TRANSITION: So what is missing?
 -->
 
 ---
@@ -1748,9 +1755,9 @@ They shut down? Sync is gone. Switch provider? Rewrite your app.
 </div>
 
 <!--
-Point at diagram: "Today — every sync engine locks you to one cloud."
+Today, every sync engine locks you to one cloud.
 
-"They shut down? Sync is gone. Switch provider? Rewrite your app."
+They shut down? Sync is gone. Switch provider? Rewrite your app.
 -->
 
 ---
@@ -1784,16 +1791,13 @@ Like email: pick Gmail, Fastmail, self-host — the protocol is the same.
 </div>
 
 <!--
-Point at diagram: "The endgame — open protocol, MULTIPLE backends. AWS for convenience, self-hosted for control, P2P for resilience. All active at once."
+The endgame — an open protocol with multiple backends. AWS for convenience, self-hosted for control, P2P for resilience. All active at once.
 
-"Like email. Pick Gmail, Fastmail, self-host. The protocol is the same. Your data moves freely."
+Like email. Pick Gmail, Fastmail, self-host. The protocol is the same. Your data moves freely.
 
-- This doesn't fully exist yet — but this is where the ecosystem is heading
-- THIS is what makes ideals 5, 6, 7 possible
+This does not fully exist yet — but this is where the ecosystem is heading. And this is what makes ideals 5, 6, 7 possible.
 
-TRANSITION: "Now — is this idealistic? Yes. But..."
-
-[CHECK: ~25:00 — entering closing]
+TRANSITION: Now — is this idealistic? Yes. But...
 -->
 
 ---
@@ -1815,15 +1819,15 @@ Historical parallels:
 We're in the <span v-mark="{ type: 'underline', color: '#ff6bed' }" class="font-bold">pragmatist phase</span> — the tools aren't perfect, but you can start today.
 
 <!--
-Adam Wiggins = co-founder of Heroku.
+Movements succeed when idealists define the vision and pragmatists build the infrastructure.
 
-Build with clicks:
+CLICK — Cypherpunks dreamed of encrypted communication. Decades later: Let's Encrypt.
 
-CLICK 1: "Cypherpunks dreamed of encrypted communication. Decades later: Let's Encrypt."
-CLICK 2: "Free software idealists. Decades later: GitHub and npm."
-CLICK 3: "Local-first ideals. The pragmatic infrastructure is... being built right now."
+CLICK — Free software idealists. Decades later: GitHub and npm.
 
-"We're in the pragmatist phase. The tools aren't perfect. But they're good enough to start."
+CLICK — Local-first ideals. The pragmatic infrastructure is being built right now.
+
+We are in the pragmatist phase. The tools are not perfect. But they are good enough to start.
 -->
 
 ---
@@ -1855,17 +1859,17 @@ The generic sync engine is coming. When it arrives, upgrading from offline-first
 </Card>
 
 <!--
-"So what can you do on Monday?"
+So what can you do on Monday?
 
-CLICK 1: "Step one: pick a sync engine. Dexie for the easiest start, Jazz for batteries-included, Yjs for flexibility. Each gets you closer to local-first."
+CLICK — Step one: pick a sync engine. Dexie for the easiest start, Jazz for batteries-included, Yjs for flexibility. Each gets you closer to local-first.
 
-CLICK 2: "Step two: add a download button. Let users export their data. JSON, CSV — whatever. That's the SIMPLEST local-first gesture."
+CLICK — Step two: add a download button. Let users export their data. JSON, CSV — whatever. That is the simplest local-first gesture.
 
-CLICK 3: "Step three: watch this space. When the generic sync protocol arrives, upgrading will be a config change, not a rewrite."
+CLICK — Step three: watch this space. When the generic sync protocol arrives, upgrading will be a config change, not a rewrite.
 
-- "You're not betting on a specific vendor. You're betting on a PATTERN."
+You are not betting on a specific vendor. You are betting on a pattern.
 
-TRANSITION: "Let's see the full scorecard..."
+TRANSITION: Let's see the full scorecard...
 -->
 
 ---
@@ -1903,15 +1907,13 @@ Offline-first = a **subset** of local-first. Sync engines = a **bigger subset**.
 </Callout>
 
 <!--
-The payoff slide — build it progressively.
+CLICK — Technology row — 0, 2, 4... and local-first nails all four.
 
-CLICK 1: "Technology row — 0, 2, 4... and local-first nails all four."
-CLICK 2: "Values row — only local-first checks these. That's the gap."
-CLICK 3: "0, 2, 4, 7."
+CLICK — Values row — only local-first checks these. That is the gap.
 
-PAUSE — let the progression sink in.
+CLICK — 0, 2, 4, 7.
 
-"The first 4 are technology. The last 3 are values. That's the difference."
+The first 4 are technology. The last 3 are values. That is the difference.
 -->
 
 ---
@@ -1921,11 +1923,7 @@ transition: fade
 <PartSlide title="Closing" subtitle="The Rendering Era Is Over" />
 
 <!--
-BREATHE. You're almost done.
-
-"One more thing before I close."
-
-[CHECK: ~27:00 — if past 28:00, go straight to arc then thank you]
+One more thing before I close.
 -->
 
 ---
@@ -1948,16 +1946,15 @@ Vue's reactivity system was built for this — <code>ref()</code> + sync engine 
 </div>
 
 <!--
-Let the animation play. Then walk through the timeline:
+CLICK — jQuery — you were the sync engine.
 
-"jQuery — you were the sync engine."
-"Vue — the framework syncs the DOM."
-"Sync engines — the engine syncs the data."
-"Local-first — the USER owns the data."
+CLICK — Vue — the framework syncs the DOM.
 
-PAUSE.
+CLICK — Sync engines — the engine syncs the data.
 
-"We solved rendering. The data layer is where it's happening now. And Vue is perfectly positioned to be part of it."
+CLICK — Local-first — the user owns the data.
+
+CLICK — We solved rendering. The data layer is where it is happening now. And Vue is perfectly positioned to be part of it.
 -->
 
 ---
@@ -1980,14 +1977,9 @@ PAUSE.
 </div>
 
 <!--
-Don't read the list — just gesture.
+All the references are here and will be on the slides page.
 
-"All the references are here and will be on the slides page."
-
-- Only call out: "The Ink & Switch essay is the foundational read. Start there."
-- "My article compares 7 sync engines through Vue's lens — link on the next slide."
-
-TRANSITION: "Thank you."
+The Ink and Switch essay is the foundational read. Start there. My article compares 7 sync engines through Vue's lens — link on the next slide.
 -->
 
 ---
@@ -2016,13 +2008,7 @@ Slides, references & sync engine comparison
 </div>
 
 <!--
-EYE CONTACT. Smile.
+Thank you!
 
-"Thank you!"
-
-PAUSE — wait for applause to start.
-
-"Slides and all the links are at alexop.dev/vue-amsterdam. Come find me if you want to chat about local-first. Thank you!"
-
-[TARGET: ~28:00-30:00]
+Slides and all the links are at alexop.dev/vue-amsterdam. Come find me if you want to chat about local-first. Thank you!
 -->
