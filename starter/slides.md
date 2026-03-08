@@ -873,7 +873,7 @@ Not two answers -- it's a SPECTRUM
 -->
 
 ---
-clicks: 5
+clicks: 3
 ---
 
 # Conflict Resolution: It's a Spectrum
@@ -881,18 +881,16 @@ clicks: 5
 <ConflictSpectrumDiagram
   :items="[
     { id: 'lww', label: 'Last-Write-Wins', subtitle: 'Fastest', pro: 'Simple & fast', con: 'Loses data', variant: 'danger', weight: 1 },
-    { id: 'server', label: 'Server Authority', subtitle: 'Centralized', pro: 'Biz rules', con: 'Needs server', variant: 'muted', click: 1, weight: 2 },
-    { id: 'oplog', label: 'Operation Logs', subtitle: 'Replayable', pro: 'Full history', con: 'Storage cost', variant: 'default', click: 2, weight: 3 },
-    { id: 'crdt', label: 'CRDTs', subtitle: 'Auto-converge', pro: 'No server', con: 'Complex types', variant: 'success', click: 3, weight: 4 },
-    { id: 'hybrid', label: 'Hybrid / Manual', subtitle: 'User decides', pro: 'Full control', con: 'UX complexity', variant: 'accent', click: 4, weight: 5 },
+    { id: 'crdt', label: 'CRDTs', subtitle: 'Auto-converge', pro: 'No server', con: 'Complex types', variant: 'success', click: 1, weight: 3 },
+    { id: 'hybrid', label: 'Hybrid / Manual', subtitle: 'User decides', pro: 'Full control', con: 'UX complexity', variant: 'accent', click: 2, weight: 5 },
   ]"
   :roughness="1.2"
   :seed="777"
 />
 
-<Callout v-click="5" type="info">
+<Callout v-click="3" type="info">
 
-Most sync engines **combine strategies** — auto-merge where possible, escalate where necessary.
+What if you got LWW's simplicity with CRDT's guarantees? That's exactly what a **CoMap** is.
 
 </Callout>
 
@@ -901,22 +899,17 @@ Full picture before the two main camps
 
 LWW -- simplest. Last save wins. Fast, but LOSES data.
 
-CLICK -- Server decides. Business rules. But needs a server.
-
-CLICK -- Operation logs. Save every op. Replay, reorder, merge.
-
 CLICK -- CRDTs. Math guarantees convergence. No server needed.
 
 CLICK -- Hybrid. Surface conflict to user (like Git merge).
 
-CLICK -- Key insight: production = COMBINED strategies
-Auto-merge names, LWW timestamps, user-prompt for docs
+CLICK -- What if LWW simplicity + CRDT guarantees? That's a CoMap.
 
 TRANSITION: Two main camps for local-first...
 -->
 
 ---
-clicks: 4
+clicks: 2
 ---
 
 # The Hardest Problem: Where Do You Resolve Conflicts?
@@ -957,14 +950,6 @@ clicks: 4
 
 </div>
 
-<Callout v-click="3" type="info">
-
-Client-side resolution makes **true local-first** possible — but requires **CRDTs** to guarantee convergence.
-
-</Callout>
-
-
-
 <!--
 Two places conflict resolution can live
 
@@ -976,12 +961,6 @@ CLICK -- Client decides. Every device resolves on its own.
 Server = dumb relay. Can go fully P2P.
 Hard part: merges must ALWAYS converge.
 Yjs + Jazz = this approach.
-
-CLICK -- Client-side = true local-first possible
-But needs MATH. Needs CRDTs.
-
-CLICK -- Third option: let the USER decide (Git merge conflicts)
-Production = hybrid. Auto-merge what you can, escalate the rest.
 
 TRANSITION: What are CRDTs, and how do they work?
 -->
@@ -1017,7 +996,122 @@ CLICK -- Real objects, three rules:
 [look up]
 Server needs ZERO conflict logic -- just relays bytes
 
-TRANSITION: Now the landscape...
+TRANSITION: But a counter is just numbers. Real apps have objects...
+-->
+
+---
+layout: statement
+clicks: 1
+---
+
+# From Counter to Map
+
+G-Counter = one number per peer. But real apps have **objects with fields**.
+
+<div v-click="1" class="mt-8 text-lg op-80">
+
+Each field stores `{ value, timestamp, peerId }` — an **LWW Register**.
+
+Many registers together → an **LWW Map**.
+
+</div>
+
+<!--
+Counter was great for the concept. But real data = objects.
+
+A todo has title, done, assignee. Not just a number.
+
+CLICK -- Each field is an LWW Register. Value + timestamp + who wrote it.
+Put many registers together? You get an LWW Map.
+
+TRANSITION: Let me show you exactly how this merges...
+-->
+
+---
+clicks: 4
+---
+
+# The LWW Map — How Real Objects Merge
+
+<CoMapDiagram :roughness="1.2" :seed="900" />
+
+<!--
+A CoMap -- like a database row but with a globally unique ID.
+
+CLICK -- Alice creates todo: title + done. Both at 8:01.
+
+CLICK -- Bob edits title on one device, toggles done on another -- all offline.
+
+CLICK -- Reconnect: per-field LWW. Title conflict -- latest wins (8:03 > 8:01). Done -- no conflict, both survive.
+
+CLICK -- THIS is the CoMap. Every field is an LWW register.
+Two simple rules cover everything:
+✓ Different fields → both survive
+⚡ Same field → latest timestamp wins
+
+TRANSITION: So what if your database worked like this?
+-->
+
+---
+clicks: 2
+---
+
+# What If Your Database WAS a CRDT?
+
+<div class="grid grid-cols-2 gap-8 mt-6">
+
+<div v-click="1">
+
+<Card variant="muted" size="lg">
+
+<div class="text-sm font-bold text-brand mb-2 flex items-center gap-2"><div class="i-ph-stack-bold" /> Traditional Stack</div>
+
+1. Define schema
+2. Write SQL migrations
+3. Build REST/GraphQL API
+4. Add caching layer
+5. Implement sync logic
+6. Handle conflict resolution
+
+<div class="mt-2 text-xs op-50">6 layers between your data and your UI</div>
+
+</Card>
+
+</div>
+
+<div v-click="2">
+
+<Card size="lg" glow>
+
+<div class="text-sm font-bold text-brand mb-2 flex items-center gap-2"><div class="i-ph-lightning-bold" /> What If...</div>
+
+1. Define schema
+2. **Done.**
+
+Schema IS the CRDT.
+
+Database IS the sync engine.
+
+<div class="mt-2 text-xs op-50">The schema is all you need</div>
+
+</Card>
+
+</div>
+
+</div>
+
+<!--
+Traditional stack -- you all know this.
+
+CLICK -- Schema, migrations, API, cache, sync, conflicts. SIX layers.
+Every layer = more code, more bugs, more maintenance.
+
+CLICK -- What if: define schema, done. Schema IS the CRDT.
+Database IS the sync engine. No API. No cache. No conflict code.
+
+[pause] That's not a dream. That's Jazz.
+
+TRANSITION: Let's look at the landscape and then dive into Jazz...
 -->
 
 ---
@@ -1042,13 +1136,62 @@ transition: fade
 
 # Why Jazz?
 
-<div class="mt-4 text-xl op-70">The most batteries-included option — with official Vue community bindings.</div>
+<div class="mt-4 text-xl op-70">The database that syncs — with official Vue bindings.</div>
 
 <!--
 Most AMBITIOUS engine -- only one with first-class Vue support
 community-jazz-vue on their GitHub
 
 Let me show you what you get -- starting with the SIMPLEST possible example...
+-->
+
+---
+clicks: 3
+---
+
+# CoValues — One Abstraction, Three Problems Solved
+
+<div class="text-center text-sm op-60 mb-4">
+The CoMap you just saw? That's a CoValue. Jazz adds persistence and encryption on top.
+</div>
+
+<div class="flex justify-center">
+<FlowDiagram
+  :nodes="[
+    { id: 'covalue', label: 'CoValue', subtitle: 'co.map / co.list', variant: 'accent' },
+    { id: 'sync', label: 'Sync', subtitle: 'Real-time CRDT merge', click: 1 },
+    { id: 'persist', label: 'Persistence', subtitle: 'IndexedDB, offline-first', click: 2 },
+    { id: 'security', label: 'Security', subtitle: 'Groups, roles, E2E encryption', click: 3 },
+  ]"
+  :edges="[
+    { from: 'covalue', to: 'sync', click: 1 },
+    { from: 'covalue', to: 'persist', click: 2 },
+    { from: 'covalue', to: 'security', click: 3 },
+  ]"
+  layout="fan-right"
+  :node-width="220"
+  :node-height="80"
+  :gap="140"
+/>
+</div>
+
+<div v-click="3" class="text-center mt-6 text-sm op-60">
+You define the shape. Jazz handles sync, storage, and access control automatically.
+</div>
+
+<!--
+The CoMap you just saw? That's a CoValue. Jazz adds persistence and encryption on top.
+
+CLICK -- SYNC. Every CoValue is a CRDT. Changes merge automatically, even offline, even with conflicts. Real-time across all connected peers.
+
+CLICK -- PERSISTENCE. Automatically persisted to IndexedDB. Offline-first by default. No cache layer.
+
+CLICK -- SECURITY. Every CoValue belongs to a Group. Roles: admin, writer, reader. End-to-end encrypted. Server is just a relay.
+
+[look up]
+One abstraction. Three problems that usually take THREE separate libraries.
+
+TRANSITION: Let's see this in code...
 -->
 
 ---
@@ -1134,52 +1277,6 @@ CLICK: [slow down] That increment... is synced in real-time, persisted offline, 
 
 [pause] [look up]
 Three lines of schema. A few lines of component. ENTIRE data layer.
-
-TRANSITION: But how does this work? What IS a CoValue?
--->
-
----
-clicks: 3
----
-
-# CoValues — One Abstraction, Three Problems Solved
-
-<div class="flex justify-center mt-8">
-<FlowDiagram
-  :nodes="[
-    { id: 'covalue', label: 'CoValue', subtitle: 'co.map / co.list', variant: 'accent' },
-    { id: 'sync', label: 'Sync', subtitle: 'Real-time CRDT merge', click: 1 },
-    { id: 'persist', label: 'Persistence', subtitle: 'IndexedDB, offline-first', click: 2 },
-    { id: 'security', label: 'Security', subtitle: 'Groups, roles, E2E encryption', click: 3 },
-  ]"
-  :edges="[
-    { from: 'covalue', to: 'sync', click: 1 },
-    { from: 'covalue', to: 'persist', click: 2 },
-    { from: 'covalue', to: 'security', click: 3 },
-  ]"
-  layout="fan-right"
-  :node-width="220"
-  :node-height="80"
-  :gap="140"
-/>
-</div>
-
-<div v-click="3" class="text-center mt-6 text-sm op-60">
-You define the shape. Jazz handles sync, storage, and access control automatically.
-</div>
-
-<!--
-So what IS a CoValue? The core abstraction.
-
-CLICK -- SYNC. Every CoValue is a CRDT. Changes merge automatically, even offline, even with conflicts. Real-time across all connected peers.
-
-CLICK -- PERSISTENCE. Automatically persisted to IndexedDB. Offline-first by default. No cache layer.
-
-CLICK -- SECURITY. Every CoValue belongs to a Group. Roles: admin, writer, reader. End-to-end encrypted. Server is just a relay.
-
-[look up]
-One abstraction. Three problems that usually take THREE separate libraries.
-That counter.count++ from the last slide? Synced, persisted, AND encrypted. All at once.
 
 TRANSITION: Let's build something real...
 -->
