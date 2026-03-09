@@ -20,11 +20,13 @@ const clicks = computed(() => $clicksContext.current)
 // Click 2: Peer A = 1
 // Click 3: Peer B = 2
 // Click 4: Sync & show results
+// Click 5: Both back online, showing merged value
 
-const offline = computed(() => clicks.value >= 1)
+const offline = computed(() => clicks.value >= 1 && clicks.value < 5)
 const peerA = computed(() => clicks.value >= 2 ? 1 : 0)
 const peerB = computed(() => clicks.value >= 3 ? 2 : 0)
 const synced = computed(() => clicks.value >= 4)
+const bothOnline = computed(() => clicks.value >= 5)
 
 // --- Computed results ---
 const lwwResult = computed(() => Math.max(peerA.value, peerB.value))
@@ -52,12 +54,13 @@ const mergeBoxX = (svgW - mergeBoxW) / 2
     <!-- Status bar -->
     <div class="controls">
       <div class="step-indicator">
-        <span v-if="!offline" class="step-label">Both peers online</span>
+        <span v-if="bothOnline" class="step-label">Both peers online & in sync</span>
+        <span v-else-if="!offline" class="step-label">Both peers online</span>
         <span v-else-if="!synced" class="step-label">Peers working offline</span>
         <span v-else class="step-label">Reconnected & merged</span>
       </div>
       <div class="status" :class="offline ? 'status--offline' : 'status--online'">
-        {{ offline ? (synced ? 'Synced!' : 'Offline') : 'Online' }}
+        {{ offline ? (synced ? 'Synced!' : 'Offline') : (bothOnline ? 'Synced!' : 'Online') }}
       </div>
     </div>
 
@@ -65,14 +68,14 @@ const mergeBoxX = (svgW - mergeBoxW) / 2
       <!-- ===== PEER A ===== -->
       <RoughRect
         :x="peerAx" :y="peerY" :width="peerW" :height="peerH"
-        :variant="offline ? 'accent' : 'default'"
+        :variant="offline ? 'accent' : (bothOnline ? 'success' : 'default')"
         :seed="seed + 1"
       />
       <text :x="peerAx + peerW / 2" :y="peerY + 24" class="label-title" text-anchor="middle">PEER A</text>
 
       <!-- Counter display -->
       <text :x="peerAx + peerW / 2" :y="peerY + 85" class="counter-value" text-anchor="middle">
-        {{ peerA }}
+        {{ bothOnline ? crdtResult : peerA }}
       </text>
 
       <!-- +1 label when incrementing -->
@@ -97,13 +100,13 @@ const mergeBoxX = (svgW - mergeBoxW) / 2
       <!-- ===== PEER B ===== -->
       <RoughRect
         :x="peerBx" :y="peerY" :width="peerW" :height="peerH"
-        :variant="offline ? 'accent' : 'default'"
+        :variant="offline ? 'accent' : (bothOnline ? 'success' : 'default')"
         :seed="seed + 2"
       />
       <text :x="peerBx + peerW / 2" :y="peerY + 24" class="label-title" text-anchor="middle">PEER B</text>
 
       <text :x="peerBx + peerW / 2" :y="peerY + 85" class="counter-value" text-anchor="middle">
-        {{ peerB }}
+        {{ bothOnline ? crdtResult : peerB }}
       </text>
 
       <!-- +2 label when incrementing -->
@@ -182,8 +185,20 @@ const mergeBoxX = (svgW - mergeBoxW) / 2
         </text>
       </g>
 
+      <!-- ===== BOTH ONLINE: connection line between peers ===== -->
+      <g v-if="bothOnline" class="fade-in">
+        <RoughLine
+          :x1="peerAx + peerW + 10" :y1="peerY + peerH / 2"
+          :x2="peerBx - 10" :y2="peerY + peerH / 2"
+          stroke="rgba(52, 211, 153, 0.6)" :stroke-width="2" :seed="seed + 40"
+        />
+        <text :x="svgW / 2" :y="peerY + peerH / 2 - 12" class="label-synced" text-anchor="middle">
+          both = {{ crdtResult }}
+        </text>
+      </g>
+
       <!-- ===== HINT TEXT ===== -->
-      <foreignObject v-if="!offline" :x="svgW / 2 - 140" :y="peerY + peerH + 20" width="280" height="40">
+      <foreignObject v-if="!offline && !bothOnline" :x="svgW / 2 - 140" :y="peerY + peerH + 20" width="280" height="40">
         <div class="hint">Press next to go offline</div>
       </foreignObject>
       <foreignObject v-else-if="!synced && peerA === 0 && peerB === 0" :x="svgW / 2 - 160" :y="peerY + peerH + 20" width="320" height="40">
@@ -298,6 +313,15 @@ const mergeBoxX = (svgW - mergeBoxW) / 2
 
 .label-verdict--correct {
   fill: rgba(52, 211, 153, 0.7);
+}
+
+/* ---- Synced label ---- */
+.label-synced {
+  font-family: 'Geist Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  fill: rgba(52, 211, 153, 0.9);
+  letter-spacing: 0.05em;
 }
 
 /* ---- Increment label ---- */

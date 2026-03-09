@@ -96,8 +96,8 @@ Way fewer hands -- THAT gap is why we're here
   { title: 'The Status Quo', subtitle: 'Vue abstracts the DOM, not the data' },
   { title: 'Offline-First', subtitle: 'The app that never stops working' },
   { title: 'Sync Engines', subtitle: 'The new data layer' },
-  { title: 'Jazz', subtitle: 'The database that syncs' },
-  { title: 'Local-First', subtitle: `It's about values, not just technology` }
+  { title: 'Local-First', subtitle: 'More than just offline' },
+  { title: 'Jazz', subtitle: 'Local-first Vue in practice' }
 ]" />
 
 <!--
@@ -105,9 +105,9 @@ Overview -- universe is big, structured like this:
 
 - Status quo -- how apps are built today
 - Offline-first -- work without WiFi
-- Sync engines
-- Deep dive into ONE library
-- Define local-first at the end
+- Sync engines -- the new data layer
+- Local-first -- what it really means
+- Jazz -- build it for real
 
 TRANSITION: Let's start at the bottom -- the status quo.
 -->
@@ -763,97 +763,8 @@ Read/write locally -- instant
 Sync client handles replication in background
 
 THIS is what sync engines give you
--->
 
----
-
-# Who Uses Sync Engines?
-
-<div class="grid grid-cols-4 gap-4 mt-6">
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Linear</div>
-  <div class="text-xs op-50">Project management</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Figma</div>
-  <div class="text-xs op-50">Design tool</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Notion</div>
-  <div class="text-xs op-50">Knowledge management</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Superhuman</div>
-  <div class="text-xs op-50">Email client</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Excalidraw</div>
-  <div class="text-xs op-50">Whiteboard</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Google Docs</div>
-  <div class="text-xs op-50">Collaborative editing</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Pitch</div>
-  <div class="text-xs op-50">Presentations</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Obsidian</div>
-  <div class="text-xs op-50">Note-taking</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">AFFiNE</div>
-  <div class="text-xs op-50">Workspace editor</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Logseq</div>
-  <div class="text-xs op-50">Knowledge graph</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Tiptap</div>
-  <div class="text-xs op-50">Rich text editor</div>
-</div>
-
-<div class="px-4 py-3 rounded-lg bg-white/5 border border-white/10">
-  <div class="text-lg font-bold text-[#ff6bed]">Anytype</div>
-  <div class="text-xs op-50">Productivity platform</div>
-</div>
-
-</div>
-
-<div class="mt-6 text-lg text-gray-400 text-center">
-
-All chose sync engines for the same reasons: **instant UI**, **offline support**, and **real-time collaboration**.
-
-</div>
-
-<!--
-NOT a niche pattern
-
-[gesture] Every category -- most responsive apps use sync
-
-Why:
-- Instant UI -- no spinners
-- Offline -- queue + sync on reconnect
-- Real-time collab
-- COMPETITIVE advantage
-STAT: Linear's snappiness = #1 differentiator vs Jira
-Figma killed Sketch with real-time multiplayer
-
-[look up] Not for fun -- ONLY way to deliver the UX users demand
-
-TRANSITION: What's out there. But first -- one question they all answer differently.
+TRANSITION: But here's the fundamental question...
 -->
 
 ---
@@ -861,15 +772,105 @@ layout: statement
 transition: fade
 ---
 
-# Before We Look at Engines...
+# The Fundamental Problem
 
-<div class="mt-4 text-xl op-70">They all solve the same fundamental problem differently.</div>
+<div class="mt-4 text-xl op-70">Two devices go offline. Both edit the same data. How do you merge?</div>
 
 <!--
-Same architecture, DIFFERENT answer to one question:
-Two devices, same data, offline -- who decides?
+Two devices, same data, offline edits — how do you merge?
 
-Not two answers -- it's a SPECTRUM
+Let me show you the most elegant solution first...
+-->
+
+---
+clicks: 5
+---
+
+# CRDTs: Merge Without a Server
+
+<CrdtCounterDemo :roughness="1.2" :seed="800" />
+
+
+<!--
+CLICK -- Two peers go offline
+
+CLICK -- Peer A: +1
+
+CLICK -- Peer B: +2, independent
+
+CLICK -- LWW = 2 (WRONG), CRDT = slot per peer. 1+2 = 3 (CORRECT)
+
+CLICK -- Both online again. Both peers now show 3. That's the magic — they converge.
+
+[slow down]
+Analogy: two doctors on a flight
+- A adds allergy, B updates dosage
+- LWW: one edit LOST. CRDT: both survive
+
+CLICK -- Real objects, three rules:
+- Different fields -> auto-merge
+- Same field -> LWW
+- Delete vs update -> delete wins (tombstone)
+
+[look up]
+Server needs ZERO conflict logic -- just relays bytes
+
+TRANSITION: But a counter is just numbers. Real apps have objects...
+-->
+
+---
+layout: statement
+clicks: 1
+---
+
+# From Counter to Map
+
+G-Counter = one number per peer. But real apps have **objects with fields**.
+
+<div v-click="1" class="mt-8 text-lg op-80">
+
+Each field stores `{ value, timestamp, peerId }` — an **LWW Register**.
+
+Many registers together → an **LWW Map**.
+
+</div>
+
+<!--
+Counter was great for the concept. But real data = objects.
+
+A todo has title, done, assignee. Not just a number.
+
+CLICK -- Each field is an LWW Register. Value + timestamp + who wrote it.
+Put many registers together? You get an LWW Map.
+
+TRANSITION: Let me show you exactly how this merges...
+-->
+
+---
+clicks: 5
+---
+
+# The LWW Map — How Real Objects Merge
+
+<CoMapDiagram :roughness="1.2" :seed="900" />
+
+<!--
+A CoMap -- like a database row but with a globally unique ID.
+
+CLICK -- Alice creates todo: title + done. Both at 8:01.
+
+CLICK -- Bob edits title on device 1 -- offline.
+
+CLICK -- Bob marks done on device 2 -- also offline.
+
+CLICK -- Reconnect: per-field LWW. Title conflict -- latest wins (8:03 > 8:01). Done -- no conflict, both survive.
+
+CLICK -- THIS is the CoMap. Every field is an LWW register.
+Two simple rules cover everything:
+✓ Different fields → both survive
+⚡ Same field → latest timestamp wins
+
+TRANSITION: Now you've seen how CRDTs work — let's zoom out and see the full spectrum of approaches...
 -->
 
 ---
@@ -895,17 +896,17 @@ What if you got LWW's simplicity with CRDT's guarantees? That's exactly what a *
 </Callout>
 
 <!--
-Full picture before the two main camps
+Full picture -- now that you've SEEN CRDTs in action
 
 LWW -- simplest. Last save wins. Fast, but LOSES data.
 
-CLICK -- CRDTs. Math guarantees convergence. No server needed.
+CLICK -- CRDTs. Math guarantees convergence. No server needed. You just saw this!
 
 CLICK -- Hybrid. Surface conflict to user (like Git merge).
 
-CLICK -- What if LWW simplicity + CRDT guarantees? That's a CoMap.
+CLICK -- What if LWW simplicity + CRDT guarantees? That's a CoMap — you just saw it.
 
-TRANSITION: Two main camps for local-first...
+TRANSITION: But WHERE does this resolution happen?
 -->
 
 ---
@@ -962,94 +963,226 @@ Server = dumb relay. Can go fully P2P.
 Hard part: merges must ALWAYS converge.
 Yjs + Jazz = this approach.
 
-TRANSITION: What are CRDTs, and how do they work?
+TRANSITION: Let's look at the apps you already love...
 -->
 
 ---
-clicks: 5
 ---
 
-# CRDTs: Merge Without a Server
+# Sync Engines in the Wild
 
-<CrdtCounterDemo :roughness="1.2" :seed="800" />
+<div class="grid grid-cols-3 gap-6 mt-6">
 
+<Card variant="muted" size="lg">
+<div class="text-lg font-bold text-brand mb-2">Linear</div>
 
-<!--
-CLICK -- Two peers go offline
+- Syncs workspace to **IndexedDB**
+- Sub-50ms page loads
+- Server remains source of truth
 
-CLICK -- Peer A: +1
+</Card>
 
-CLICK -- Peer B: +2, independent
+<Card variant="muted" size="lg">
+<div class="text-lg font-bold text-brand mb-2">Figma</div>
 
-CLICK -- LWW = 2 (WRONG), CRDT = slot per peer. 1+2 = 3 (CORRECT)
+- CRDT-**inspired**, not a true CRDT
+- Central server decides ordering
+- Offline limited to open files only
 
-[slow down]
-Analogy: two doctors on a flight
-- A adds allergy, B updates dosage
-- LWW: one edit LOST. CRDT: both survive
+</Card>
 
-CLICK -- Real objects, three rules:
-- Different fields -> auto-merge
-- Same field -> LWW
-- Delete vs update -> delete wins (tombstone)
+<Card variant="muted" size="lg">
+<div class="text-lg font-bold text-brand mb-2">Notion</div>
 
-[look up]
-Server needs ZERO conflict logic -- just relays bytes
+- **SQLite WASM** replaced IndexedDB
+- 33% faster in India, 20% overall
+- Offline mode shipped Dec 2025
 
-TRANSITION: But a counter is just numbers. Real apps have objects...
--->
+</Card>
 
----
-layout: statement
-clicks: 1
----
+</div>
 
-# From Counter to Map
+<div v-click class="mt-6 text-center text-lg op-70">
 
-G-Counter = one number per peer. But real apps have **objects with fields**.
-
-<div v-click="1" class="mt-8 text-lg op-80">
-
-Each field stores `{ value, timestamp, peerId }` — an **LWW Register**.
-
-Many registers together → an **LWW Map**.
+All three use sync engines. All work offline. But are they **local-first**?
 
 </div>
 
 <!--
-Counter was great for the concept. But real data = objects.
+Apps you USE every day -- all sync-engine powered
 
-A todo has title, done, assignee. Not just a number.
+Linear -- sub-50ms page loads. Syncs workspace to IndexedDB.
+BUT: server is the source of truth. It can reject your writes.
 
-CLICK -- Each field is an LWW Register. Value + timestamp + who wrote it.
-Put many registers together? You get an LWW Map.
+Figma -- CRDT-inspired, NOT a true CRDT. Central server decides ordering.
+Offline? Only files already open in your tab. Can't open new ones.
 
-TRANSITION: Let me show you exactly how this merges...
+Notion -- IndexedDB failed at scale (too slow per-row for their block model).
+Switched to SQLite WASM. 33% faster in India. Offline mode only shipped Dec 2025.
+
+CLICK -- [slow down] All three. Sync engines. Fast. Some offline.
+But... are they truly local-first? What happens if Linear shuts down?
+Your data? Gone. Your workspace? Gone.
+
+TRANSITION: Let's define what truly local-first means...
+-->
+
+---
+transition: fade
+---
+
+<PartSlide part="3" title="Local-First" subtitle="More Than Just Offline" />
+
+<!--
+[breathe]
+
+We just saw Linear, Figma, Notion -- incredible apps.
+Sync engines, offline, fast.
+But something's missing.
+
+TRANSITION: What separates offline-first from local-first?
+-->
+
+---
+layout: statement
+transition: fade-out
+---
+
+# But Are These Truly Local-First?
+
+<div v-click class="mt-8 text-xl op-80">
+
+Martin Kleppmann defines truly local-first with three criteria.
+
+</div>
+
+<!--
+Linear, Figma, Notion -- great sync. Great offline.
+But are they truly LOCAL-FIRST?
+
+CLICK -- Martin Kleppmann (Ink & Switch, Automerge)
+Boils it down to THREE criteria
 -->
 
 ---
 clicks: 4
 ---
 
-# The LWW Map — How Real Objects Merge
+# The Three Criteria
 
-<CoMapDiagram :roughness="1.2" :seed="900" />
+<div class="grid gap-3 mt-6">
+  <Card v-click="1" variant="muted">
+    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">1.</span> Offline reads <strong>and</strong> writes</div>
+    <p class="text-sm text-gray-400 mt-1 pl-6">Not just cached reads — the app must accept writes while disconnected and reconcile later.</p>
+  </Card>
+  <Card v-click="2" variant="muted">
+    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">2.</span> Collaboration across devices</div>
+    <p class="text-sm text-gray-400 mt-1 pl-6">Multiple users and devices can edit concurrently, and changes merge automatically.</p>
+  </Card>
+  <Card v-click="3" glow>
+    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">3.</span> Data survives the developer shutting down</div>
+    <p class="text-sm text-gray-400 mt-1 pl-6">If the company disappears, your data and app must keep working. No vendor lock-in.</p>
+  </Card>
+</div>
+
+<div v-click="4" class="mt-4 text-center text-sm text-gray-500">
+
+Criterion 3 is the hardest — and it's what separates **offline-first** from **local-first**.
+
+</div>
 
 <!--
-A CoMap -- like a database row but with a globally unique ID.
+CLICK -- Offline reads AND writes
 
-CLICK -- Alice creates todo: title + done. Both at 8:01.
+CLICK -- Collaboration. Multiple devices, changes merge.
 
-CLICK -- Bob edits title on one device, toggles done on another -- all offline.
+CLICK -- [slow down] Data survives the developer SHUTTING DOWN
 
-CLICK -- Reconnect: per-field LWW. Title conflict -- latest wins (8:03 > 8:01). Done -- no conflict, both survive.
+CLICK -- This separates offline-first from local-first. The dealbreaker.
 
-CLICK -- THIS is the CoMap. Every field is an LWW register.
-Two simple rules cover everything:
-✓ Different fields → both survive
-⚡ Same field → latest timestamp wins
+Key insight: No single approach (proprietary, self-host, P2P, file sync) fully solves criterion 3. Each improves resilience but has trade-offs.
 
-TRANSITION: So what if your database worked like this?
+TRANSITION: Let's compare offline-first and local-first directly...
+-->
+
+---
+layout: two-cols
+---
+
+<div class="h-full flex flex-col justify-center">
+
+## Offline-First Asks
+
+"How do I keep working without a server?"
+
+<Card variant="muted" size="lg" class="mt-8 text-center">
+
+<span v-mark="{ type: 'highlight', color: '#ff6bed' }" class="font-bold">Server</span> is the owner
+
+Client is a cache
+
+</Card>
+
+<div class="mt-4 text-sm op-70">
+
+If server rejects your write → client rolls back
+
+</div>
+
+</div>
+
+::right::
+
+<div class="h-full flex flex-col justify-center">
+
+## Local-First Asks
+
+"Why does the server own my data at all?"
+
+<Card variant="muted" size="lg" class="mt-8 text-center">
+
+<span v-mark="{ type: 'underline', color: '#ff6bed' }" class="font-bold">YOU</span> are the owner
+
+Server is a utility
+
+</Card>
+
+<div class="mt-4 text-sm op-70">
+
+Server can't reject your write → it just relays
+
+No foreign kill switch — your data, your jurisdiction
+
+</div>
+
+</div>
+
+<!--
+Offline-first: "how do I keep working without server?"
+Server = owner. Client = cache.
+
+Local-first: "why does the server own my data AT ALL?"
+
+[look up]
+YOU are the owner. Server = utility. Can't reject your writes.
+No foreign kill switch -- your data stays in YOUR jurisdiction.
+
+TRANSITION: Now that we know what local-first means -- let's BUILD it.
+-->
+
+---
+transition: fade
+---
+
+<PartSlide part="4" title="Jazz" subtitle="Local-First Vue in Practice" />
+
+<!--
+[breathe]
+
+Now that we know what local-first MEANS -- let's build it.
+One library that nails all three criteria with Vue.
+
+TRANSITION: What if your database was a CRDT?
 -->
 
 ---
@@ -1111,20 +1244,7 @@ Database IS the sync engine. No API. No cache. No conflict code.
 
 [pause] That's not a dream. That's Jazz.
 
-TRANSITION: Let's look at the landscape and then dive into Jazz...
--->
-
----
-layout: iframe
-url: https://www.localfirst.fm/landscape
----
-
-<!--
-Here's the full landscape -- localfirst.fm maintains this great overview of all the sync engines out there.
-
-Take a screenshot if you want to explore later.
-
-[look up] We're going deep on Jazz -- most COMPLETE vision for local-first Vue
+TRANSITION: Let's dive into Jazz...
 -->
 
 ---
@@ -1268,12 +1388,15 @@ STEP 1: Start with schema. co.map with one field. That's your "database table."
 CLICK: Export it so our component can use it.
 
 CLICK: Counter.vue — useCoState takes schema + ID, gives you a reactive ref. Auto-subscribes.
+Think of useCoState like useFetch from VueUse -- but instead of fetching once, it SUBSCRIBES. Returns a reactive ref, just like ref().
 
 CLICK: Mutation? Just counter.count++. That's it.
+Yes, direct mutation. Like Pinia without actions. Mutate the ref, Jazz syncs it everywhere.
 
 CLICK: Template — one button. Standard Vue.
 
 CLICK: [slow down] That increment... is synced in real-time, persisted offline, encrypted. All of it.
+No axios. No Pinia store. No socket.io. counter.count++ replaces ALL of that.
 
 [pause] [look up]
 Three lines of schema. A few lines of component. ENTIRE data layer.
@@ -1296,11 +1419,23 @@ Chat app. Three steps. You'll USE this app yourself in a few minutes.
 -->
 
 ---
-clicks: 1
+clicks: 2
 ---
 
 # Step 1 — Define Your Schema
 
+<div class="text-sm op-60 -mt-2 mb-1">schema.ts</div>
+
+````md magic-move {lines: true}
+```ts
+// schema.ts
+import { co } from 'jazz-tools'
+
+const Message = co.map({
+  text: co.plainText(),
+  image: co.optional(co.image()),
+})
+```
 ```ts
 // schema.ts
 import { co } from 'jazz-tools'
@@ -1314,27 +1449,38 @@ const Chat = co.list(Message).withPermissions({
   onCreate: (owner) => owner.addMember('everyone', 'writer'),
 })
 ```
+```ts
+// schema.ts
+import { co } from 'jazz-tools'
 
-<Callout v-click="1" type="info">
+export const Message = co.map({
+  text: co.plainText(),
+  image: co.optional(co.image()),
+})
 
-`co.plainText()` = collaborative rich text. `co.optional(co.image())` = optional image upload built in. `.withPermissions()` = anyone with the link can write — permissions baked into the schema.
-
-</Callout>
+export const Chat = co.list(Message).withPermissions({
+  onCreate: (owner) => owner.addMember('everyone', 'writer'),
+})
+```
+````
 
 <!--
-Step 1: Schema.
+First step: the schema. Think of this like defining a Prisma model — except it's also your API, your real-time sync layer, and your permissions system. All in one.
 
-Two types. Message = text + optional image. Chat = list of messages.
-Permissions declared right in the schema -- everyone gets writer access on create.
+We start with Message. co.map is like a typed object — text and an optional image.
 
-CLICK -- plainText for collaborative text. Image upload is part of the schema. Permissions are NOT an afterthought -- they're baked in.
+CLICK: Now add Chat — a list of Messages. withPermissions sets who can write. Here, everyone with the link is a writer. Permissions are baked into the data, not enforced by a server.
 
-TRANSITION: Wire it up...
+CLICK: Export both types. That's it. This schema IS your database AND your API. No endpoint, no Pinia action, no migration file.
+
+TRANSITION: Now let's wire it up...
 -->
 
 ---
 
 # Step 2 — Wire Up the Provider
+
+<div class="text-sm op-60 -mt-2 mb-1">RootApp.vue</div>
 
 ```vue
 <!-- RootApp.vue -->
@@ -1353,24 +1499,25 @@ const sync = { peer }
 ```
 
 <!--
-Step 2: Provider.
+Step 2: the provider. If you've used Vue Router, this is the same idea — wrap your app, give it config, done.
 
-Same provider pattern as before. Anonymous auth -- no login needed.
-defaultProfileName gives every user a random name automatically.
+JazzVueProvider connects to a sync server. Anonymous auth by default — no login screen, no Auth0. That's it. Your app is SYNCING.
 
-[look up] That's it. App is SYNCING.
+10 lines. One concept. Move on.
 
-TRANSITION: Using it in the component...
+TRANSITION: Now the fun part — using it in a component...
 -->
 
 ---
-clicks: 2
+clicks: 1
 ---
 
-# Step 3 — Use It in Your Component
+# Step 3a — Load & Write Data
 
-```vue
-<script setup lang="ts">
+<div class="text-sm op-60 -mt-2 mb-1">ChatApp.vue — &lt;script setup&gt;</div>
+
+````md magic-move {lines: true}
+```ts
 import { useAccount, useCoState } from 'community-jazz-vue'
 import { Chat } from './schema'
 
@@ -1378,12 +1525,15 @@ const chat = useCoState(Chat, () => chatId, {
   resolve: { $each: { text: true, image: true } },
 })
 const me = useAccount()
-</script>
 ```
-
-<div v-click="1">
-
 ```ts
+import { useAccount, useCoState } from 'community-jazz-vue'
+import { Chat } from './schema'
+
+const chat = useCoState(Chat, () => chatId, {
+  resolve: { $each: { text: true, image: true } },
+})
+const me = useAccount()
 const inputValue = ref('')
 
 function sendMessage() {
@@ -1392,12 +1542,25 @@ function sendMessage() {
   inputValue.value = ''
 }
 ```
+````
 
-</div>
+<!--
+Step 3: the component. First the script.
 
-<div v-click="2">
+useCoState loads the chat. resolve: $each deeply loads each message — like Prisma's 'include'. useAccount gives us the current user. That's your entire data-fetching layer.
 
-```vue
+CLICK: Now we write data. sendMessage pushes to the list. That's your entire "API call". No axios.post, no mutation, no optimistic update code. Just push.
+
+TRANSITION: Now the template...
+-->
+
+---
+
+# Step 3b — Render It
+
+<div class="text-sm op-60 -mt-2 mb-1">ChatApp.vue — &lt;template&gt;</div>
+
+```html
 <template>
   <div v-for="msg in chat" :key="msg.$jazz.id">
     {{ msg.text }}
@@ -1408,29 +1571,41 @@ function sendMessage() {
 </template>
 ```
 
+<!--
+And here's the template. Standard v-for, v-model. Nothing Jazz-specific here. The data layer is INVISIBLE — and that's the whole point.
+
+No special components, no render props, no slot gymnastics. Just Vue.
+
+TRANSITION: Let me zoom out and show you what you got for free...
+-->
+
+---
+layout: center
+class: text-center
+---
+
+<div class="text-2xl font-bold op-90">
+
+Schema + Provider + `useCoState` = **your entire data layer**
+
 </div>
+<div class="mt-3 text-base op-60">Real-time. Offline. Encrypted. Three files.</div>
 
 <!--
-Step 3: Component.
-
-useCoState loads the chat. resolve: $each deeply loads each message's text and image.
-useAccount gives us the current user.
-
-CLICK -- sendMessage. Push to the list. That's it. No fetch, no mutation, no loading spinner.
-
-CLICK -- Template. Standard v-for. A form. Nothing special.
-The data layer is INVISIBLE.
-
 [pause] [look up]
-THIS is what you'll use in a moment with the QR code.
-Schema + Provider + useCoState = your ENTIRE data layer. Real-time. Offline. Encrypted.
 
-TRANSITION: Let me show you what you get for free...
+Three files. That's it. Schema, provider, component. Your entire data layer.
+
+THIS is what you'll use in a moment with the QR code.
+
+TRANSITION: But first — let me show you what you get for free...
 -->
 
 ---
 
 # What You Get — Zero Extra Code
+
+<div class="text-sm op-60 -mt-2 mb-2">This replaces Pinia + axios + socket.io + your REST API</div>
 
 <div class="grid grid-cols-3 gap-3 mt-6">
   <Card icon="i-ph-arrows-clockwise" label="Real-time Sync" size="sm">
@@ -1454,7 +1629,7 @@ TRANSITION: Let me show you what you get for free...
 </div>
 
 <!--
-Everything you just saw in that todo app -- ZERO extra code for:
+Everything you just saw in that chat app -- ZERO extra code for:
 
 CLICK -- Real-time sync. CRDTs. Automatic conflict resolution.
 
@@ -1506,232 +1681,6 @@ Every message you just sent:
 
 Schema + Provider + useCoState = THAT.
 
-TRANSITION: But are these truly local-first?
--->
-
----
-layout: statement
-transition: fade-out
----
-
-# But Are These Truly Local-First?
-
-<div v-click class="mt-8 text-xl op-80">
-
-Martin Kleppmann defines truly local-first with three criteria.
-
-</div>
-
-<!--
-Seen the landscape -- which are ACTUALLY local-first?
-
-CLICK -- Martin Kleppmann (Ink & Switch, Automerge)
-Boils it down to THREE criteria
--->
-
----
-clicks: 4
----
-
-# The Three Criteria
-
-<div class="grid gap-3 mt-6">
-  <Card v-click="1" variant="muted">
-    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">1.</span> Offline reads <strong>and</strong> writes</div>
-    <p class="text-sm text-gray-400 mt-1 pl-6">Not just cached reads — the app must accept writes while disconnected and reconcile later.</p>
-  </Card>
-  <Card v-click="2" variant="muted">
-    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">2.</span> Collaboration across devices</div>
-    <p class="text-sm text-gray-400 mt-1 pl-6">Multiple users and devices can edit concurrently, and changes merge automatically.</p>
-  </Card>
-  <Card v-click="3" glow>
-    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">3.</span> Data survives the developer shutting down</div>
-    <p class="text-sm text-gray-400 mt-1 pl-6">If the company disappears, your data and app must keep working. No vendor lock-in.</p>
-  </Card>
-</div>
-
-<div v-click="4" class="mt-4 text-center text-sm text-gray-500">
-
-Criterion 3 is the hardest — and it's what separates **offline-first** from **local-first**.
-
-</div>
-
-<!--
-CLICK -- Offline reads AND writes
-
-CLICK -- Collaboration. Multiple devices, changes merge.
-
-CLICK -- [slow down] Data survives the developer SHUTTING DOWN
-
-CLICK -- This separates offline-first from local-first. The dealbreaker.
-
-Key insight: No single approach (proprietary, self-host, P2P, file sync) fully solves criterion 3. Each improves resilience but has trade-offs. P2P needs conflict resolution without a central authority.
-
-TRANSITION: The 7 Ideals...
--->
-
----
-
-# The 7 Ideals
-
-<div class="text-lg op-70 mb-2">It's about values, not just technology</div>
-
-From the Ink & Switch essay on local-first software (2019):
-
-<div v-click="1" class="mt-4">
-
-**Technology:**
-
-<div class="grid gap-1.5 ml-1">
-  <div class="flex items-center gap-2"><div class="i-ph-lightning-bold text-brand" /> <span><strong>Fast</strong> — No spinners. Data is local.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-devices-bold text-brand" /> <span><strong>Multi-device</strong> — Sync across all your devices.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-wifi-slash-bold text-brand" /> <span><strong>Works offline</strong> — Network is optional.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-users-bold text-brand" /> <span><strong>Collaboration</strong> — Real-time co-editing.</span></div>
-</div>
-
-</div>
-
-<div v-click="2" class="mt-4 pt-4 border-t border-white/10">
-
-**Values:**
-
-<div class="grid gap-1.5 ml-1">
-  <div class="flex items-center gap-2"><div class="i-ph-clock-bold text-brand" /> <span><strong>Longevity</strong> — Data accessible forever. Survives the developer shutting down.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-lock-bold text-brand" /> <span><strong>Privacy</strong> — End-to-end encryption. The server never sees your data.</span></div>
-  <div class="flex items-center gap-2"><div class="i-ph-user-bold text-brand" /> <span><strong>User control</strong> — You own your data. Full stop. Export it. Delete it. Script against it.</span></div>
-</div>
-
-</div>
-
-<!--
-Ink & Switch essay, 2019 -- the foundational text
-
-CLICK -- First four: technology. We already know these.
-
-CLICK -- [slow down] These three: longevity, privacy, user control
-VALUES. Not features.
-Not another architecture pattern -- a PHILOSOPHY about who owns the data.
--->
-
----
-layout: two-cols
----
-
-<div class="h-full flex flex-col justify-center">
-
-## Offline-First Asks
-
-"How do I keep working without a server?"
-
-<Card variant="muted" size="lg" class="mt-8 text-center">
-
-<span v-mark="{ type: 'highlight', color: '#ff6bed' }" class="font-bold">Server</span> is the owner
-
-Client is a cache
-
-</Card>
-
-<div class="mt-4 text-sm op-70">
-
-If server rejects your write → client rolls back
-
-</div>
-
-</div>
-
-::right::
-
-<div class="h-full flex flex-col justify-center">
-
-## Local-First Asks
-
-"Why does the server own my data at all?"
-
-<Card variant="muted" size="lg" class="mt-8 text-center">
-
-<span v-mark="{ type: 'underline', color: '#ff6bed' }" class="font-bold">YOU</span> are the owner
-
-Server is a utility
-
-</Card>
-
-<div class="mt-4 text-sm op-70">
-
-Server can't reject your write → it just relays
-
-</div>
-
-</div>
-
-<!--
-Offline-first: "how do I keep working without server?"
-Server = owner. Client = cache.
-
-Local-first: "why does the server own my data AT ALL?"
-
-[look up]
-YOU are the owner. Server = utility. Can't reject your writes.
--->
-
----
-
-# Where We're Headed
-
-<div class="text-sm text-white/50 mb-2">Today: every sync engine locks you to one provider</div>
-
-<div class="flex justify-center">
-<FlowDiagram
-  :nodes="[
-    { id: 'app', label: 'Your App' },
-    { id: 'dexie', label: 'Dexie Cloud', subtitle: '(proprietary)' },
-  ]"
-  :edges="[
-    { from: 'app', to: 'dexie', label: 'locked to their API' },
-  ]"
-  direction="horizontal"
-  :node-width="180"
-  :node-height="60"
-  :gap="100"
-/>
-</div>
-
-<div v-click class="mt-6">
-<div class="text-sm text-center font-bold mb-2">The endgame — generic sync, multiple backends:</div>
-<div class="flex justify-center">
-<FlowDiagram
-  :nodes="[
-    { id: 'app2', label: 'Your App', subtitle: 'ALL biz logic HERE', variant: 'accent' },
-    { id: 'aws', label: 'AWS / Cloud' },
-    { id: 'self', label: 'Self-hosted' },
-    { id: 'p2p', label: 'P2P / NAS' },
-  ]"
-  :edges="[
-    { from: 'app2', to: 'aws', label: 'open protocol' },
-    { from: 'app2', to: 'self' },
-    { from: 'app2', to: 'p2p' },
-  ]"
-  layout="fan-right"
-  :node-width="160"
-  :node-height="55"
-  :gap="100"
-/>
-</div>
-</div>
-
-<div v-click class="mt-3 text-center text-white/50 text-sm">
-Like email: pick Gmail, Fastmail, self-host — the protocol is the same.
-</div>
-
-<!--
-Today: locked to one cloud. Shut down? Sync gone. Switch? Rewrite.
-
-CLICK -- [gesture] Endgame: open protocol, multiple backends
-AWS for convenience, self-host for control, P2P for resilience
-
-CLICK -- Like EMAIL -- Gmail, Fastmail, self-host. Protocol is the same.
-Doesn't fully exist yet -- but where ecosystem is HEADING
-Makes ideals 5, 6, 7 possible
-
 TRANSITION: What can you do today?
 -->
 
@@ -1745,7 +1694,7 @@ TRANSITION: What can you do today?
 
 ### <span class="inline-flex items-center gap-2"><span class="i-ph-compass-bold text-brand" /> Step 1: Pick your sync engine.</span>
 
-**Dexie** for the easiest start. **Jazz** for batteries-included. **Yjs** for max flexibility. Match the engine to your app.
+**Jazz** for batteries-included local-first with Vue support out of the box.
 
 </Card>
 
@@ -1780,53 +1729,7 @@ Upgrade = config change, not rewrite.
 
 [look up] Not betting on a vendor. Betting on a PATTERN.
 
-TRANSITION: Full scorecard...
--->
-
----
-
-# The Full Scorecard
-
-<div class="mt-2 text-sm">
-<table class="w-full">
-  <thead>
-    <tr class="border-b border-white/20">
-      <th class="text-left py-1.5 pr-4"></th>
-      <th class="text-center py-1.5 px-2">Status Quo</th>
-      <th class="text-center py-1.5 px-2">Offline-First</th>
-      <th class="text-center py-1.5 px-2">Sync Engines</th>
-      <th class="text-center py-1.5 px-2 font-bold">Local-First</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-lightning-bold text-brand text-xs" /> Fast</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
-    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-devices-bold text-brand text-xs" /> Multi-device</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
-    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-wifi-slash-bold text-brand text-xs" /> Works offline</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
-    <tr v-click="1" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-users-bold text-brand text-xs" /> Collaboration</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-emerald-400 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
-    <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-clock-bold text-brand text-xs" /> Longevity</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
-    <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-lock-bold text-brand text-xs" /> Privacy</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
-    <tr v-click="2" class="border-b border-white/5"><td class="py-1.5 pr-4 flex items-center gap-1.5"><div class="i-ph-user-bold text-brand text-xs" /> User control</td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-minus text-white/20 mx-auto" /></td><td class="text-center"><div class="i-ph-check-circle-fill text-brand mx-auto" /></td></tr>
-    <tr v-click="3"><td class="py-1.5 pr-4 font-bold">Score</td><td class="text-center font-bold">0/7</td><td class="text-center font-bold">2/7</td><td class="text-center font-bold">4/7</td><td class="text-center font-bold text-brand">7/7</td></tr>
-  </tbody>
-</table>
-</div>
-
-<Callout type="info">
-
-Offline-first = a **subset** of local-first. Sync engines = a **bigger subset**. Local-first = **the whole picture.** The first 4 are technology. The last 3 are **values.**
-
-</Callout>
-
-<!--
-CLICK -- Technology row: 0, 2, 4... local-first nails all four.
-
-CLICK -- Values row: ONLY local-first checks these.
-
-CLICK -- 0, 2, 4, 7.
-
-[look up] First 4 = technology. Last 3 = VALUES. That's the difference.
-
-[wait for reaction]
+TRANSITION: The rendering era is over...
 -->
 
 ---
@@ -1842,23 +1745,18 @@ One more thing...
 -->
 
 ---
-clicks: 5
 layout: center
 class: flex items-center justify-center h-full
 ---
 
 <Timeline
   :items="[
-    { id: 'jquery', title: 'jQuery', year: '(2006)', description: 'You sync the DOM', details: ['Manual', 'getElementById', 'innerHTML'], click: 1, variant: 'muted' },
-    { id: 'reactive', title: 'Reactive', year: '(2014)', description: 'Vue syncs the DOM', details: ['Declarative', 'ref() + v-bind', 'computed()'], click: 2 },
-    { id: 'sync', title: 'Sync', year: '(2020)', description: 'Engine syncs the data', details: ['No spinners', 'No cache mgmt', 'Multi-device'], click: 3, variant: 'success' },
-    { id: 'local-first', title: 'Local-First', year: '(now)', description: 'User owns the data', details: ['Privacy', 'Longevity', 'Full control'], click: 4, variant: 'accent' },
+    { id: 'jquery', title: 'jQuery', year: '(2006)', description: 'You sync the DOM', details: ['Manual', 'getElementById', 'innerHTML'], variant: 'muted' },
+    { id: 'reactive', title: 'Reactive', year: '(2014)', description: 'Vue syncs the DOM', details: ['Declarative', 'ref() + v-bind', 'computed()'] },
+    { id: 'sync', title: 'Sync', year: '(2020)', description: 'Engine syncs the data', details: ['No spinners', 'No cache mgmt', 'Multi-device'], variant: 'success' },
+    { id: 'local-first', title: 'Local-First', year: '(now)', description: 'User owns the data', details: ['Privacy', 'Longevity', 'Full control'], variant: 'accent' },
   ]"
 />
-
-<div v-click="5" class="text-center mt-4 text-sm op-70">
-Vue's reactivity system was built for this — <code>ref()</code> + sync engine = the reactive data layer Vue never had.
-</div>
 
 <!--
 CLICK -- jQuery: YOU were the sync engine
@@ -1872,31 +1770,6 @@ CLICK -- Local-first: USER owns the data
 CLICK -- [slow down] [look up]
 We solved rendering. Data layer = where it's happening NOW.
 Vue is perfectly POSITIONED.
--->
-
----
-
-# References
-
-<div class="text-sm">
-
-- **Local-First Software** — Ink & Switch (2019) — the foundational essay
-- **Past, Present, and Future of Local-First** — Kleppmann, Local-First Conf 2024
-- **Jazz** — jazz.tools — batteries-included local-first framework
-- **LiveStore** — livestore.dev — event-sourced reactive SQLite
-- **Dexie.js** — dexie.org — IndexedDB wrapper + DexieCloud sync
-- **Yjs** — yjs.dev — high-performance CRDT library
-- **Zero** — zero.rocicorp.dev — query-driven sync from Rocicorp
-- **Sync Engines for Vue Developers** — alexop.dev
-- **PWA in 4 Steps** — alexop.dev/posts/create-pwa-vue3-vite-4-steps
-- **A Gentle Introduction to CRDTs** — Matt Wonlaw
-
-</div>
-
-<!--
-References on slides page
-Ink & Switch = foundational read. Start there.
-My article: 7 sync engines through Vue's lens -- next slide
 -->
 
 ---

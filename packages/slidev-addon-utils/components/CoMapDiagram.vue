@@ -168,8 +168,8 @@ const arrowY2 = mergeY
         >edits title offline</text>
       </g>
 
-      <!-- Column 3: bob / device 2 — click 2 -->
-      <g class="click-el" :class="{ '--hidden': !isVisible(2) }">
+      <!-- Column 3: bob / device 2 — click 3 -->
+      <g class="click-el" :class="{ '--hidden': !isVisible(3) }">
         <RoughRect
           :x="col3X" :y="colY" :width="colW" :height="colH"
           variant="default"
@@ -208,8 +208,8 @@ const arrowY2 = mergeY
         >marks done offline</text>
       </g>
 
-      <!-- Arrows + merge label — click 3 -->
-      <g class="click-el" :class="{ '--hidden': !isVisible(3) }">
+      <!-- Arrows + merge label — click 4 -->
+      <g class="click-el" :class="{ '--hidden': !isVisible(4) }">
         <RoughArrow
           :x1="arrow1X" :y1="arrowY1"
           :x2="arrow1X" :y2="arrowY2"
