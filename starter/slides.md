@@ -766,28 +766,27 @@ TRANSITION: Let me show you exactly how this merges...
 -->
 
 ---
-clicks: 5
+clicks: 6
 ---
 
 # The LWW Map — How Real Objects Merge
 
-<CoMapDiagram :roughness="1.2" :seed="900" />
+<CoMapDiagram />
 
 <!--
 A CoMap -- like a database row but with a globally unique ID.
 
-CLICK -- Alice creates todo: title + done. Both at 8:01.
+CLICK 1 -- Alice creates todo: title "Buy milk" + done: false. Both at 8:01.
 
-CLICK -- Bob edits title on device 1 -- offline.
+CLICK 2 -- Bob renames it to "Buy oat milk" on device 1 -- offline.
 
-CLICK -- Bob marks done on device 2 -- also offline.
+CLICK 3 -- Bob refines to "Get oat milk" -- still offline.
 
-CLICK -- Reconnect: per-field LWW. Title conflict -- latest wins (8:03 > 8:01). Done -- no conflict, both survive.
+CLICK 4 -- Meanwhile on Bob's phone (device 2) -- marks it done.
 
-CLICK -- THIS is the CoMap. Every field is an LWW register.
-Two simple rules cover everything:
-✓ Different fields → both survive
-⚡ Same field → latest timestamp wins
+CLICK 5 -- Alice changes title to "Buy eggs" -- conflict! LWW: 8:05 > 8:03, Alice wins.
+
+CLICK 6 -- Bob marks it not done. Final state merges per-field LWW.
 
 TRANSITION: Now you've seen how CRDTs work — let's zoom out and see the full spectrum of approaches...
 -->
@@ -1302,26 +1301,13 @@ TRANSITION: Let's see this in code...
 -->
 
 ---
-layout: center
-class: text-center
----
-
-<div class="text-4xl font-bold">Let's Build a Chat App</div>
-<div class="mt-4 text-xl op-60">Schema → Provider → Component — three steps</div>
-
-<!--
-Let's see Jazz in action. We'll build a real chat app.
-
-Three steps. You'll USE this app yourself in a few minutes.
--->
-
----
+layout: code-editor
+activeFile: schema.ts
+tabs: schema.ts
+step: Step 1
+transition: fade
 clicks: 2
 ---
-
-# Step 1 — Define Your Schema
-
-<div class="text-sm op-60 -mt-2 mb-1">schema.ts</div>
 
 ````md magic-move {lines: true}
 ```ts
@@ -1374,10 +1360,12 @@ TRANSITION: Now let's wire it up...
 -->
 
 ---
-
-# Step 2 — Wire Up the Provider
-
-<div class="text-sm op-60 -mt-2 mb-1">RootApp.vue</div>
+layout: code-editor
+activeFile: RootApp.vue
+tabs: schema.ts, RootApp.vue
+step: Step 2
+transition: fade
+---
 
 ```vue
 <!-- RootApp.vue -->
@@ -1406,12 +1394,13 @@ TRANSITION: Now the fun part — using it in a component...
 -->
 
 ---
+layout: code-editor
+activeFile: ChatApp.vue
+tabs: schema.ts, RootApp.vue, ChatApp.vue
+step: Step 3a
+transition: fade
 clicks: 1
 ---
-
-# Step 3a — Load & Write Data
-
-<div class="text-sm op-60 -mt-2 mb-1">ChatApp.vue — &lt;script setup&gt;</div>
 
 ````md magic-move {lines: true}
 ```ts
@@ -1452,10 +1441,12 @@ TRANSITION: Now the template...
 -->
 
 ---
-
-# Step 3b — Render It
-
-<div class="text-sm op-60 -mt-2 mb-1">ChatApp.vue — &lt;template&gt;</div>
+layout: code-editor
+activeFile: ChatApp.vue
+tabs: schema.ts, RootApp.vue, ChatApp.vue
+step: Step 3b
+transition: fade
+---
 
 ```html
 <template>

@@ -36,23 +36,19 @@
       </Card>
     </div>
 
-    <!-- All 7 achieved: first 6 -->
-    <div v-if="allAchieved" v-click="1" class="grid grid-cols-2 gap-4 mt-4">
-      <Card v-for="ideal in achievedIdeals.slice(0, 6)" :key="ideal.key" variant="success" glow size="lg">
-        <div class="flex items-center gap-2 text-emerald-400 font-bold text-lg">
-          <div class="i-ph-check-circle-fill text-xl" /> {{ ideal.label }}
+    <!-- All 7 achieved: compact grid -->
+    <div v-if="allAchieved" v-click="1" class="grid grid-cols-4 gap-3 mt-6">
+      <Card v-for="ideal in achievedIdeals.slice(0, 4)" :key="ideal.key" variant="success" glow size="sm">
+        <div class="flex items-center gap-1.5 text-emerald-400 font-bold text-sm">
+          <div class="i-ph-check-circle-fill text-base" /> {{ ideal.label }}
         </div>
-        <p class="text-sm text-gray-400 mt-1 pl-7">{{ getDescription(ideal) }}</p>
       </Card>
     </div>
-
-    <!-- All 7 achieved: 7th card centered -->
-    <div v-if="allAchieved" v-click="2" class="grid grid-cols-1 gap-2 mt-4 max-w-xs mx-auto">
-      <Card variant="success" glow size="lg">
-        <div class="flex items-center justify-center gap-2 text-emerald-400 font-bold text-lg">
-          <div class="i-ph-check-circle-fill text-xl" /> {{ achievedIdeals[6].label }}
+    <div v-if="allAchieved" v-click="2" class="flex justify-center gap-3 mt-3">
+      <Card v-for="ideal in achievedIdeals.slice(4)" :key="ideal.key" variant="success" glow size="sm" class="w-[calc(25%-9px)]">
+        <div class="flex items-center gap-1.5 text-emerald-400 font-bold text-sm">
+          <div class="i-ph-check-circle-fill text-base" /> {{ ideal.label }}
         </div>
-        <p class="text-sm text-gray-400 mt-1 text-center">{{ getDescription(achievedIdeals[6]) }}</p>
       </Card>
     </div>
 

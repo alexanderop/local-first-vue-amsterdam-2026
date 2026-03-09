@@ -1,341 +1,413 @@
 <script setup lang="ts">
-import RoughSvg from './RoughSvg.vue'
-import RoughRect from './RoughRect.vue'
-import RoughArrow from './RoughArrow.vue'
+import { computed, ref, watch, onUnmounted } from 'vue'
 import { useClickVisibility } from '../composables/useClickVisibility'
 
-const { roughness = 1.2, seed = 900 } = defineProps<{
-  roughness?: number
-  seed?: number
-}>()
+const { clicks } = useClickVisibility()
 
-const { isVisible } = useClickVisibility()
+const USER_COLORS = { alice: '#34D399', bob: '#F59E0B' } as const
 
-// Layout constants
-const W = 760
-const H = 480
+interface HistoryEvent {
+  click: number
+  user: 'alice' | 'bob'
+  device: number
+  field: 'title' | 'done'
+  value: string | number | boolean
+  time: string
+}
 
-// Header
-const headerX = 20
-const headerY = 0
-const headerW = 720
-const headerH = 55
+const EVENTS: HistoryEvent[] = [
+  { click: 1, user: 'alice', device: 1, field: 'title', value: 'Buy milk',     time: '8:01 AM' },
+  { click: 1, user: 'alice', device: 1, field: 'done',  value: false,          time: '8:01 AM' },
+  { click: 2, user: 'bob',   device: 1, field: 'title', value: 'Buy oat milk', time: '8:02 AM' },
+  { click: 3, user: 'bob',   device: 1, field: 'title', value: 'Get oat milk', time: '8:03 AM' },
+  { click: 4, user: 'bob',   device: 2, field: 'done',  value: true,           time: '8:04 AM' },
+  { click: 5, user: 'alice', device: 1, field: 'title', value: 'Buy eggs',     time: '8:05 AM' },
+  { click: 6, user: 'bob',   device: 1, field: 'done',  value: false,          time: '8:06 AM' },
+]
 
-// History columns
-const colY = 75
-const colH = 195
-const colW = 215
-const colGap = 18
-const col1X = 20
-const col2X = col1X + colW + colGap
-const col3X = col2X + colW + colGap
+const visibleEvents = computed(() => EVENTS.filter(e => clicks.value >= e.click))
 
-// Merge box
-const mergeY = 310
-const mergeX = 20
-const mergeW = 720
-const mergeH = 120
+const columns = computed(() => {
+  const alice1: HistoryEvent[] = []
+  const bob1: HistoryEvent[] = []
+  const bob2: HistoryEvent[] = []
+  for (const e of visibleEvents.value) {
+    if (e.user === 'alice' && e.device === 1) alice1.push(e)
+    else if (e.user === 'bob' && e.device === 1) bob1.push(e)
+    else if (e.user === 'bob' && e.device === 2) bob2.push(e)
+  }
+  return [
+    { key: 'alice1', user: 'alice' as const, device: 1, events: alice1 },
+    { key: 'bob1',   user: 'bob'   as const, device: 1, events: bob1 },
+    { key: 'bob2',   user: 'bob'   as const, device: 2, events: bob2 },
+  ]
+})
 
-// Arrow positions
-const arrow1X = col1X + colW / 2
-const arrow2X = col2X + colW / 2
-const arrow3X = col3X + colW / 2
-const arrowY1 = colY + colH
-const arrowY2 = mergeY
+const mergedState = computed(() => {
+  const state: Record<string, string | number | boolean> = {}
+  for (const e of visibleEvents.value) {
+    state[e.field] = e.value
+  }
+  return state
+})
+
+const mergedEntries = computed(() => Object.entries(mergedState.value))
+
+const currentTime = computed(() => {
+  const visible = visibleEvents.value
+  return visible.length > 0 ? visible[visible.length - 1].time : '8:00 AM'
+})
+
+// Track which fields just changed for flash animation
+const changedFields = ref<Set<string>>(new Set())
+let prevState: Record<string, string | number | boolean> = {}
+let flashTimer: ReturnType<typeof setTimeout> | null = null
+
+watch(mergedState, (newState) => {
+  const changed = new Set<string>()
+  for (const key of Object.keys(newState)) {
+    if (prevState[key] !== newState[key]) changed.add(key)
+  }
+  changedFields.value = changed
+  prevState = { ...newState }
+
+  if (flashTimer) clearTimeout(flashTimer)
+  if (changed.size > 0) {
+    flashTimer = setTimeout(() => {
+      changedFields.value = new Set()
+      flashTimer = null
+    }, 700)
+  }
+})
+
+onUnmounted(() => {
+  if (flashTimer) clearTimeout(flashTimer)
+  prevState = {}
+})
+
+function eventKey(e: HistoryEvent) {
+  return `${e.user}-${e.device}-${e.field}-${e.click}`
+}
 </script>
 
 <template>
-  <div class="comap-diagram-wrap">
-    <RoughSvg :width="W" :height="H" :roughness="roughness" :seed="seed" :padding="12">
+  <div class="comap-wrap">
+    <!-- Time display -->
+    <div class="time-display">{{ currentTime }}</div>
 
-      <!-- Header — always visible -->
-      <g class="click-el">
-        <RoughRect
-          :x="headerX" :y="headerY" :width="headerW" :height="headerH"
-          variant="accent"
-          :roughness="roughness"
-          :seed="seed"
-        />
-        <text
-          :x="headerX + headerW / 2" :y="headerY + 22"
-          text-anchor="middle" dominant-baseline="central"
-          class="label-mono"
-          style="font-size: 13px; fill: rgba(255, 107, 237, 0.95); font-weight: 600;"
-        >CoMap co_z3YG8oTv5VWNMQT</text>
-        <text
-          :x="headerX + headerW / 2" :y="headerY + 42"
-          text-anchor="middle" dominant-baseline="central"
-          class="label-mono"
-          style="font-size: 11px;"
-        >type: "todo" · owner: alice · created: 8:00 AM</text>
-      </g>
+    <!-- Title bar -->
+    <div class="title-bar">
+      <span class="title-id">CoMap</span>
+      <span class="title-hash">co_z3YG8oTv5VWNMQT</span>
+    </div>
 
-      <!-- Column 1: alice / device 1 — click 1 -->
-      <g class="click-el" :class="{ '--hidden': !isVisible(1) }">
-        <RoughRect
-          :x="col1X" :y="colY" :width="colW" :height="colH"
-          variant="default"
-          :roughness="roughness"
-          :seed="seed + 10"
-        />
-        <text
-          :x="col1X + colW / 2" :y="colY + 22"
-          text-anchor="middle" dominant-baseline="central"
-          class="label-title"
-        >ALICE / DEVICE 1</text>
+    <!-- Outer frame -->
+    <div class="outer-frame">
 
-        <!-- title field -->
-        <text
-          :x="col1X + 14" :y="colY + 58"
-          dominant-baseline="central"
-          class="label-mono"
-        >title:</text>
-        <text
-          :x="col1X + 65" :y="colY + 58"
-          dominant-baseline="central"
-          class="label-mono accent"
-        >"Buy milk"</text>
-        <text
-          :x="col1X + colW - 14" :y="colY + 58"
-          text-anchor="end" dominant-baseline="central"
-          class="label-mono"
-          style="font-size: 10px;"
-        >8:01</text>
+      <!-- HEADER section -->
+      <div class="section-row">
+        <div class="section-label"><span>HEADER</span></div>
+        <div class="header-content">
+          <div class="header-field"><span class="header-key">type:</span> <span class="header-val">"todo"</span></div>
+          <div class="header-field"><span class="header-key">createdAt:</span> <span class="header-val">8:00 AM</span></div>
+          <div class="header-field"><span class="header-key">owner:</span> <span class="header-val" :style="{ color: USER_COLORS.alice }">alice</span></div>
+          <div class="header-field"><span class="header-key">uniqueness:</span> <span class="header-val">co_z3YG8oTv5VWNMQT</span></div>
+        </div>
+      </div>
 
-        <!-- done field -->
-        <text
-          :x="col1X + 14" :y="colY + 88"
-          dominant-baseline="central"
-          class="label-mono"
-        >done:</text>
-        <text
-          :x="col1X + 62" :y="colY + 88"
-          dominant-baseline="central"
-          class="label-mono accent"
-        >false</text>
-        <text
-          :x="col1X + colW - 14" :y="colY + 88"
-          text-anchor="end" dominant-baseline="central"
-          class="label-mono"
-          style="font-size: 10px;"
-        >8:01</text>
+      <div class="section-divider" />
 
-        <text
-          :x="col1X + colW / 2" :y="colY + colH - 28"
-          text-anchor="middle" dominant-baseline="central"
-          class="edge-label"
-          style="font-size: 11px;"
-        >creates todo</text>
-      </g>
+      <!-- HISTORY section -->
+      <div class="section-row history-section">
+        <div class="section-label"><span>HISTORY</span></div>
+        <div class="history-columns">
+          <div v-for="col in columns" :key="col.key" class="history-col">
+            <div class="col-header">
+              <span class="col-user" :style="{ color: USER_COLORS[col.user] }">{{ col.user }}</span>
+              <span class="col-device">device {{ col.device }}</span>
+            </div>
+            <TransitionGroup name="entry" tag="div" class="entries">
+              <div
+                v-for="e in col.events"
+                :key="eventKey(e)"
+                class="entry-row"
+                :class="{ 'entry-new': clicks === e.click }"
+              >
+                <span class="entry-field">{{ e.field }}: <span class="entry-value">{{ e.value }}</span></span>
+                <span class="entry-time">{{ e.time }}</span>
+              </div>
+            </TransitionGroup>
+          </div>
+        </div>
+      </div>
 
-      <!-- Column 2: bob / device 1 — click 2 -->
-      <g class="click-el" :class="{ '--hidden': !isVisible(2) }">
-        <RoughRect
-          :x="col2X" :y="colY" :width="colW" :height="colH"
-          variant="default"
-          :roughness="roughness"
-          :seed="seed + 20"
-        />
-        <text
-          :x="col2X + colW / 2" :y="colY + 22"
-          text-anchor="middle" dominant-baseline="central"
-          class="label-title"
-        >BOB / DEVICE 1</text>
+      <!-- Triangle separator -->
+      <div class="triangle-separator">
+        <span class="triangle-label">LWW merge</span>
+        <span class="triangle-icon">&#9660;</span>
+      </div>
 
-        <!-- title field -->
-        <text
-          :x="col2X + 14" :y="colY + 58"
-          dominant-baseline="central"
-          class="label-mono"
-        >title:</text>
-        <text
-          :x="col2X + 65" :y="colY + 58"
-          dominant-baseline="central"
-          class="label-mono accent"
-        >"Buy oat milk"</text>
-        <text
-          :x="col2X + colW - 14" :y="colY + 58"
-          text-anchor="end" dominant-baseline="central"
-          class="label-mono"
-          style="font-size: 10px;"
-        >8:03</text>
+      <div class="section-divider" />
 
-        <text
-          :x="col2X + colW / 2" :y="colY + colH - 28"
-          text-anchor="middle" dominant-baseline="central"
-          class="edge-label"
-          style="font-size: 11px;"
-        >edits title offline</text>
-      </g>
+      <!-- STATE section -->
+      <div class="section-row">
+        <div class="section-label"><span>STATE</span></div>
+        <div class="state-content">
+          <span class="state-brace">{</span>
+          <span
+            v-for="([key, val], i) in mergedEntries"
+            :key="key"
+            class="state-entry"
+          >
+            <span class="state-key">{{ key }}</span>:
+            <span
+              class="state-value"
+              :class="{ 'state-flash': changedFields.has(key) }"
+            >{{ val }}</span><span v-if="i < mergedEntries.length - 1">,&nbsp;</span>
+          </span>
+          <span class="state-brace">}</span>
+        </div>
+      </div>
 
-      <!-- Column 3: bob / device 2 — click 3 -->
-      <g class="click-el" :class="{ '--hidden': !isVisible(3) }">
-        <RoughRect
-          :x="col3X" :y="colY" :width="colW" :height="colH"
-          variant="default"
-          :roughness="roughness"
-          :seed="seed + 30"
-        />
-        <text
-          :x="col3X + colW / 2" :y="colY + 22"
-          text-anchor="middle" dominant-baseline="central"
-          class="label-title"
-        >BOB / DEVICE 2</text>
-
-        <!-- done field -->
-        <text
-          :x="col3X + 14" :y="colY + 58"
-          dominant-baseline="central"
-          class="label-mono"
-        >done:</text>
-        <text
-          :x="col3X + 62" :y="colY + 58"
-          dominant-baseline="central"
-          class="label-mono accent"
-        >true</text>
-        <text
-          :x="col3X + colW - 14" :y="colY + 58"
-          text-anchor="end" dominant-baseline="central"
-          class="label-mono"
-          style="font-size: 10px;"
-        >8:02</text>
-
-        <text
-          :x="col3X + colW / 2" :y="colY + colH - 28"
-          text-anchor="middle" dominant-baseline="central"
-          class="edge-label"
-          style="font-size: 11px;"
-        >marks done offline</text>
-      </g>
-
-      <!-- Arrows + merge label — click 4 -->
-      <g class="click-el" :class="{ '--hidden': !isVisible(4) }">
-        <RoughArrow
-          :x1="arrow1X" :y1="arrowY1"
-          :x2="arrow1X" :y2="arrowY2"
-          :roughness="roughness"
-          :seed="seed + 40"
-        />
-        <RoughArrow
-          :x1="arrow2X" :y1="arrowY1"
-          :x2="arrow2X" :y2="arrowY2"
-          :roughness="roughness"
-          :seed="seed + 45"
-        />
-        <RoughArrow
-          :x1="arrow3X" :y1="arrowY1"
-          :x2="arrow3X" :y2="arrowY2"
-          :roughness="roughness"
-          :seed="seed + 50"
-        />
-        <text
-          :x="W / 2" :y="(arrowY1 + arrowY2) / 2"
-          text-anchor="middle" dominant-baseline="central"
-          class="edge-label"
-        >LWW merge ▼</text>
-
-        <RoughRect
-          :x="mergeX" :y="mergeY" :width="mergeW" :height="mergeH"
-          variant="success"
-          :roughness="roughness * 0.7"
-          :seed="seed + 55"
-          :stroke-width="1.5"
-          stroke-dasharray="8 6"
-        />
-        <text
-          :x="mergeX + mergeW / 2" :y="mergeY + 30"
-          text-anchor="middle" dominant-baseline="central"
-          class="label-title"
-          style="fill: rgba(52, 211, 153, 0.9);"
-        >MERGED STATE</text>
-        <text
-          :x="mergeX + mergeW / 2" :y="mergeY + 62"
-          text-anchor="middle" dominant-baseline="central"
-          class="label-mono"
-          style="font-size: 14px;"
-        >{ title: "Buy oat milk", done: true }</text>
-        <text
-          :x="mergeX + mergeW / 2" :y="mergeY + 90"
-          text-anchor="middle" dominant-baseline="central"
-          class="edge-label"
-          style="font-size: 11px;"
-        >title → 8:03 wins over 8:01 · done → no conflict</text>
-      </g>
-
-
-    </RoughSvg>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.comap-diagram-wrap {
+.comap-wrap {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-}
-
-.comap-diagram-wrap :deep(.rough-svg) {
-  width: 100%;
-  max-height: 100%;
-  height: auto;
-}
-
-.label-title {
   font-family: 'Geist Mono', monospace;
-  font-size: 14px;
-  font-weight: 600;
-  fill: rgba(255, 255, 255, 0.5);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.label-box {
-  font-family: 'Geist', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  fill: rgba(234, 237, 243, 0.95);
-}
-
-.label-mono {
-  font-family: 'Geist Mono', monospace;
+.time-display {
   font-size: 12px;
-  font-weight: 400;
-  fill: rgba(255, 255, 255, 0.4);
-}
-
-.label-mono.accent {
-  fill: rgba(255, 107, 237, 0.85);
-}
-
-.edge-label {
-  font-family: 'Geist Mono', monospace;
-  font-size: 12px;
-  font-weight: 400;
-  fill: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 6px;
   letter-spacing: 0.05em;
 }
 
-.rule-text {
-  font-family: 'Geist', sans-serif;
-  font-size: 15px;
+.title-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.title-id {
+  color: rgba(255, 107, 237, 0.9);
   font-weight: 600;
 }
 
-.rule-success {
-  fill: rgba(52, 211, 153, 0.9);
+.title-hash {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 11px;
 }
 
-.rule-accent {
-  fill: rgba(255, 107, 237, 0.85);
+.outer-frame {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  width: 680px;
+  overflow: hidden;
 }
 
-.click-el {
-  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+.section-row {
+  display: flex;
 }
 
-.click-el.--hidden {
+.section-label {
+  width: 28px;
+  min-width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 0;
+}
+
+.section-label span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.section-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* HEADER */
+.header-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 24px;
+  padding: 10px 16px;
+  font-size: 11px;
+}
+
+.header-key {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.header-val {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* HISTORY */
+.history-section {
+  min-height: 140px;
+}
+
+.history-columns {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+}
+
+.history-col {
+  padding: 8px 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.history-col:last-child {
+  border-right: none;
+}
+
+.col-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.col-user {
+  font-weight: 600;
+}
+
+.col-device {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 10px;
+}
+
+.entries {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.entry-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.entry-new {
+  background: rgba(255, 107, 237, 0.12);
+}
+
+.entry-field {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.entry-value {
+  color: rgba(255, 107, 237, 0.85);
+}
+
+.entry-time {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 9px;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+/* Entry transitions */
+.entry-enter-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.entry-enter-from {
   opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* Triangle separator */
+.triangle-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 0;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 11px;
+}
+
+.triangle-label {
+  letter-spacing: 0.05em;
+}
+
+.triangle-icon {
+  font-size: 10px;
+}
+
+/* STATE */
+.state-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 12px 16px;
+  font-size: 13px;
+}
+
+.state-brace {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.state-entry {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.state-key {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.state-value {
+  color: rgba(255, 107, 237, 0.85);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.state-flash {
+  animation: flash 0.6s ease-out;
+}
+
+@keyframes flash {
+  0% {
+    background: rgba(255, 107, 237, 0.35);
+  }
+  100% {
+    background: transparent;
+  }
 }
 </style>
