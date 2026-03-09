@@ -326,60 +326,7 @@ TRANSITION: Where that leaves us on the scorecard...
 
 # The Status Quo Scorecard
 
-<div class="grid grid-cols-4 gap-3 mt-6">
-  <Card variant="muted" size="sm">
-    <div class="flex flex-col items-center gap-2 text-center">
-      <div class="i-ph-lightning text-2xl text-brand/50" />
-      <div class="text-sm font-semibold text-gray-300">Fast</div>
-      <div class="text-xs text-gray-500 leading-tight">No spinners. Instant response.</div>
-    </div>
-  </Card>
-  <Card variant="muted" size="sm">
-    <div class="flex flex-col items-center gap-2 text-center">
-      <div class="i-ph-devices text-2xl text-brand/50" />
-      <div class="text-sm font-semibold text-gray-300">Multi-device</div>
-      <div class="text-xs text-gray-500 leading-tight">Your work on any device.</div>
-    </div>
-  </Card>
-  <Card variant="muted" size="sm">
-    <div class="flex flex-col items-center gap-2 text-center">
-      <div class="i-ph-wifi-slash text-2xl text-brand/50" />
-      <div class="text-sm font-semibold text-gray-300">Works offline</div>
-      <div class="text-xs text-gray-500 leading-tight">The network is optional.</div>
-    </div>
-  </Card>
-  <Card variant="muted" size="sm">
-    <div class="flex flex-col items-center gap-2 text-center">
-      <div class="i-ph-users-three text-2xl text-brand/50" />
-      <div class="text-sm font-semibold text-gray-300">Collaboration</div>
-      <div class="text-xs text-gray-500 leading-tight">Seamless real-time teamwork.</div>
-    </div>
-  </Card>
-</div>
-
-<div class="flex justify-center gap-3 mt-3">
-  <Card variant="muted" size="sm" class="w-[calc(25%-9px)]">
-    <div class="flex flex-col items-center gap-2 text-center">
-      <div class="i-ph-clock-countdown text-2xl text-brand/50" />
-      <div class="text-sm font-semibold text-gray-300">Longevity</div>
-      <div class="text-xs text-gray-500 leading-tight">Your data outlives the app.</div>
-    </div>
-  </Card>
-  <Card variant="muted" size="sm" class="w-[calc(25%-9px)]">
-    <div class="flex flex-col items-center gap-2 text-center">
-      <div class="i-ph-shield-check text-2xl text-brand/50" />
-      <div class="text-sm font-semibold text-gray-300">Privacy</div>
-      <div class="text-xs text-gray-500 leading-tight">Security and privacy by default.</div>
-    </div>
-  </Card>
-  <Card variant="muted" size="sm" class="w-[calc(25%-9px)]">
-    <div class="flex flex-col items-center gap-2 text-center">
-      <div class="i-ph-key text-2xl text-brand/50" />
-      <div class="text-sm font-semibold text-gray-300">User control</div>
-      <div class="text-xs text-gray-500 leading-tight">You retain ownership and control.</div>
-    </div>
-  </Card>
-</div>
+<Scorecard mode="intro" :achieved="[]" :show-summary="false" />
 
 <div v-click="1" class="mt-4 text-center text-gray-500">
 
@@ -627,38 +574,10 @@ TRANSITION: What does offline-first already give us?
 
 # What Offline-First Already Gives Us
 
-<div v-click="1" class="grid grid-cols-2 gap-4 mt-6">
-  <Card variant="success" glow size="lg">
-    <div class="flex items-center gap-2 text-emerald-400 font-bold text-lg"><div class="i-ph-check-circle-fill text-xl" /> Fast — no spinners</div>
-    <p class="text-sm text-gray-400 mt-1 pl-7">Data is local. Reads are instant. No waiting for the network.</p>
-  </Card>
-  <Card variant="success" glow size="lg">
-    <div class="flex items-center gap-2 text-emerald-400 font-bold text-lg"><div class="i-ph-check-circle-fill text-xl" /> Works offline</div>
-    <p class="text-sm text-gray-400 mt-1 pl-7">The whole point. Read and write without connectivity.</p>
-  </Card>
-</div>
-
-<div v-click="2" class="grid grid-cols-5 gap-2 mt-4">
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> Multi-device?</div>
-  </Card>
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> Collaboration?</div>
-  </Card>
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> Longevity?</div>
-  </Card>
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> Privacy?</div>
-  </Card>
-  <Card variant="muted" dashed dimmed size="sm">
-    <div class="flex items-center justify-center gap-1 text-sm"><div class="i-ph-question text-base" /> User control?</div>
-  </Card>
-</div>
-
-<div v-click="3" class="text-center mt-8 text-sm text-gray-500 tracking-wide">
-  <span class="text-emerald-400 font-bold">2</span> / <span class="text-gray-400">7</span> local-first principles achieved
-</div>
+<Scorecard :achieved="['fast', 'offline']" :descriptions="{
+  fast: 'Data is local. Reads are instant. No waiting for the network.',
+  offline: 'The whole point. Read and write without connectivity.'
+}" />
 
 <!--
 CLICK -- Two things FREE: speed (local reads) + offline capability
@@ -786,7 +705,7 @@ Let me show you the most elegant solution first...
 clicks: 5
 ---
 
-# CRDTs: Merge Without a Server
+# CRDTs: Git for JSON
 
 <CrdtCounterDemo :roughness="1.2" :seed="800" />
 
@@ -1028,6 +947,29 @@ TRANSITION: Let's define what truly local-first means...
 -->
 
 ---
+
+# What Sync Engines Add
+
+<Scorecard :achieved="['fast', 'offline', 'multi-device', 'collaboration']" :descriptions="{
+  fast: 'Local reads, optimistic writes. UI never waits for the server.',
+  offline: 'Sync engines queue changes and reconcile when back online.',
+  'multi-device': 'State syncs across devices via the server in real time.',
+  collaboration: 'Multiple users edit the same document — conflicts resolved automatically.'
+}" />
+
+<!--
+CLICK -- Four things covered now: speed, offline, multi-device, collaboration.
+Sync engines are POWERFUL.
+
+CLICK -- But three question marks remain: longevity, privacy, user control.
+If Linear shuts down -- your data is gone. Server owns it.
+
+CLICK -- 4 out of 7. Great engineering, but not truly local-first yet.
+
+TRANSITION: Let's define what truly local-first means...
+-->
+
+---
 transition: fade
 ---
 
@@ -1167,7 +1109,33 @@ Local-first: "why does the server own my data AT ALL?"
 YOU are the owner. Server = utility. Can't reject your writes.
 No foreign kill switch -- your data stays in YOUR jurisdiction.
 
-TRANSITION: Now that we know what local-first means -- let's BUILD it.
+TRANSITION: Now that we know what local-first means -- let's see the full scorecard.
+-->
+
+---
+
+# The Local-First Promise
+
+<Scorecard :achieved="['fast', 'offline', 'multi-device', 'collaboration', 'longevity', 'privacy', 'user-control']" :descriptions="{
+  fast: 'Data is local. Reads are instant. No waiting for the network.',
+  offline: 'Full read and write without connectivity — not just a cache.',
+  'multi-device': 'State syncs seamlessly across every device you own.',
+  collaboration: 'Real-time multiplayer with automatic conflict resolution.',
+  longevity: 'Your data outlives any company. No server dependency for access.',
+  privacy: 'End-to-end encryption. The server never sees your plaintext data.',
+  'user-control': 'You own your data. Export, switch, delete — your choice, always.'
+}" />
+
+<!--
+CLICK -- All seven. That's the promise of local-first.
+Fast, offline, multi-device, collaboration -- we had those with sync engines.
+
+CLICK -- But now also: longevity, privacy, and USER CONTROL.
+Your data outlives any company. Encrypted. Yours.
+
+CLICK -- 7 out of 7. The full picture. Now -- how do we BUILD this in Vue?
+
+TRANSITION: Let's build it with Jazz.
 -->
 
 ---
@@ -1266,7 +1234,7 @@ Let me show you what you get -- starting with the SIMPLEST possible example...
 -->
 
 ---
-clicks: 3
+clicks: 4
 ---
 
 # CoValues — One Abstraction, Three Problems Solved
@@ -1275,27 +1243,44 @@ clicks: 3
 The CoMap you just saw? That's a CoValue. Jazz adds persistence and encryption on top.
 </div>
 
-<div class="flex justify-center">
-<FlowDiagram
-  :nodes="[
-    { id: 'covalue', label: 'CoValue', subtitle: 'co.map / co.list', variant: 'accent' },
-    { id: 'sync', label: 'Sync', subtitle: 'Real-time CRDT merge', click: 1 },
-    { id: 'persist', label: 'Persistence', subtitle: 'IndexedDB, offline-first', click: 2 },
-    { id: 'security', label: 'Security', subtitle: 'Groups, roles, E2E encryption', click: 3 },
-  ]"
-  :edges="[
-    { from: 'covalue', to: 'sync', click: 1 },
-    { from: 'covalue', to: 'persist', click: 2 },
-    { from: 'covalue', to: 'security', click: 3 },
-  ]"
-  layout="fan-right"
-  :node-width="220"
-  :node-height="80"
-  :gap="140"
-/>
+<div class="grid grid-cols-[1fr_1.4fr] gap-8 items-start mt-2">
+
+<div v-click="1" class="flex justify-center">
+  <ChatWireframe />
 </div>
 
-<div v-click="3" class="text-center mt-6 text-sm op-60">
+<div class="space-y-4">
+  <div v-click="2">
+    <div class="text-base font-semibold text-[#ff6bed]">Sync</div>
+    <ul class="text-sm op-70 mt-1 list-none pl-0">
+      <li>Real-time CRDT merge</li>
+      <li>Automatic conflict resolution</li>
+      <li>Works across all peers</li>
+    </ul>
+  </div>
+
+  <div v-click="3">
+    <div class="text-base font-semibold text-[#ff6bed]">Persistence</div>
+    <ul class="text-sm op-70 mt-1 list-none pl-0">
+      <li>IndexedDB storage</li>
+      <li>Offline-first by default</li>
+      <li>No cache layer needed</li>
+    </ul>
+  </div>
+
+  <div v-click="4">
+    <div class="text-base font-semibold text-[#ff6bed]">Security</div>
+    <ul class="text-sm op-70 mt-1 list-none pl-0">
+      <li>Group-based access control</li>
+      <li>Admin / writer / reader roles</li>
+      <li>End-to-end encrypted</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+
+<div v-click="4" class="text-center mt-4 text-sm op-60">
 You define the shape. Jazz handles sync, storage, and access control automatically.
 </div>
 
@@ -1315,96 +1300,6 @@ TRANSITION: Let's see this in code...
 -->
 
 ---
-clicks: 5
----
-
-# Jazz in 30 Seconds — A Collaborative Counter
-
-````md magic-move {lines: true}
-```ts
-// schema.ts — define your collaborative data
-import { co, z } from 'jazz-tools'
-
-const Counter = co.map({ count: z.number() })
-```
-```ts
-// schema.ts — define your collaborative data
-import { co, z } from 'jazz-tools'
-
-export const Counter = co.map({ count: z.number() })
-```
-```vue
-<!-- Counter.vue -->
-<script setup lang="ts">
-import { useCoState } from 'community-jazz-vue'
-import { Counter } from './schema'
-
-const counter = useCoState(Counter, counterId)
-</script>
-```
-```vue
-<!-- Counter.vue -->
-<script setup lang="ts">
-import { useCoState } from 'community-jazz-vue'
-import { Counter } from './schema'
-
-const counter = useCoState(Counter, counterId)
-
-function increment() {
-  if (counter.value) counter.value.count++
-}
-</script>
-```
-```vue
-<!-- Counter.vue -->
-<script setup lang="ts">
-import { useCoState } from 'community-jazz-vue'
-import { Counter } from './schema'
-
-const counter = useCoState(Counter, counterId)
-
-function increment() {
-  if (counter.value) counter.value.count++
-}
-</script>
-
-<template>
-  <button @click="increment">{{ counter?.count ?? 0 }}</button>
-</template>
-```
-````
-
-<div v-click="5" class="mt-4 text-center text-lg op-80">
-
-`counter.count++` — **synced**, **persisted**, **encrypted**. No fetch. No API.
-
-</div>
-
-<!--
-Let's build the simplest Jazz app. A counter.
-
-STEP 1: Start with schema. co.map with one field. That's your "database table."
-
-CLICK: Export it so our component can use it.
-
-CLICK: Counter.vue — useCoState takes schema + ID, gives you a reactive ref. Auto-subscribes.
-Think of useCoState like useFetch from VueUse -- but instead of fetching once, it SUBSCRIBES. Returns a reactive ref, just like ref().
-
-CLICK: Mutation? Just counter.count++. That's it.
-Yes, direct mutation. Like Pinia without actions. Mutate the ref, Jazz syncs it everywhere.
-
-CLICK: Template — one button. Standard Vue.
-
-CLICK: [slow down] That increment... is synced in real-time, persisted offline, encrypted. All of it.
-No axios. No Pinia store. No socket.io. counter.count++ replaces ALL of that.
-
-[pause] [look up]
-Three lines of schema. A few lines of component. ENTIRE data layer.
-
-TRANSITION: Let's build something real...
--->
-
----
 layout: center
 class: text-center
 ---
@@ -1413,9 +1308,9 @@ class: text-center
 <div class="mt-4 text-xl op-60">Schema → Provider → Component — three steps</div>
 
 <!--
-Counter was the concept. Now let's build something REAL.
+Let's see Jazz in action. We'll build a real chat app.
 
-Chat app. Three steps. You'll USE this app yourself in a few minutes.
+Three steps. You'll USE this app yourself in a few minutes.
 -->
 
 ---
