@@ -1240,7 +1240,7 @@ clicks: 4
 # CoValues — One Abstraction, Three Problems Solved
 
 <div class="text-center text-sm op-60 mb-4">
-The CoMap you just saw? That's a CoValue. Jazz adds persistence and encryption on top.
+The CoMap you just saw? That's a CoValue — Jazz's word for CRDTs (they don't call them that). Jazz adds persistence and encryption on top.
 </div>
 
 <div class="grid grid-cols-[1fr_1.4fr] gap-8 items-start mt-2">
@@ -1286,6 +1286,8 @@ You define the shape. Jazz handles sync, storage, and access control automatical
 
 <!--
 The CoMap you just saw? That's a CoValue. Jazz adds persistence and encryption on top.
+
+Fun fact — Jazz deliberately doesn't call them CRDTs. They call them coValues. But make no mistake, they ARE CRDTs under the hood.
 
 CLICK -- SYNC. Every CoValue is a CRDT. Changes merge automatically, even offline, even with conflicts. Real-time across all connected peers.
 
