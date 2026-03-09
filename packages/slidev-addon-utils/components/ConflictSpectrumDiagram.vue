@@ -47,7 +47,7 @@ const cards = computed(() => {
 const W = computed(() => {
   const c = cards.value
   if (!c.length) return 0
-  const last = c[c.length - 1]
+  const last = c.at(-1)
   return last.x + last.w
 })
 

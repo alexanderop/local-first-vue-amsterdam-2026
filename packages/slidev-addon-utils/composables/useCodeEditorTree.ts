@@ -5,6 +5,7 @@ import {
   findFilePath,
   getAncestorPaths,
   collectFolderPaths,
+  parseCommaSeparated,
   type FileTreeNode,
 } from '../utils/parseFileTree'
 import { editorTreeKey } from './editorTreeKey'
@@ -35,7 +36,7 @@ export function useCodeEditorTree(options: UseCodeEditorTreeOptions | Ref<UseCod
       }
     }
     // Fallback: derive flat tree from tabs
-    const tabs = resolveTabs(opts.tabs, opts.activeFile)
+    const tabs = parseCommaSeparated(opts.tabs, opts.activeFile)
     if (tabs.length > 0) {
       return buildTreeFromPaths(tabs.map(t => `src/${t}`))
     }
@@ -56,20 +57,25 @@ export function useCodeEditorTree(options: UseCodeEditorTreeOptions | Ref<UseCod
   // Auto-expand ancestor folders of the active file
   watch(
     [tree, activeFilePath],
-    ([treeVal, activePath]) => {
+    ([treeVal, _activePath]) => {
       if (!treeVal.length) return
 
       const opts = toValue(options)
 
-      // If explicit openFolders, use those
+      // If explicit openFolders, match by folder name and expand ancestors
       if (opts.openFolders) {
         expandedNodes.clear()
-        const folders = typeof opts.openFolders === 'string'
-          ? opts.openFolders.split(',').map(f => f.trim())
-          : opts.openFolders
-        for (const f of folders) {
-          const path = f.startsWith('/') ? f : `/${f}`
-          expandedNodes.add(path)
+        const folderNames = parseCommaSeparated(opts.openFolders)
+        const allFolderPaths = collectFolderPaths(treeVal)
+        for (const name of folderNames) {
+          for (const folderPath of allFolderPaths) {
+            if (folderPath === `/${name}` || folderPath.endsWith(`/${name}`)) {
+              expandedNodes.add(folderPath)
+              for (const ancestor of getAncestorPaths(folderPath)) {
+                expandedNodes.add(ancestor)
+              }
+            }
+          }
         }
         return
       }
@@ -109,11 +115,4 @@ export function useCodeEditorTree(options: UseCodeEditorTreeOptions | Ref<UseCod
     toggleNode,
     isExpanded,
   }
-}
-
-/** Resolve tabs from string | string[] | undefined, with activeFile as fallback */
-function resolveTabs(tabs: string | string[] | undefined, activeFile?: string): string[] {
-  if (!tabs) return activeFile ? [activeFile] : []
-  if (typeof tabs === 'string') return tabs.split(',').map(t => t.trim())
-  return tabs
 }

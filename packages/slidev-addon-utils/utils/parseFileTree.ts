@@ -16,23 +16,22 @@ export interface FileTreeNode {
  *       ChatApp.vue
  *   package.json
  */
+function getIndent(line: string) {
+  let i = 0
+  while (i < line.length && line[i] === ' ') i++
+  return i
+}
+
 export function parseFileTree(input: string): FileTreeNode[] {
   const lines = input
-    .replace(/\r\n?/g, '\n')
-    .replace(/\t/g, '  ')
+    .replaceAll(/\r\n?/g, '\n')
+    .replaceAll('\t', '  ')
     .split('\n')
-    .map(l => l.replace(/\t/g, '  '))
 
   const root: FileTreeNode[] = []
   const stack: Array<{ indent: number; node: FileTreeNode }> = []
   let prevIndent = 0
   let prevNode: FileTreeNode | null = null
-
-  const getIndent = (line: string) => {
-    let i = 0
-    while (i < line.length && line[i] === ' ') i++
-    return i
-  }
 
   for (const raw of lines) {
     if (!raw.trim()) continue
@@ -52,12 +51,12 @@ export function parseFileTree(input: string): FileTreeNode[] {
       }
       stack.push({ indent: prevIndent, node: prevNode })
     } else {
-      while (stack.length && indent <= stack[stack.length - 1].indent) {
+      while (stack.length && indent <= stack.at(-1).indent) {
         stack.pop()
       }
     }
 
-    const parent = stack.length ? stack[stack.length - 1].node : null
+    const parent = stack.length ? stack.at(-1).node : null
     const node: FileTreeNode = {
       name: trimmed,
       type: forcedFolder ? 'folder' : 'file',
@@ -173,36 +172,132 @@ export function getAncestorPaths(filePath: string): string[] {
   return ancestors
 }
 
+/** Strip matched surrounding quotes from a string (handles YAML frontmatter artifacts). */
+export function stripQuotes(s: string): string {
+  if ((s.startsWith("'") && s.endsWith("'")) || (s.startsWith('"') && s.endsWith('"'))) {
+    return s.slice(1, -1)
+  }
+  return s
+}
+
+/** Parse a comma-separated string (or pass-through array) into a trimmed string[]. */
+export function parseCommaSeparated(input: string | string[] | undefined, fallback?: string): string[] {
+  if (!input) return fallback ? [fallback] : []
+  if (Array.isArray(input)) return input
+  return input.split(',').map(s => s.trim())
+}
+
 const FILE_NAME_ICONS: Record<string, string> = {
   'package.json': 'i-vscode-icons:file-type-node',
   'tsconfig.json': 'i-vscode-icons:file-type-tsconfig',
   'vite.config.ts': 'i-vscode-icons:file-type-vite',
+  'vite.config.js': 'i-vscode-icons:file-type-vite',
   '.gitignore': 'i-vscode-icons:file-type-git',
+  '.env': 'i-vscode-icons:file-type-dotenv',
+  '.env.local': 'i-vscode-icons:file-type-dotenv',
+  '.eslintrc': 'i-vscode-icons:file-type-eslint',
+  '.eslintrc.js': 'i-vscode-icons:file-type-eslint',
+  '.eslintrc.json': 'i-vscode-icons:file-type-eslint',
+  '.prettierrc': 'i-vscode-icons:file-type-prettier',
+  'Dockerfile': 'i-vscode-icons:file-type-docker2',
+  'docker-compose.yml': 'i-vscode-icons:file-type-docker2',
+  'README.md': 'i-vscode-icons:file-type-markdown',
+  'LICENSE': 'i-vscode-icons:file-type-license',
+  'yarn.lock': 'i-vscode-icons:file-type-yarn',
+  'pnpm-lock.yaml': 'i-vscode-icons:file-type-pnpm',
+  'tailwind.config.ts': 'i-vscode-icons:file-type-tailwind',
+  'tailwind.config.js': 'i-vscode-icons:file-type-tailwind',
+  'nuxt.config.ts': 'i-vscode-icons:file-type-nuxt',
 }
 
 const EXTENSION_ICONS: Record<string, string> = {
-  vue: 'i-logos:vue',
-  ts: 'i-logos:typescript-icon',
-  tsx: 'i-logos:typescript-icon',
-  js: 'i-logos:javascript',
-  jsx: 'i-logos:javascript',
-  json: 'i-carbon:settings',
-  css: 'i-logos:css-3',
-  scss: 'i-logos:sass',
-  sass: 'i-logos:sass',
-  html: 'i-logos:html-5',
-  md: 'i-carbon:document',
-  svg: 'i-carbon:image',
-  png: 'i-carbon:image',
-  jpg: 'i-carbon:image',
-  jpeg: 'i-carbon:image',
-  gif: 'i-carbon:image',
+  vue: 'i-vscode-icons:file-type-vue',
+  ts: 'i-vscode-icons:file-type-typescript',
+  tsx: 'i-vscode-icons:file-type-typescriptdef',
+  js: 'i-vscode-icons:file-type-js',
+  jsx: 'i-vscode-icons:file-type-reactjs',
+  json: 'i-vscode-icons:file-type-json',
+  css: 'i-vscode-icons:file-type-css',
+  scss: 'i-vscode-icons:file-type-scss',
+  sass: 'i-vscode-icons:file-type-sass',
+  html: 'i-vscode-icons:file-type-html',
+  md: 'i-vscode-icons:file-type-markdown',
+  yaml: 'i-vscode-icons:file-type-yaml',
+  yml: 'i-vscode-icons:file-type-yaml',
+  graphql: 'i-vscode-icons:file-type-graphql',
+  prisma: 'i-vscode-icons:file-type-prisma',
+  svg: 'i-vscode-icons:file-type-svg',
+  png: 'i-vscode-icons:file-type-image',
+  jpg: 'i-vscode-icons:file-type-image',
+  jpeg: 'i-vscode-icons:file-type-image',
+  gif: 'i-vscode-icons:file-type-image',
   ico: 'i-vscode-icons:file-type-favicon',
+  py: 'i-vscode-icons:file-type-python',
+  rb: 'i-vscode-icons:file-type-ruby',
+  go: 'i-vscode-icons:file-type-go',
+  rs: 'i-vscode-icons:file-type-rust',
+  sql: 'i-vscode-icons:file-type-sql',
+  sh: 'i-vscode-icons:file-type-shell',
+  toml: 'i-vscode-icons:file-type-toml',
+}
+
+const DEFAULT_FILE_ICON = 'i-vscode-icons:default-file'
+
+const FOLDER_NAME_ICONS: Record<string, { closed: string; open: string }> = {
+  src: { closed: 'i-vscode-icons:folder-type-src', open: 'i-vscode-icons:folder-type-src-opened' },
+  components: { closed: 'i-vscode-icons:folder-type-component', open: 'i-vscode-icons:folder-type-component-opened' },
+  pages: { closed: 'i-vscode-icons:folder-type-view', open: 'i-vscode-icons:folder-type-view-opened' },
+  views: { closed: 'i-vscode-icons:folder-type-view', open: 'i-vscode-icons:folder-type-view-opened' },
+  assets: { closed: 'i-vscode-icons:folder-type-images', open: 'i-vscode-icons:folder-type-images-opened' },
+  public: { closed: 'i-vscode-icons:folder-type-public', open: 'i-vscode-icons:folder-type-public-opened' },
+  styles: { closed: 'i-vscode-icons:folder-type-css', open: 'i-vscode-icons:folder-type-css-opened' },
+  utils: { closed: 'i-vscode-icons:folder-type-helper', open: 'i-vscode-icons:folder-type-helper-opened' },
+  lib: { closed: 'i-vscode-icons:folder-type-library', open: 'i-vscode-icons:folder-type-library-opened' },
+  tests: { closed: 'i-vscode-icons:folder-type-test', open: 'i-vscode-icons:folder-type-test-opened' },
+  test: { closed: 'i-vscode-icons:folder-type-test', open: 'i-vscode-icons:folder-type-test-opened' },
+  config: { closed: 'i-vscode-icons:folder-type-config', open: 'i-vscode-icons:folder-type-config-opened' },
+  api: { closed: 'i-vscode-icons:folder-type-api', open: 'i-vscode-icons:folder-type-api-opened' },
+  composables: { closed: 'i-vscode-icons:folder-type-hook', open: 'i-vscode-icons:folder-type-hook-opened' },
+  hooks: { closed: 'i-vscode-icons:folder-type-hook', open: 'i-vscode-icons:folder-type-hook-opened' },
+  types: { closed: 'i-vscode-icons:folder-type-typings', open: 'i-vscode-icons:folder-type-typings-opened' },
+  docs: { closed: 'i-vscode-icons:folder-type-docs', open: 'i-vscode-icons:folder-type-docs-opened' },
+  dist: { closed: 'i-vscode-icons:folder-type-dist', open: 'i-vscode-icons:folder-type-dist-opened' },
+}
+
+const DEFAULT_FOLDER_ICON = {
+  closed: 'i-vscode-icons:default-folder',
+  open: 'i-vscode-icons:default-folder-opened',
 }
 
 /** Resolve an icon class for a filename. Checks exact name first, then extension. */
 export function getFileIcon(filename: string): string {
   if (FILE_NAME_ICONS[filename]) return FILE_NAME_ICONS[filename]
   const ext = filename.split('.').pop()?.toLowerCase() ?? ''
-  return EXTENSION_ICONS[ext] ?? 'i-carbon:document'
+  return EXTENSION_ICONS[ext] ?? DEFAULT_FILE_ICON
+}
+
+/** Resolve a folder icon class. Uses named folder icons when available. */
+export function getFolderIcon(folderName: string, expanded: boolean): string {
+  const entry = FOLDER_NAME_ICONS[folderName.toLowerCase()] ?? DEFAULT_FOLDER_ICON
+  return expanded ? entry.open : entry.closed
+}
+
+/** Collect all icon class strings for UnoCSS safelisting. */
+export function getAllIconClasses(): string[] {
+  const icons = new Set<string>()
+
+  Object.values(FILE_NAME_ICONS).forEach(v => icons.add(v))
+  Object.values(EXTENSION_ICONS).forEach(v => icons.add(v))
+  icons.add(DEFAULT_FILE_ICON)
+
+  Object.values(FOLDER_NAME_ICONS).forEach(v => {
+    icons.add(v.closed)
+    icons.add(v.open)
+  })
+  icons.add(DEFAULT_FOLDER_ICON.closed)
+  icons.add(DEFAULT_FOLDER_ICON.open)
+
+  icons.add('i-ph-caret-right')
+
+  return [...icons]
 }

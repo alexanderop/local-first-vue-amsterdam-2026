@@ -90,7 +90,7 @@ const contentWidth = computed(() => {
 })
 
 const contentHeight = computed(() => {
-  const lastAcc = accPositions.value[accPositions.value.length - 1]
+  const lastAcc = accPositions.value.at(-1)
   return lastAcc ? lastAcc.y + accH + 40 : rejH
 })
 
@@ -117,7 +117,7 @@ const rejArrows = computed(() => {
 
 // L-turn: horizontal line from last rejected to corner, then arrow down to first accepted
 const turnLine = computed(() => {
-  const last = rejPositions.value[rejPositions.value.length - 1]
+  const last = rejPositions.value.at(-1)
   if (!last || !accPositions.value.length) return null
   return {
     x1: last.x + rejW,

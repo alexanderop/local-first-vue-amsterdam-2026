@@ -7,7 +7,7 @@ export function useClickVisibility() {
 
   function isVisible(click?: number, fallbackClick?: number): boolean {
     const effectiveClick = click ?? fallbackClick
-    if (effectiveClick == null) return true
+    if (effectiveClick === null || effectiveClick === undefined) return true
     return clicks.value >= effectiveClick
   }
 

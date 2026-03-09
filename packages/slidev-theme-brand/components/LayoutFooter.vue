@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-// @ts-ignore
+// @ts-expect-error
 import { isDark } from '@slidev/client/logic/dark.ts'
 
 defineProps({

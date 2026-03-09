@@ -141,7 +141,7 @@ const edgeShapes = computed(() => {
       labelX: (x1 + x2) / 2,
       labelY: (y1 + y2) / 2,
     }
-  }).filter((e): e is NonNullable<typeof e> => e != null)
+  }).filter((e): e is NonNullable<typeof e> => e !== null)
 })
 </script>
 

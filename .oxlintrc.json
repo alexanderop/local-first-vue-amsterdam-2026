@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "vue"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "rules": {
+    "eqeqeq": "error",
+    "typescript/prefer-ts-expect-error": "warn",
+    "unicorn/prefer-string-replace-all": "warn",
+    "unicorn/prefer-at": "warn",
+    "unicorn/prefer-math-trunc": "warn",
+    "unicorn/prefer-code-point": "warn",
+    "unicorn/consistent-function-scoping": "warn"
+  },
+  "settings": {},
+  "env": {
+    "builtin": true
+  },
+  "globals": {},
+  "ignorePatterns": ["node_modules", "dist", "**/node_modules"]
+}

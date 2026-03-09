@@ -29,7 +29,7 @@
         </div>
 
         <!-- Code area (default slot) -->
-        <div class="editor-code">
+        <div ref="editorCodeRef" class="editor-code">
           <slot />
         </div>
       </div>
@@ -38,11 +38,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useMutationObserver, useScroll } from '@vueuse/core'
 import EditorTitleBar from '../components/EditorTitleBar.vue'
 import EditorFileTree from '../components/EditorFileTree.vue'
 import { useCodeEditorTree } from '../composables/useCodeEditorTree'
-import { getFileIcon, findFilePath } from '../utils/parseFileTree'
+import { getFileIcon, findFilePath, stripQuotes, parseCommaSeparated } from '../utils/parseFileTree'
 
 const props = withDefaults(defineProps<{
   /** Title bar project name */
@@ -66,13 +67,9 @@ const props = withDefaults(defineProps<{
   activeFile: 'schema.ts',
 })
 
-const resolvedTabs = computed(() => {
-  if (!props.tabs) return [props.activeFile]
-  if (typeof props.tabs === 'string') {
-    return props.tabs.split(',').map(t => t.trim())
-  }
-  return props.tabs
-})
+const resolvedTabs = computed(() =>
+  parseCommaSeparated(props.tabs, props.activeFile).map(stripQuotes),
+)
 
 const { tree: treeData, activeFilePath } = useCodeEditorTree(
   computed(() => ({
@@ -90,6 +87,21 @@ function isActiveTab(tabName: string): boolean {
   const fullPath = findFilePath(treeData.value, tabName)
   return fullPath === activeFilePath.value
 }
+
+// Auto-scroll when code grows (e.g. magic-move transitions)
+const editorCodeRef = ref<HTMLElement | null>(null)
+const { arrivedState } = useScroll(editorCodeRef)
+
+let scrollTimer: ReturnType<typeof setTimeout> | undefined
+
+useMutationObserver(editorCodeRef, () => {
+  const wasAtBottom = arrivedState.bottom
+  clearTimeout(scrollTimer)
+  scrollTimer = setTimeout(() => {
+    if (!editorCodeRef.value || !wasAtBottom) return
+    editorCodeRef.value.scrollTo({ top: editorCodeRef.value.scrollHeight, behavior: 'smooth' })
+  }, 600)
+}, { childList: true, subtree: true })
 </script>
 
 <style scoped>
@@ -115,9 +127,10 @@ function isActiveTab(tabName: string): boolean {
 .editor-sidebar {
   width: 180px;
   background: rgba(52, 63, 96, 0.2);
-  border-right: 1px solid rgba(171, 75, 153, 0.15);
+  border-left: 1px solid rgba(171, 75, 153, 0.15);
   flex-shrink: 0;
   overflow-y: auto;
+  order: 1;
 }
 
 .editor-main {

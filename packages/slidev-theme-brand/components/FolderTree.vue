@@ -65,13 +65,13 @@ const nav = useNav()
 
 // Toggle node expansion
 function toggleNode(path: string) {
-  const isFirstLevelChild = path.match(/^\/src\/[^\/]+$/)
+  const isFirstLevelChild = path.match(/^\/src\/[^/]+$/)
 
   // Only apply sibling-closing logic if we're NOT using click-based opening
   if (isFirstLevelChild && props.openOnClicks.length === 0) {
     // Close all other first-level siblings
     Array.from(expandedNodes).forEach(expandedPath => {
-      if (expandedPath.match(/^\/src\/[^\/]+$/) && expandedPath !== path) {
+      if (expandedPath.match(/^\/src\/[^/]+$/) && expandedPath !== path) {
         expandedNodes.delete(expandedPath)
         // Also close children
         Array.from(expandedNodes).forEach(childPath => {
@@ -111,23 +111,23 @@ if (props.root) {
 const nodesToRender = computed<TreeNode[]>(() => {
   if (props.nodes) return props.nodes
   const input = (props.structure ?? '')
-    .replace(/\r\n?/g, '\n')
-    .replace(/\t/g, '  ')
+    .replaceAll(/\r\n?/g, '\n')
+    .replaceAll('\t', '  ')
   return parseStructure(input)
 })
 
+function getIndent(line: string) {
+  let i = 0
+  while (i < line.length && line[i] === ' ') i++
+  return i
+}
+
 function parseStructure(input: string): TreeNode[] {
-  const lines = input.split('\n').map(l => l.replace(/\t/g, '  '))
+  const lines = input.split('\n').map(l => l.replaceAll('\t', '  '))
   const root: TreeNode[] = []
   const stack: Array<{ indent: number; node: TreeNode }> = []
   let prevIndent = 0
   let prevNode: TreeNode | null = null
-
-  const getIndent = (line: string) => {
-    let i = 0
-    while (i < line.length && line[i] === ' ') i++
-    return i
-  }
 
   for (const raw of lines) {
     if (!raw.trim()) continue
@@ -147,12 +147,12 @@ function parseStructure(input: string): TreeNode[] {
       }
       stack.push({ indent: prevIndent, node: prevNode })
     } else {
-      while (stack.length && indent <= stack[stack.length - 1].indent) {
+      while (stack.length && indent <= stack.at(-1).indent) {
         stack.pop()
       }
     }
 
-    const parent = stack.length ? stack[stack.length - 1].node : null
+    const parent = stack.length ? stack.at(-1).node : null
     const node: TreeNode = {
       name: trimmed,
       type: forcedFolder ? 'folder' : 'file',

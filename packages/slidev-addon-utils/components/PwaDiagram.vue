@@ -112,7 +112,7 @@ const panelData = computed(() => {
         y2: to.y,
         seed: seed + hashId(arrow.from + arrow.to),
       }
-    }).filter((e): e is NonNullable<typeof e> => e != null)
+    }).filter((e): e is NonNullable<typeof e> => e !== null)
 
     // Annotation positions — below last box
     const lastBoxBottom = panel.boxes.length > 0

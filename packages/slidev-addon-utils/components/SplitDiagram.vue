@@ -108,7 +108,7 @@ const panelData = computed(() => {
         labelX: (x1 + x2) / 2 + 14,
         labelY: (y1 + y2) / 2,
       }
-    }).filter((e): e is NonNullable<typeof e> => e != null)
+    }).filter((e): e is NonNullable<typeof e> => e !== null)
 
     // Badge positions
     const badges = (panel.badges || []).map((badge) => {
@@ -118,7 +118,7 @@ const panelData = computed(() => {
         by = contentTop + panelHeight + 24
       } else {
         // inline — position near the last edge's label area
-        const lastEdge = edgeShapes[edgeShapes.length - 1]
+        const lastEdge = edgeShapes.at(-1)
         if (lastEdge) {
           bx = lastEdge.labelX
           by = lastEdge.labelY + 16

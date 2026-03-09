@@ -55,7 +55,7 @@ const mergedEntries = computed(() => Object.entries(mergedState.value))
 
 const currentTime = computed(() => {
   const visible = visibleEvents.value
-  return visible.length > 0 ? visible[visible.length - 1].time : '8:00 AM'
+  return visible.length > 0 ? visible.at(-1).time : '8:00 AM'
 })
 
 // Track which fields just changed for flash animation

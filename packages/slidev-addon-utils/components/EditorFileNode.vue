@@ -10,10 +10,10 @@
       :style="{ paddingLeft: `${12 + depth * 14}px` }"
     >
       <div class="editor-node__caret" :class="{ 'editor-node__caret--open': expanded }" aria-hidden="true">
-        <div class="i-carbon:chevron-right" />
+        <div class="i-ph-caret-right" />
       </div>
       <div class="editor-node__icon" aria-hidden="true">
-        <div class="i-carbon:folder" />
+        <div :class="folderIcon" />
       </div>
       <span class="editor-node__name">{{ node.name }}</span>
     </button>
@@ -46,9 +46,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue'
+import { computed, inject, ref, type Ref } from 'vue'
 import { editorTreeKey } from '../composables/editorTreeKey'
-import { getFileIcon } from '../utils/parseFileTree'
+import { getFileIcon, getFolderIcon } from '../utils/parseFileTree'
 import type { FileTreeNode } from '../utils/parseFileTree'
 
 defineOptions({ name: 'EditorFileNode' })
@@ -58,15 +58,17 @@ const props = defineProps<{
   depth: number
 }>()
 
+const FALLBACK_REF: Ref<string> = ref('')
 const ctx = inject(editorTreeKey, {
   toggleNode: () => {},
   isExpanded: () => false,
-  activeFilePath: ref(''),
+  activeFilePath: FALLBACK_REF,
 })
 
 const expanded = computed(() => ctx.isExpanded(props.node.path))
 const isActive = computed(() => ctx.activeFilePath.value === props.node.path)
 const fileIcon = computed(() => getFileIcon(props.node.name))
+const folderIcon = computed(() => getFolderIcon(props.node.name, expanded.value))
 
 function toggle() {
   ctx.toggleNode(props.node.path)
@@ -139,10 +141,6 @@ function toggle() {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.editor-node__children {
-  /* No extra padding — depth-based paddingLeft handles indentation */
 }
 
 .editor-tree-slide-enter-from,
