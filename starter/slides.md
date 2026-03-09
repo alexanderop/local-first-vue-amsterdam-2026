@@ -1239,7 +1239,7 @@ clicks: 4
 # CoValues — One Abstraction, Three Problems Solved
 
 <div class="text-center text-sm op-60 mb-4">
-The CoMap you just saw? That's a CoValue — Jazz's word for CRDTs (they don't call them that). Jazz adds persistence and encryption on top.
+CoValues are Jazz's collaborative data primitives — CRDTs with persistence and encryption built in.
 </div>
 
 <div class="grid grid-cols-[1fr_1.4fr] gap-8 items-start mt-2">
@@ -1254,7 +1254,6 @@ The CoMap you just saw? That's a CoValue — Jazz's word for CRDTs (they don't c
     <ul class="text-sm op-70 mt-1 list-none pl-0">
       <li>Real-time CRDT merge</li>
       <li>Automatic conflict resolution</li>
-      <li>Works across all peers</li>
     </ul>
   </div>
 
@@ -1263,15 +1262,13 @@ The CoMap you just saw? That's a CoValue — Jazz's word for CRDTs (they don't c
     <ul class="text-sm op-70 mt-1 list-none pl-0">
       <li>IndexedDB storage</li>
       <li>Offline-first by default</li>
-      <li>No cache layer needed</li>
     </ul>
   </div>
 
   <div v-click="4">
     <div class="text-base font-semibold text-[#ff6bed]">Security</div>
     <ul class="text-sm op-70 mt-1 list-none pl-0">
-      <li>Group-based access control</li>
-      <li>Admin / writer / reader roles</li>
+      <li>Role-based access control</li>
       <li>End-to-end encrypted</li>
     </ul>
   </div>
@@ -1302,11 +1299,22 @@ TRANSITION: Let's see this in code...
 
 ---
 layout: code-editor
+project: vue-jazz-chat
 activeFile: schema.ts
 tabs: schema.ts
 step: Step 1
 transition: fade
 clicks: 2
+files: |
+  src
+    schema.ts
+    RootApp.vue
+    pages/
+      index.vue
+      chat/
+        [chatId].vue
+  package.json
+  vite.config.ts
 ---
 
 ````md magic-move {lines: true}
@@ -1323,27 +1331,41 @@ const Message = co.map({
 // schema.ts
 import { co } from 'jazz-tools'
 
-const Message = co.map({
-  text: co.plainText(),
-  image: co.optional(co.image()),
-})
+const Message = co
+  .map({
+    text: co.plainText(),
+    image: co.optional(co.image()),
+  })
+  .resolved({ text: true, image: true })
+  .withPermissions({ onInlineCreate: 'sameAsContainer' })
+
+type Message = co.loaded<typeof Message>
 
 const Chat = co.list(Message).withPermissions({
   onCreate: (owner) => owner.addMember('everyone', 'writer'),
 })
+
+type Chat = co.loaded<typeof Chat>
 ```
 ```ts
 // schema.ts
 import { co } from 'jazz-tools'
 
-export const Message = co.map({
-  text: co.plainText(),
-  image: co.optional(co.image()),
-})
+export const Message = co
+  .map({
+    text: co.plainText(),
+    image: co.optional(co.image()),
+  })
+  .resolved({ text: true, image: true })
+  .withPermissions({ onInlineCreate: 'sameAsContainer' })
+
+export type Message = co.loaded<typeof Message>
 
 export const Chat = co.list(Message).withPermissions({
   onCreate: (owner) => owner.addMember('everyone', 'writer'),
 })
+
+export type Chat = co.loaded<typeof Chat>
 ```
 ````
 
@@ -1352,28 +1374,42 @@ First step: the schema. Think of this like defining a Prisma model — except it
 
 We start with Message. co.map is like a typed object — text and an optional image.
 
-CLICK: Now add Chat — a list of Messages. withPermissions sets who can write. Here, everyone with the link is a writer. Permissions are baked into the data, not enforced by a server.
+CLICK: Now the full picture. .resolved tells Jazz which fields to deeply load. .withPermissions on Message says "inherit permissions from whatever list contains me." Chat is a list of Messages — and withPermissions sets who can write. Here, everyone with the link is a writer. We also get TypeScript types for free with co.loaded.
 
-CLICK: Export both types. That's it. This schema IS your database AND your API. No endpoint, no Pinia action, no migration file.
+CLICK: Export everything. That's it. This schema IS your database AND your API. No endpoint, no Pinia action, no migration file.
 
 TRANSITION: Now let's wire it up...
 -->
 
 ---
 layout: code-editor
+project: vue-jazz-chat
 activeFile: RootApp.vue
 tabs: schema.ts, RootApp.vue
 step: Step 2
 transition: fade
+files: |
+  src
+    schema.ts
+    RootApp.vue
+    pages/
+      index.vue
+      chat/
+        [chatId].vue
+  package.json
+  vite.config.ts
 ---
 
 ```vue
 <!-- RootApp.vue -->
 <script setup lang="ts">
 import { JazzVueProvider } from 'community-jazz-vue'
+import type { SyncConfig } from 'jazz-tools'
+import App from './App.vue'
 
-const peer = 'wss://cloud.jazz.tools/?key=vue-chat@example.com'
-const sync = { peer }
+const sync: SyncConfig = {
+  peer: `wss://cloud.jazz.tools/?key=${import.meta.env.VITE_JAZZ_KEY}`,
+}
 </script>
 
 <template>
@@ -1386,41 +1422,117 @@ const sync = { peer }
 <!--
 Step 2: the provider. If you've used Vue Router, this is the same idea — wrap your app, give it config, done.
 
-JazzVueProvider connects to a sync server. Anonymous auth by default — no login screen, no Auth0. That's it. Your app is SYNCING.
+JazzVueProvider connects to a sync server. We type it with SyncConfig for safety. Anonymous auth by default — no login screen, no Auth0. Your app is SYNCING.
 
-10 lines. One concept. Move on.
+10 lines of config. One concept. Move on.
 
-TRANSITION: Now the fun part — using it in a component...
+TRANSITION: How do we create a chat in the first place?
 -->
 
 ---
 layout: code-editor
-activeFile: ChatApp.vue
-tabs: schema.ts, RootApp.vue, ChatApp.vue
-step: Step 3a
+project: vue-jazz-chat
+activeFile: index.vue
+tabs: schema.ts, RootApp.vue, index.vue
+step: Step 3
+transition: fade
+files: |
+  src
+    schema.ts
+    RootApp.vue
+    pages/
+      index.vue
+      chat/
+        [chatId].vue
+  package.json
+  vite.config.ts
+---
+
+```vue
+<!-- pages/index.vue -->
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { Chat } from '@/schema'
+
+const router = useRouter()
+
+onMounted(() => {
+  const chat = Chat.create([])
+  router.push(`/chat/${chat.$jazz.id}`)
+})
+</script>
+
+<template>
+  <div>Creating chat...</div>
+</template>
+```
+
+<!--
+Step 3: creating a chat. This is the magic moment.
+
+Chat.create — that's it. One line. You get back a live CoValue with a unique ID. No API call, no await, no POST request. It's created locally, and Jazz syncs it in the background.
+
+Then we navigate to the chat page using the Jazz ID as a route parameter. That ID is all you need to load it anywhere — any device, any user.
+
+TRANSITION: Now let's read and write messages...
+-->
+
+---
+layout: code-editor
+project: vue-jazz-chat
+activeFile: '[chatId].vue'
+tabs: schema.ts, RootApp.vue, index.vue, '[chatId].vue'
+step: Step 4a
 transition: fade
 clicks: 1
+files: |
+  src
+    schema.ts
+    RootApp.vue
+    pages/
+      index.vue
+      chat/
+        [chatId].vue
+  package.json
+  vite.config.ts
 ---
 
 ````md magic-move {lines: true}
 ```ts
+// pages/chat/[chatId].vue
+import { computed, ref } from 'vue'
 import { useAccount, useCoState } from 'community-jazz-vue'
-import { Chat } from './schema'
+import type { ID } from 'jazz-tools'
+import { Chat } from '@/schema'
 
-const chat = useCoState(Chat, () => chatId, {
+const props = defineProps<{ chatId: ID<typeof Chat> }>()
+
+const chat = useCoState(Chat, () => props.chatId, {
   resolve: { $each: { text: true, image: true } },
 })
-const me = useAccount()
+const me = useAccount(undefined, { resolve: { profile: true } })
 ```
 ```ts
+// pages/chat/[chatId].vue
+import { computed, ref } from 'vue'
 import { useAccount, useCoState } from 'community-jazz-vue'
-import { Chat } from './schema'
+import type { ID } from 'jazz-tools'
+import { Chat } from '@/schema'
 
-const chat = useCoState(Chat, () => chatId, {
+const props = defineProps<{ chatId: ID<typeof Chat> }>()
+
+const chat = useCoState(Chat, () => props.chatId, {
   resolve: { $each: { text: true, image: true } },
 })
-const me = useAccount()
+const me = useAccount(undefined, { resolve: { profile: true } })
+
 const inputValue = ref('')
+const isLoaded = computed(() => chat.value?.$isLoaded && me.value?.$isLoaded)
+const messages = computed(() => {
+  if (!chat.value?.$isLoaded) return []
+  return chat.value.slice(-30).toReversed()
+})
 
 function sendMessage() {
   if (!inputValue.value.trim() || !chat.value?.$isLoaded) return
@@ -1431,36 +1543,56 @@ function sendMessage() {
 ````
 
 <!--
-Step 3: the component. First the script.
+Step 4: the chat page. First the script.
 
-useCoState loads the chat. resolve: $each deeply loads each message — like Prisma's 'include'. useAccount gives us the current user. That's your entire data-fetching layer.
+useCoState loads the chat by ID from the route. resolve tells Jazz to deeply load each message's text and image — like Prisma's 'include'. useAccount gives us the current user with their profile.
 
-CLICK: Now we write data. sendMessage pushes to the list. That's your entire "API call". No axios.post, no mutation, no optimistic update code. Just push.
+CLICK: Now the reactive layer. isLoaded is a computed that checks both are ready. messages grabs the last 30 and reverses them — newest first. And sendMessage? Just push to the list. That's your entire "API call". No axios.post, no mutation, no optimistic update code. Just push.
 
 TRANSITION: Now the template...
 -->
 
 ---
 layout: code-editor
-activeFile: ChatApp.vue
-tabs: schema.ts, RootApp.vue, ChatApp.vue
-step: Step 3b
+project: vue-jazz-chat
+activeFile: '[chatId].vue'
+tabs: schema.ts, RootApp.vue, index.vue, '[chatId].vue'
+step: Step 4b
 transition: fade
+files: |
+  src
+    schema.ts
+    RootApp.vue
+    pages/
+      index.vue
+      chat/
+        [chatId].vue
+  package.json
+  vite.config.ts
 ---
 
 ```html
+<!-- pages/chat/[chatId].vue -->
 <template>
-  <div v-for="msg in chat" :key="msg.$jazz.id">
-    {{ msg.text }}
-  </div>
-  <form @submit.prevent="sendMessage">
-    <input v-model="inputValue" placeholder="Message" />
-  </form>
+  <template v-if="isLoaded">
+    <div v-for="msg in messages" :key="msg.$jazz.id">
+      <strong>{{ msg.$jazz.createdBy === me!.$jazz.id ? 'You' : 'Other' }}:</strong>
+      {{ msg.text }}
+    </div>
+
+    <form @submit.prevent="sendMessage">
+      <input v-model="inputValue" placeholder="Message" />
+      <button type="submit">Send</button>
+    </form>
+  </template>
+  <div v-else>Loading...</div>
 </template>
 ```
 
 <!--
-And here's the template. Standard v-for, v-model. Nothing Jazz-specific here. The data layer is INVISIBLE — and that's the whole point.
+And here's the template. Standard v-for, v-model. The v-if/v-else handles the loading state cleanly.
+
+Notice the author check — msg.$jazz.createdBy compared to me.$jazz.id. That's how you know who sent what. No user table, no join query.
 
 No special components, no render props, no slot gymnastics. Just Vue.
 
@@ -1477,12 +1609,12 @@ class: text-center
 Schema + Provider + `useCoState` = **your entire data layer**
 
 </div>
-<div class="mt-3 text-base op-60">Real-time. Offline. Encrypted. Three files.</div>
+<div class="mt-3 text-base op-60">Real-time. Offline. Encrypted. Four files.</div>
 
 <!--
 [pause] [look up]
 
-Three files. That's it. Schema, provider, component. Your entire data layer.
+Four files. That's it. Schema, provider, create page, chat component. Your entire data layer.
 
 THIS is what you'll use in a moment with the QR code.
 

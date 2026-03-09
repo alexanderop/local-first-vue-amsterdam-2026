@@ -1,20 +1,12 @@
 <template>
   <div class="editor-window">
     <!-- Title bar -->
-    <div class="editor-titlebar">
-      <div class="editor-titlebar__dots">
-        <span class="dot dot--red" />
-        <span class="dot dot--yellow" />
-        <span class="dot dot--green" />
-      </div>
-      <div class="editor-titlebar__title">vue-jazz-chat</div>
-      <div class="editor-titlebar__spacer" />
-    </div>
+    <EditorTitleBar :project="project" />
 
     <div class="editor-body">
       <!-- Sidebar -->
       <div class="editor-sidebar">
-        <EditorFileTree :active-file="activeFile" :files="fileEntries" />
+        <EditorFileTree :tree="treeData" />
       </div>
 
       <!-- Main area -->
@@ -25,7 +17,7 @@
             v-for="tab in resolvedTabs"
             :key="tab"
             class="editor-tab"
-            :class="{ 'editor-tab--active': tab === activeFile }"
+            :class="{ 'editor-tab--active': isActiveTab(tab) }"
           >
             <div class="editor-tab__icon" aria-hidden="true">
               <div :class="getFileIcon(tab)" />
@@ -47,12 +39,30 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import EditorTitleBar from '../components/EditorTitleBar.vue'
+import EditorFileTree from '../components/EditorFileTree.vue'
+import { useCodeEditorTree } from '../composables/useCodeEditorTree'
+import { getFileIcon, findFilePath } from '../utils/parseFileTree'
 
 const props = withDefaults(defineProps<{
+  /** Title bar project name */
+  project?: string
+  /** Active file (basename or path) */
   activeFile?: string
+  /** Open tabs (comma-separated string or array) */
   tabs?: string | string[]
+  /** Step label in tab bar */
   step?: string
+  /**
+   * File tree structure.
+   * String: indentation-based format.
+   * Array: flat file paths.
+   */
+  files?: string | string[]
+  /** Explicitly expanded folders (comma-separated or array) */
+  openFolders?: string | string[]
 }>(), {
+  project: 'Project',
   activeFile: 'schema.ts',
 })
 
@@ -64,15 +74,22 @@ const resolvedTabs = computed(() => {
   return props.tabs
 })
 
-function getFileIcon(filename: string): string {
-  if (filename.endsWith('.ts')) return 'i-logos:typescript-icon'
-  if (filename.endsWith('.vue')) return 'i-logos:vue'
-  return 'i-carbon:document'
-}
-
-const fileEntries = computed(() =>
-  resolvedTabs.value.map(name => ({ name, icon: getFileIcon(name) }))
+const { tree: treeData, activeFilePath } = useCodeEditorTree(
+  computed(() => ({
+    files: props.files,
+    tabs: props.tabs,
+    activeFile: props.activeFile,
+    openFolders: props.openFolders,
+  })),
 )
+
+function isActiveTab(tabName: string): boolean {
+  // Match by basename
+  if (tabName === props.activeFile) return true
+  // Match by path
+  const fullPath = findFilePath(treeData.value, tabName)
+  return fullPath === activeFilePath.value
+}
 </script>
 
 <style scoped>
@@ -86,44 +103,6 @@ const fileEntries = computed(() =>
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   overflow: hidden;
   background: rgba(20, 24, 36, 0.95);
-}
-
-/* Title bar */
-.editor-titlebar {
-  display: flex;
-  align-items: center;
-  height: 38px;
-  padding: 0 14px;
-  background: rgba(20, 24, 36, 0.95);
-  border-bottom: 1px solid rgba(171, 75, 153, 0.15);
-  flex-shrink: 0;
-}
-
-.editor-titlebar__dots {
-  display: flex;
-  gap: 7px;
-}
-
-.dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-}
-
-.dot--red { background: #ff5f57; }
-.dot--yellow { background: #febc2e; }
-.dot--green { background: #28c840; }
-
-.editor-titlebar__title {
-  flex: 1;
-  text-align: center;
-  font-family: 'Geist Sans', sans-serif;
-  font-size: 0.8rem;
-  opacity: 0.4;
-}
-
-.editor-titlebar__spacer {
-  width: 52px;
 }
 
 /* Body: sidebar + main */
