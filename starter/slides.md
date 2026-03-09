@@ -36,6 +36,12 @@ TRANSITION: Quick intro...
 
 ---
 
+<div class="flex items-center justify-center h-full">
+  <img src="/manly-handshake.gif" class="max-h-full max-w-full rounded-lg" />
+</div>
+
+---
+
 # About me
 
 <About />
@@ -1153,7 +1159,7 @@ TRANSITION: What if your database was a CRDT?
 -->
 
 ---
-clicks: 3
+clicks: 2
 ---
 
 # What If Your Database WAS a CRDT?
@@ -1168,25 +1174,6 @@ clicks: 3
 <div class="space-y-4">
 
 <div v-click="2">
-
-<Card variant="muted">
-
-<div class="text-sm font-bold text-brand mb-2 flex items-center gap-2"><div class="i-ph-stack-bold" /> Traditional Stack</div>
-
-1. Define schema
-2. Write SQL migrations
-3. Build REST/GraphQL API
-4. Add caching layer
-5. Implement sync logic
-6. Handle conflict resolution
-
-<div class="mt-1 text-xs op-50">6 layers between your data and your UI</div>
-
-</Card>
-
-</div>
-
-<div v-click="3">
 
 <Card glow>
 
@@ -1210,8 +1197,6 @@ Let's build a chat app for this conference.
 
 CLICK -- Here's what it'll look like. Simple wireframe. Messages, an input, send. But also: image uploads, edit history, permissions — all from the same schema.
 
-CLICK -- Normally? Schema, migrations, API, cache, sync, conflicts. SIX layers. Every layer = more code, more bugs, more maintenance.
-
 CLICK -- With Jazz: define schema, done. Real-time sync, image uploads, edit history, permissions — all included. Schema IS the CRDT. Database IS the sync engine.
 
 [pause] Let me show you the code...
@@ -1222,9 +1207,9 @@ layout: code-editor
 project: vue-jazz-chat
 activeFile: schema.ts
 tabs: schema.ts
-step: Step 1
+step: 1/6 Schema
 transition: fade
-clicks: 1
+clicks: 5
 files: |
   src
     schema.ts
@@ -1240,20 +1225,54 @@ files: |
 ````md magic-move {lines: true}
 ```ts
 // schema.ts
-import { co } from 'jazz-tools'
+import { co, z } from 'jazz-tools'
+```
+```ts
+// schema.ts
+import { co, z } from 'jazz-tools'
 
+// A collaborative object — like a Prisma model, but syncs in real-time
 const Message = co.map({
-  text: co.plainText(),
-  image: co.optional(co.image()),
 })
 ```
 ```ts
 // schema.ts
-import { co } from 'jazz-tools'
+import { co, z } from 'jazz-tools'
+
+const Message = co.map({
+  // Zod-style validator for primitives
+  text: z.string(),
+})
+```
+```ts
+// schema.ts
+import { co, z } from 'jazz-tools'
 
 export const Message = co.map({
-  text: co.plainText(),
-  image: co.optional(co.image()),
+  text: z.string(),
+  // Inherit permissions from the parent container
+}).withPermissions({ onInlineCreate: 'sameAsContainer' })
+```
+```ts
+// schema.ts
+import { co, z } from 'jazz-tools'
+
+export const Message = co.map({
+  text: z.string(),
+}).withPermissions({ onInlineCreate: 'sameAsContainer' })
+
+// An ordered list of Messages — with public write access
+export const Chat = co.list(Message)
+  .withPermissions({
+    onCreate: (owner) => owner.addMember('everyone', 'writer'),
+  })
+```
+```ts
+// schema.ts — complete schema
+import { co, z } from 'jazz-tools'
+
+export const Message = co.map({
+  text: z.string(),
 })
 
 export const Chat = co.list(Message)
@@ -1261,13 +1280,17 @@ export const Chat = co.list(Message)
 ````
 
 <!--
-The schema. Six lines. Think of this like a Prisma model — except it's also your API, your sync layer, and your permissions. All in one.
+We start with just an import. co and z from jazz-tools — that's all you need.
 
-Message — co.map is a typed object. Text and optional image.
+CLICK: co.map — think of it like a Prisma model, but it syncs in real-time across all clients.
 
-CLICK: Add exports. Chat is a list of Messages. That's your entire data model. No .resolved(), no .withPermissions() — we'll handle those where they're used.
+CLICK: text field. z.string() — Jazz uses Zod-style validators for primitives. Fully type-safe.
 
-6 lines of schema, zero API routes. This IS your database AND your API.
+CLICK: Export + permissions. withPermissions on Message says "inherit from the parent container." Permissions are DECLARATIVE, right in the schema.
+
+CLICK: Chat — an ordered list of Messages. onCreate adds 'everyone' as writer. That's public write access, declared right here. No Group.create() at runtime.
+
+CLICK: Final schema. That's everything — messages with text, permissions, public access. No API routes, no server config.
 
 TRANSITION: Now let's wire it up...
 -->
@@ -1275,13 +1298,53 @@ TRANSITION: Now let's wire it up...
 ---
 layout: code-editor
 project: vue-jazz-chat
-activeFile: RootApp.vue
-tabs: schema.ts, RootApp.vue
-step: Step 2
+activeFile: main.ts
+tabs: schema.ts, main.ts
+step: 2/6 Entry Point
 transition: fade
-clicks: 1
+clicks: 0
 files: |
   src
+    main.ts
+    schema.ts
+    RootApp.vue
+    pages/
+      index.vue
+      chat/
+        [chatId].vue
+  package.json
+  vite.config.ts
+---
+
+````md magic-move {lines: true}
+```ts
+// main.ts
+import './assets/main.css'
+import { createApp } from 'vue'
+import RootApp from './RootApp.vue'
+import router from './router'
+
+const app = createApp(RootApp)
+app.use(router)
+app.mount('#app')
+```
+````
+
+<!--
+Standard Vue entry point — but notice it mounts RootApp, not App. That's intentional: RootApp wraps your entire app with Jazz's provider. Let's look at that next...
+-->
+
+---
+layout: code-editor
+project: vue-jazz-chat
+activeFile: RootApp.vue
+tabs: schema.ts, main.ts, RootApp.vue
+step: 3/6 Provider
+transition: fade
+clicks: 5
+files: |
+  src
+    main.ts
     schema.ts
     RootApp.vue
     pages/
@@ -1296,10 +1359,25 @@ files: |
 ```vue
 <!-- RootApp.vue -->
 <script setup lang="ts">
+</script>
+```
+```vue
+<!-- RootApp.vue -->
+<script setup lang="ts">
+// The Vue integration for Jazz
+import { JazzVueProvider } from 'community-jazz-vue'
+import type { SyncConfig } from 'jazz-tools'
+import App from './App.vue'
+</script>
+```
+```vue
+<!-- RootApp.vue -->
+<script setup lang="ts">
 import { JazzVueProvider } from 'community-jazz-vue'
 import type { SyncConfig } from 'jazz-tools'
 import App from './App.vue'
 
+// Point to Jazz Cloud — one WebSocket, that's your entire backend
 const sync: SyncConfig = {
   peer: `wss://cloud.jazz.tools/?key=${import.meta.env.VITE_JAZZ_KEY}`,
 }
@@ -1318,6 +1396,46 @@ const sync: SyncConfig = {
 </script>
 
 <template>
+  <!-- Like Vue Router — wrap your app, give it config -->
+  <JazzVueProvider :sync="sync">
+    <App />
+  </JazzVueProvider>
+</template>
+```
+```vue
+<!-- RootApp.vue -->
+<script setup lang="ts">
+import { JazzVueProvider } from 'community-jazz-vue'
+import type { SyncConfig } from 'jazz-tools'
+import App from './App.vue'
+
+const sync: SyncConfig = {
+  peer: `wss://cloud.jazz.tools/?key=${import.meta.env.VITE_JAZZ_KEY}`,
+}
+</script>
+
+<template>
+  <!-- Anonymous auth — no login screen, no Auth0 -->
+  <JazzVueProvider :sync="sync" :defaultProfileName="'Anonymous'">
+    <App />
+  </JazzVueProvider>
+</template>
+```
+```vue
+<!-- RootApp.vue -->
+<script setup lang="ts">
+import { JazzVueProvider } from 'community-jazz-vue'
+import type { SyncConfig } from 'jazz-tools'
+import App from './App.vue'
+
+// One WebSocket connection — that's your entire backend
+const sync: SyncConfig = {
+  peer: `wss://cloud.jazz.tools/?key=${import.meta.env.VITE_JAZZ_KEY}`,
+}
+</script>
+
+<template>
+  <!-- One provider, one config — your app is now syncing -->
   <JazzVueProvider :sync="sync" :defaultProfileName="'Anonymous'">
     <App />
   </JazzVueProvider>
@@ -1326,13 +1444,17 @@ const sync: SyncConfig = {
 ````
 
 <!--
-Step 2: the provider. Like Vue Router — wrap your app, give it config, done.
+Step 2: the provider. RootApp.vue — this is where we wire Jazz into our Vue app.
 
-JazzVueProvider connects to a sync server. Anonymous auth by default — no login screen, no Auth0.
+CLICK: Imports. JazzVueProvider from community-jazz-vue — the Vue integration. Plus our App component.
 
-CLICK: Wrap your App component. One provider, one config object. Your app is SYNCING.
+CLICK: Sync config. One WebSocket URL pointing to Jazz Cloud. That's your entire backend connection. No REST, no GraphQL.
 
-That's it for wiring.
+CLICK: Template. Wrap your App in JazzVueProvider — just like Vue Router or Pinia. Pass the sync config.
+
+CLICK: Anonymous auth. defaultProfileName gives users an identity without a login screen. No Auth0, no OAuth setup.
+
+CLICK: And that's the full picture. One provider, one config object. Your app is SYNCING. Zero backend code.
 
 TRANSITION: Now let's create a chat...
 -->
@@ -1341,12 +1463,13 @@ TRANSITION: Now let's create a chat...
 layout: code-editor
 project: vue-jazz-chat
 activeFile: index.vue
-tabs: schema.ts, RootApp.vue, index.vue
-step: Step 3
+tabs: schema.ts, main.ts, RootApp.vue, index.vue
+step: 4/6 Create Chat
 transition: fade
 clicks: 1
 files: |
   src
+    main.ts
     schema.ts
     RootApp.vue
     pages/
@@ -1359,30 +1482,26 @@ files: |
 
 ````md magic-move {lines: true}
 ```vue
-<!-- pages/index.vue — creating a chat with permissions -->
+<!-- pages/index.vue — creating a chat -->
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Group } from 'jazz-tools'
 import { Chat } from '@/schema'
 
 const router = useRouter()
 </script>
 ```
 ```vue
-<!-- pages/index.vue — creating a chat with permissions -->
+<!-- pages/index.vue — creating a chat -->
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Group } from 'jazz-tools'
 import { Chat } from '@/schema'
 
 const router = useRouter()
 
 onMounted(() => {
-  const group = Group.create()
-  group.addMember('everyone', 'writer')
-  const chat = Chat.create([], { owner: group })
+  const chat = Chat.create([])
   router.push(`/chat/${chat.$jazz.id}`)
 })
 </script>
@@ -1394,9 +1513,9 @@ onMounted(() => {
 ````
 
 <!--
-Step 3: creating a chat — imports and setup. Group is Jazz's permission primitive.
+Step 3: creating a chat — imports and setup. No Group import needed — permissions come from the schema.
 
-CLICK: onMounted — Group.create, addMember 'everyone' as 'writer'. Chat.create with that group as owner. Permissions travel WITH the data — encrypted, enforced cryptographically. Not by a server. BY THE DATA ITSELF.
+CLICK: onMounted — Chat.create with an empty array. That's it. The withPermissions we defined in the schema automatically adds 'everyone' as writer. No Group.create(), no addMember — it's all declarative.
 
 No API call, no await, no POST request. Created locally, Jazz syncs in the background.
 
@@ -1407,13 +1526,14 @@ TRANSITION: Now the chat page itself...
 layout: code-editor
 project: vue-jazz-chat
 activeFile: useChat.ts
-tabs: schema.ts, RootApp.vue, index.vue, useChat.ts
-step: Step 4
+tabs: schema.ts, main.ts, RootApp.vue, index.vue, useChat.ts
+step: 5/6 Composable
 transition: fade
-clicks: 2
+clicks: 7
 openFolders: src, composables
 files: |
   src
+    main.ts
     schema.ts
     RootApp.vue
     composables/
@@ -1429,34 +1549,59 @@ files: |
 ````md magic-move {lines: true}
 ```ts
 // composables/useChat.ts
-import { computed, ref, type Ref } from 'vue'
+import { computed, ref, type MaybeRefOrGetter } from 'vue'
 import { useAccount, useCoState } from 'community-jazz-vue'
 import type { ID } from 'jazz-tools'
-import { Chat, Message } from '@/schema'
+import { Chat } from '@/schema'
+```
+```ts
+// composables/useChat.ts
+import { computed, ref, type MaybeRefOrGetter } from 'vue'
+import { useAccount, useCoState } from 'community-jazz-vue'
+import type { ID } from 'jazz-tools'
+import { Chat } from '@/schema'
 
-export function useChat(chatId: Ref<ID<typeof Chat>>) {
-  // 1. Load the chat — resolve each message deeply
-  const chat = useCoState(Chat, () => chatId.value, {
-    resolve: { $each: true },
-  })
+// A standard Vue composable — accepts a reactive chat ID
+export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
+}
+```
+```ts
+// composables/useChat.ts
+import { computed, ref, type MaybeRefOrGetter } from 'vue'
+import { useAccount, useCoState } from 'community-jazz-vue'
+import type { ID } from 'jazz-tools'
+import { Chat } from '@/schema'
+
+export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
+  // Load the chat by ID — one line, that's your entire data layer
+  const chat = useCoState(Chat, chatId)
+}
+```
+```ts
+// composables/useChat.ts
+import { computed, ref, type MaybeRefOrGetter } from 'vue'
+import { useAccount, useCoState } from 'community-jazz-vue'
+import type { ID } from 'jazz-tools'
+import { Chat } from '@/schema'
+
+export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
+  const chat = useCoState(Chat, chatId)
+  // Current user — for showing "you" vs others
   const me = useAccount(undefined, { resolve: { profile: true } })
 }
 ```
 ```ts
 // composables/useChat.ts
-import { computed, ref, type Ref } from 'vue'
+import { computed, ref, type MaybeRefOrGetter } from 'vue'
 import { useAccount, useCoState } from 'community-jazz-vue'
 import type { ID } from 'jazz-tools'
-import { Chat, Message } from '@/schema'
+import { Chat } from '@/schema'
 
-export function useChat(chatId: Ref<ID<typeof Chat>>) {
-  // 1. Load the chat — resolve each message deeply
-  const chat = useCoState(Chat, () => chatId.value, {
-    resolve: { $each: true },
-  })
+export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
+  const chat = useCoState(Chat, chatId)
   const me = useAccount(undefined, { resolve: { profile: true } })
 
-  // 2. Reactive state — last 30 messages, reversed for display
+  // Plain Vue reactivity — nothing Jazz-specific here
   const inputValue = ref('')
   const messages = computed(() => {
     if (!chat.value?.$isLoaded) return []
@@ -1466,33 +1611,69 @@ export function useChat(chatId: Ref<ID<typeof Chat>>) {
 ```
 ```ts
 // composables/useChat.ts
-import { computed, ref, type Ref } from 'vue'
+import { computed, ref, type MaybeRefOrGetter } from 'vue'
 import { useAccount, useCoState } from 'community-jazz-vue'
 import type { ID } from 'jazz-tools'
-import { Chat, Message } from '@/schema'
+import { Chat } from '@/schema'
 
-export function useChat(chatId: Ref<ID<typeof Chat>>) {
-  // 1. Load the chat — resolve each message deeply
-  const chat = useCoState(Chat, () => chatId.value, {
-    resolve: { $each: true },
-  })
+export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
+  const chat = useCoState(Chat, chatId)
   const me = useAccount(undefined, { resolve: { profile: true } })
 
-  // 2. Reactive state — last 30 messages, reversed for display
   const inputValue = ref('')
   const messages = computed(() => {
     if (!chat.value?.$isLoaded) return []
     return chat.value.slice(-30).toReversed()
   })
 
-  // 3. Send — create, push, done. No API call needed.
+  // Push a plain object — Jazz creates the Message inline
   function sendMessage() {
     if (!inputValue.value.trim() || !chat.value?.$isLoaded) return
-    chat.value.push(
-      Message.create({ text: inputValue.value }, chat.value._owner)
-    )
+    chat.value.$jazz.push({ text: inputValue.value })
     inputValue.value = ''
   }
+}
+```
+```ts
+// composables/useChat.ts
+import { computed, ref, type MaybeRefOrGetter } from 'vue'
+import { useAccount, useCoState } from 'community-jazz-vue'
+import type { ID } from 'jazz-tools'
+import { Chat } from '@/schema'
+
+export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
+  const chat = useCoState(Chat, chatId)
+  const me = useAccount(undefined, { resolve: { profile: true } })
+
+  const inputValue = ref('')
+  const messages = computed(() => {
+    if (!chat.value?.$isLoaded) return []
+    return chat.value.slice(-30).toReversed()
+  })
+
+  function sendMessage() {
+    if (!inputValue.value.trim() || !chat.value?.$isLoaded) return
+    chat.value.$jazz.push({ text: inputValue.value })
+    inputValue.value = ''
+  }
+
+  // No API calls, no stores — just return reactive state
+  return { chat, me, inputValue, messages, sendMessage }
+}
+```
+```ts
+// composables/useChat.ts — real-time, offline-first, encrypted
+import { computed, ref, type MaybeRefOrGetter } from 'vue'
+import { useAccount, useCoState } from 'community-jazz-vue'
+import type { ID } from 'jazz-tools'
+import { Chat } from '@/schema'
+
+export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
+  const chat = useCoState(Chat, chatId)
+  const me = useAccount(undefined, { resolve: { profile: true } })
+
+  const messages = computed(() => { ... })
+  function sendMessage() { ... }
 
   return { chat, me, inputValue, messages, sendMessage }
 }
@@ -1500,15 +1681,23 @@ export function useChat(chatId: Ref<ID<typeof Chat>>) {
 ````
 
 <!--
-Step 4: the useChat composable — Vue-idiomatic, zero API calls.
+Step 4: the useChat composable. This is where Vue devs will feel right at home.
 
-useCoState loads the chat by ID. resolve with $each: true tells Jazz to deeply load each message. useAccount gives us the current user. That's the entire data layer — two lines.
+CLICK: Imports. Vue's computed, ref, MaybeRefOrGetter. Jazz's useCoState and useAccount. Our Chat schema.
 
-CLICK: Reactive state. inputValue is a plain ref. messages is a computed that grabs the last 30 and reverses. Standard Vue reactivity — nothing special.
+CLICK: Function signature. A standard Vue composable — accepts a reactive chat ID. MaybeRefOrGetter means pass a ref, a getter, or a raw value.
 
-CLICK: sendMessage. Create a Message, push it to the list. No axios.post, no mutation, no optimistic update. The owner carries permissions automatically.
+CLICK: useCoState. Load the chat by ID. One line — that's your entire data layer.
 
-Three numbered sections, three concerns. This is a composable any Vue dev would write — except it's real-time, offline-first, and end-to-end encrypted.
+CLICK: useAccount. Gives us the current user. Two composables total for all our data needs.
+
+CLICK: Reactive state. inputValue is a plain ref. messages is a computed — last 30, reversed. Standard Vue reactivity, nothing Jazz-specific.
+
+CLICK: sendMessage. $jazz.push with a plain object — Jazz creates the Message inline using onInlineCreate permissions from the schema. No Message.create(), no owner parameter.
+
+CLICK: Return. No API calls, no Pinia stores. Just reactive state.
+
+CLICK: Zoom out. Details collapse — just the structure. useCoState, useAccount, a computed, a function, a return. A composable any Vue dev would write — except it's real-time, offline-first, and end-to-end encrypted.
 
 TRANSITION: Now let's see how clean the component becomes...
 -->
@@ -1518,12 +1707,13 @@ layout: code-editor
 project: vue-jazz-chat
 activeFile: '[chatId].vue'
 tabs: useChat.ts, '[chatId].vue'
-step: Step 5
+step: 6/6 Component
 transition: fade
-clicks: 2
+clicks: 5
 openFolders: src, composables, pages, chat
 files: |
   src
+    main.ts
     schema.ts
     RootApp.vue
     composables/
@@ -1540,22 +1730,41 @@ files: |
 ```vue
 <!-- pages/chat/[chatId].vue -->
 <script setup lang="ts">
-import { toRef } from 'vue'
+import type { ID } from 'jazz-tools'
+import { Chat } from '@/schema'
+
+const props = defineProps<{ chatId: ID<typeof Chat> }>()
+</script>
+```
+```vue
+<!-- pages/chat/[chatId].vue -->
+<script setup lang="ts">
+import type { ID } from 'jazz-tools'
+import { Chat } from '@/schema'
+// The composable we just built
+import { useChat } from '@/composables/useChat'
+
+const props = defineProps<{ chatId: ID<typeof Chat> }>()
+</script>
+```
+```vue
+<!-- pages/chat/[chatId].vue -->
+<script setup lang="ts">
 import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
 import { useChat } from '@/composables/useChat'
 
 const props = defineProps<{ chatId: ID<typeof Chat> }>()
 
+// One destructure — all logic lives in the composable
 const { chat, me, inputValue, messages, sendMessage } = useChat(
-  toRef(() => props.chatId)
+  () => props.chatId
 )
 </script>
 ```
 ```vue
 <!-- pages/chat/[chatId].vue -->
 <script setup lang="ts">
-import { toRef } from 'vue'
 import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
 import { useChat } from '@/composables/useChat'
@@ -1563,24 +1772,24 @@ import { useChat } from '@/composables/useChat'
 const props = defineProps<{ chatId: ID<typeof Chat> }>()
 
 const { chat, me, inputValue, messages, sendMessage } = useChat(
-  toRef(() => props.chatId)
+  () => props.chatId
 )
 </script>
 
 <template>
-  <template v-if="chat?.$isLoaded && me?.$isLoaded">
+  <!-- Early return pattern — show loading first -->
+  <div v-if="!chat?.$isLoaded || !me?.$isLoaded">Loading...</div>
+  <template v-else>
     <div v-for="msg in messages" :key="msg.$jazz.id">
       <strong>{{ msg.$jazz.createdBy === me!.$jazz.id ? 'You' : 'Other' }}:</strong>
       {{ msg.text }}
     </div>
   </template>
-  <div v-else>Loading...</div>
 </template>
 ```
 ```vue
 <!-- pages/chat/[chatId].vue -->
 <script setup lang="ts">
-import { toRef } from 'vue'
 import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
 import { useChat } from '@/composables/useChat'
@@ -1588,37 +1797,69 @@ import { useChat } from '@/composables/useChat'
 const props = defineProps<{ chatId: ID<typeof Chat> }>()
 
 const { chat, me, inputValue, messages, sendMessage } = useChat(
-  toRef(() => props.chatId)
+  () => props.chatId
 )
 </script>
 
 <template>
-  <template v-if="chat?.$isLoaded && me?.$isLoaded">
+  <div v-if="!chat?.$isLoaded || !me?.$isLoaded">Loading...</div>
+  <template v-else>
     <div v-for="msg in messages" :key="msg.$jazz.id">
       <strong>{{ msg.$jazz.createdBy === me!.$jazz.id ? 'You' : 'Other' }}:</strong>
       {{ msg.text }}
     </div>
 
+    <!-- v-model + submit — no store, no server calls -->
     <form @submit.prevent="sendMessage">
       <input v-model="inputValue" placeholder="Message" />
       <button type="submit">Send</button>
     </form>
   </template>
-  <div v-else>Loading...</div>
+</template>
+```
+```vue
+<!-- pages/chat/[chatId].vue — complete component -->
+<script setup lang="ts">
+import type { ID } from 'jazz-tools'
+import { Chat } from '@/schema'
+import { useChat } from '@/composables/useChat'
+
+const props = defineProps<{ chatId: ID<typeof Chat> }>()
+const { chat, me, inputValue, messages, sendMessage } = useChat(
+  () => props.chatId
+)
+</script>
+
+<template>
+  <div v-if="!chat?.$isLoaded || !me?.$isLoaded">Loading...</div>
+  <template v-else>
+    <div v-for="msg in messages" :key="msg.$jazz.id">
+      <strong>{{ msg.$jazz.createdBy === me!.$jazz.id ? 'You' : 'Other' }}:</strong>
+      {{ msg.text }}
+    </div>
+    <form @submit.prevent="sendMessage">
+      <input v-model="inputValue" placeholder="Message" />
+      <button type="submit">Send</button>
+    </form>
+  </template>
 </template>
 ```
 ````
 
 <!--
-Step 5: the component itself — 10 lines of script setup, that's it. One import, one destructure. All the logic lives in useChat.
+Step 5: the component. Start with just the page setup — props with a typed chat ID from the route.
 
-CLICK: The template — plain Vue. v-for to loop messages, v-if for loading state. Standard Vue patterns.
+CLICK: Import useChat — the composable we just built. That's our entire data layer.
 
-CLICK: Add the form — v-model on input, submit calls sendMessage. No special syntax, no store, no server calls.
+CLICK: One destructure. chat, me, inputValue, messages, sendMessage — all logic lives in the composable. The component just wires it to the template.
 
-This is what local-first looks like in Vue: a composable any Vue dev would recognize, powering a component any Vue dev could read.
+CLICK: Template. Plain Vue patterns — v-if for loading, v-for to loop messages. Nothing special.
 
-TRANSITION: Let me show you what that one line replaces...
+CLICK: The form. v-model on input, submit calls sendMessage. No special syntax, no store, no server calls.
+
+CLICK: Clean up. Comments gone — this is the final component. Look how small it is. This is what local-first looks like in Vue.
+
+TRANSITION: Let that sink in...
 -->
 
 ---
@@ -1637,12 +1878,14 @@ clicks: 1
 
 ```ts
 async function sendMessage(msg: string) {
-  const optimistic = store.addOptimistic(msg)
+  const opt = store.addOptimistic(msg)
   try {
-    await axios.post('/api/messages', { text: msg })
+    await axios.post('/api/messages', {
+      text: msg,
+    })
     socket.emit('newMessage', msg)
   } catch (e) {
-    store.rollback(optimistic)
+    store.rollback(opt)
   }
 }
 ```
@@ -1660,14 +1903,19 @@ async function sendMessage(msg: string) {
 <div class="text-sm font-bold text-brand mb-2">Jazz</div>
 
 ```ts
-function sendMessage(msg: string) {
-  chat.value.push(
-    Message.create({ text: msg }, chat.value._owner)
-  )
-}
+// Send a message
+chat.value.$jazz.push({ text: msg })
+
+// Upload an image
+const image = await createImage(
+  file, { owner }
+)
+
+// Read edit history
+msg.$jazz.getEdits().text
 ```
 
-<div class="mt-2 text-xs op-50">That's it. Synced, persisted, encrypted.</div>
+<div class="mt-2 text-xs op-50">Messages, images, and history. All synced, persisted, encrypted.</div>
 
 </Card>
 
@@ -1680,150 +1928,11 @@ function sendMessage(msg: string) {
 
 CLICK -- On the left: what you'd write today. Pinia for state, axios for the API call, socket.io for real-time, plus rollback on error. Five dependencies. Six lines of plumbing.
 
-On the right: Message.create with the owner, push to the list. Jazz handles sync, persistence, conflict resolution, and encryption. All of it.
+On the right: $jazz.push with a plain object. Jazz handles creation, sync, persistence, conflict resolution, and encryption. All of it.
 
 [look up] THIS is the promise of local-first. Not "offline mode." Not "cache layer." Your entire data layer — gone.
 
-TRANSITION: Let me zoom out...
--->
-
----
-layout: center
-class: text-center
----
-
-<div class="text-2xl font-bold op-90">
-
-Schema + Provider + Group + `useCoState` = **your entire data layer**
-
-</div>
-<div class="mt-3 text-base op-60">Real-time. Offline. Encrypted. Permissioned.</div>
-
-<!--
-[pause] [look up]
-
-Schema, provider, group, useCoState. That's it. Your entire data layer. Real-time, offline, encrypted, and permissioned.
-
-TRANSITION: But wait — there's more you get for free...
--->
-
----
-layout: code-editor
-project: vue-jazz-chat
-activeFile: '[chatId].vue'
-tabs: '[chatId].vue'
-step: Step 6
-transition: fade
-clicks: 1
-files: |
-  src
-    schema.ts
-    RootApp.vue
-    composables/
-      useChat.ts
-    pages/
-      index.vue
-      chat/
-        [chatId].vue
-  package.json
-  vite.config.ts
----
-
-````md magic-move {lines: true}
-```ts
-// Edit history — FREE with every CoValue
-
-// Get the edit history for a message's text field
-const lastEdit = msg.$jazz.getEdits().text
-```
-```ts
-// Edit history — FREE with every CoValue
-
-// Get the edit history for a message's text field
-const lastEdit = msg.$jazz.getEdits().text
-
-// Who wrote it?
-lastEdit.by?.profile?.name  // → "Alexander"
-
-// When did they write it?
-lastEdit.madeAt             // → 2026-03-09T14:32:00Z
-
-// Full history of every change
-msg.$jazz.getEdits().text
-  // → [{ by, madeAt, value }, { by, madeAt, value }, ...]
-```
-````
-
-<!--
-Step 6: edit history. Every CoValue in Jazz tracks its own history automatically. getEdits gives you the edit trail for any field.
-
-CLICK: Who wrote it? When? Full history of every change — for FREE. No audit log table, no event sourcing, no changelog migration. It's just THERE.
-
-Think about what this normally costs. With Jazz? Two lines.
-
-TRANSITION: One more thing...
--->
-
----
-layout: code-editor
-project: vue-jazz-chat
-activeFile: '[chatId].vue'
-tabs: '[chatId].vue'
-step: Step 7
-transition: fade
-clicks: 1
-files: |
-  src
-    schema.ts
-    RootApp.vue
-    composables/
-      useChat.ts
-    pages/
-      index.vue
-      chat/
-        [chatId].vue
-  package.json
-  vite.config.ts
----
-
-````md magic-move {lines: true}
-```ts
-// Image uploads — co.image() from our schema
-
-import { createImage } from 'jazz-tools'
-
-async function sendImage(file: File) {
-  const image = await createImage(file, {
-    owner: chat.value._owner,
-  })
-}
-```
-```ts
-// Image uploads — co.image() from our schema
-
-import { createImage } from 'jazz-tools'
-
-async function sendImage(file: File) {
-  const image = await createImage(file, {
-    owner: chat.value._owner,
-  })
-
-  chat.value.push(
-    Message.create(
-      { text: file.name, image },
-      chat.value._owner
-    )
-  )
-}
-```
-````
-
-<!--
-Step 7: image uploads. Remember co.image() in our schema? createImage takes a file and an owner — same Group pattern. Blur-up placeholders and progressive loading out of the box.
-
-CLICK: Then push a Message with the image. Same pattern as text. No S3, no signed URLs, no upload service. Everything synced, encrypted, permissioned — automatically.
-
-TRANSITION: Let me show you what you DIDN'T have to build...
+TRANSITION: Now let me show you what you DIDN'T have to build...
 -->
 
 ---
@@ -1864,7 +1973,7 @@ clicks: 1
 - `useCoState`
 - Built into CoValues
 - Passkeys, built in
-- Groups + roles
+- `withPermissions` + roles
 - `co.image()`
 - `$jazz.getEdits()`
 - IndexedDB + CRDTs
@@ -2021,40 +2130,40 @@ layout: two-cols
 transition: slide-left
 ---
 
-<div class="h-full flex flex-col justify-center">
+<div v-click class="h-full flex flex-col justify-center">
 
 ## <span class="text-green-400">Great Fit</span>
 
 <div class="space-y-2 mt-4">
 
-<div v-click class="flex items-start gap-2">
+<div class="flex items-start gap-2">
   <span class="text-green-400 text-lg">✓</span>
   <span>Note-taking & productivity <span class="op-50 text-sm">(Linear, Obsidian)</span></span>
 </div>
 
-<div v-click class="flex items-start gap-2">
+<div class="flex items-start gap-2">
   <span class="text-green-400 text-lg">✓</span>
   <span>Creative tools <span class="op-50 text-sm">(docs, design, whiteboards)</span></span>
 </div>
 
-<div v-click class="flex items-start gap-2">
+<div class="flex items-start gap-2">
   <span class="text-green-400 text-lg">✓</span>
   <span>Personal data <span class="op-50 text-sm">(health, finance, journals)</span></span>
 </div>
 
-<div v-click class="flex items-start gap-2">
+<div class="flex items-start gap-2">
   <span class="text-green-400 text-lg">✓</span>
   <span>Field / mobile apps <span class="op-50 text-sm">(healthcare, logistics)</span></span>
 </div>
 
-<div v-click class="flex items-start gap-2">
+<div class="flex items-start gap-2">
   <span class="text-green-400 text-lg">✓</span>
   <span>Privacy-sensitive apps</span>
 </div>
 
 </div>
 
-<div v-click class="mt-6 text-sm op-70 italic">
+<div class="mt-6 text-sm op-70 italic">
 
 Heuristic: "User creates and owns the data"
 
@@ -2064,54 +2173,44 @@ Heuristic: "User creates and owns the data"
 
 ::right::
 
-<div class="h-full flex flex-col justify-center">
+<div v-click class="h-full flex flex-col justify-center">
 
 ## <span class="text-yellow-400">Think Twice</span>
 
 <div class="space-y-2 mt-4">
 
-<div v-click class="flex items-start gap-2">
+<div class="flex items-start gap-2">
   <span class="text-yellow-400 text-lg">⚠</span>
   <span>Banking & financial transactions <span class="op-50 text-sm">(strong consistency)</span></span>
 </div>
 
-<div v-click class="flex items-start gap-2">
+<div class="flex items-start gap-2">
   <span class="text-yellow-400 text-lg">⚠</span>
   <span>E-commerce inventory <span class="op-50 text-sm">(overselling risk)</span></span>
 </div>
 
-<div v-click class="flex items-start gap-2">
+<div class="flex items-start gap-2">
   <span class="text-yellow-400 text-lg">⚠</span>
   <span>Ride-sharing / real-time matching <span class="op-50 text-sm">(central arbitration)</span></span>
 </div>
 
-<div v-click class="flex items-start gap-2">
+<div class="flex items-start gap-2">
   <span class="text-yellow-400 text-lg">⚠</span>
   <span>Large shared datasets <span class="op-50 text-sm">(analytics, social networks)</span></span>
 </div>
 
-<div v-click class="flex items-start gap-2">
+<div class="flex items-start gap-2">
   <span class="text-yellow-400 text-lg">⚠</span>
   <span>Strict centralized access control</span>
 </div>
 
 </div>
 
-<div v-click class="mt-6 text-sm op-70 italic">
+<div class="mt-6 text-sm op-70 italic">
 
 Heuristic: "A central authority must arbitrate"
 
 </div>
-
-</div>
-
-<div v-click class="absolute bottom-8 left-8 right-8">
-
-<Callout type="info">
-
-**EU Data Sovereignty** — The US CLOUD Act lets authorities demand data from US-owned companies regardless of server location. Local-first = data stays on the user's device = no foreign server to subpoena. A structural solution to a legal problem.
-
-</Callout>
 
 </div>
 
@@ -2121,7 +2220,29 @@ Linear is the poster child — feels impossibly fast because reads/writes are lo
 Banking: "An offline banking app that lets you initiate a transfer with an out-of-date balance is dangerous" (RxDB)
 
 E-commerce: two warehouses claiming the last item → CRDTs can't resolve this automatically.
+-->
 
+---
+transition: slide-left
+---
+
+<div class="h-full flex flex-col justify-center items-center">
+
+<Callout type="info">
+
+**EU Data Sovereignty** — The US CLOUD Act lets authorities demand data from US-owned companies regardless of server location. Local-first = data stays on the user's device = no foreign server to subpoena. A structural solution to a legal problem.
+
+</Callout>
+
+<div class="mt-8 text-sm op-70 italic text-center">
+
+Local-first is data sovereignty by architecture, not by legal agreement.
+
+</div>
+
+</div>
+
+<!--
 EU angle: US providers hold 70% of European cloud market; Schrems II invalidated Privacy Shield; CLOUD Act applies even to EU-hosted servers if the company is US-based.
 
 Key framing: local-first is data sovereignty by architecture, not by legal agreement.
@@ -2134,22 +2255,34 @@ transition: fade
 
 # Thank You!
 
-<div class="mt-4 text-lg">
+<div class="text-lg op-80">
 
 **alexop.dev** · **@alexanderopalic**
 
 </div>
 
-<div class="mt-6 text-2xl font-bold" style="color: #ff6bed">
-
-alexop.dev/vue-amsterdam
-
+<div class="mt-8 flex items-center justify-center gap-8">
+<Card glow class="inline-flex items-center gap-6 !px-6 !py-5">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://github.com/alexanderop/awesome-local-first&bgcolor=1a1a2e&color=ff6bed" class="w-32 h-32 rounded-lg" />
+  <div class="text-left">
+    <div class="flex items-center gap-3">
+      <img src="/local-first-logo.svg" class="w-10 h-10" />
+      <div class="text-xl font-bold" style="color: #ff6bed">awesome-local-first</div>
+    </div>
+    <div class="text-sm op-60 mt-2">A curated collection of local-first resources,<br/>tools, frameworks & articles</div>
+    <div class="mt-3 flex items-center gap-2 text-xs op-40">
+      <div class="i-ph-github-logo" />
+      <span>github.com/alexanderop/awesome-local-first</span>
+    </div>
+  </div>
+</Card>
 </div>
 
-<div class="mt-2 text-sm op-50">
-
-Slides, references & sync engine comparison
-
+<div class="mt-5 flex items-center justify-center gap-3 text-sm op-70">
+  <img src="/local-first-logo.svg" class="w-5 h-5" />
+  <span>Local First Conf — Berlin 2026</span>
+  <span class="op-40">·</span>
+  <a href="https://www.localfirstconf.com/" class="text-brand hover:underline">localfirstconf.com</a>
 </div>
 
 <!--
@@ -2157,7 +2290,8 @@ Slides, references & sync engine comparison
 
 Thank you!
 
-alexop.dev/vue-amsterdam -- slides + links
+I created awesome-local-first -- a curated GitHub repo with all useful resources on local-first. Scan the QR code or find it on GitHub.
+Also check out Local First Conf in Berlin this year -- localfirstconf.com
 Come find me to chat about local-first
 
 [pause]

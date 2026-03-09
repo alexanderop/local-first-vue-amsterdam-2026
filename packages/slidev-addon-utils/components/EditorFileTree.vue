@@ -41,6 +41,6 @@ defineProps<{
 }
 
 .editor-tree__content {
-  overflow-y: auto;
+  overflow: hidden;
 }
 </style>

@@ -129,7 +129,7 @@ useMutationObserver(editorCodeRef, () => {
   background: rgba(52, 63, 96, 0.2);
   border-left: 1px solid rgba(171, 75, 153, 0.15);
   flex-shrink: 0;
-  overflow-y: auto;
+  overflow: hidden;
   order: 1;
 }
 

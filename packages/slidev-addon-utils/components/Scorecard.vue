@@ -27,10 +27,10 @@
   <!-- Progress mode: achieved/pending split -->
   <template v-else>
     <!-- Achieved cards -->
-    <div v-if="achievedIdeals.length > 0 && !allAchieved" v-click="1" class="grid grid-cols-2 gap-4 mt-6">
-      <Card v-for="ideal in achievedIdeals" :key="ideal.key" variant="success" glow size="lg">
-        <div class="flex items-center gap-2 text-emerald-400 font-bold text-lg">
-          <div class="i-ph-check-circle-fill text-xl" /> {{ ideal.label }}
+    <div v-if="achievedIdeals.length > 0 && !allAchieved" v-click="1" class="grid grid-cols-2 gap-3 mt-4">
+      <Card v-for="ideal in achievedIdeals" :key="ideal.key" variant="success" glow size="md">
+        <div class="flex items-center gap-2 text-emerald-400 font-bold text-base">
+          <div class="i-ph-check-circle-fill text-lg" /> {{ ideal.label }}
         </div>
         <p class="text-sm text-gray-400 mt-1 pl-7">{{ getDescription(ideal) }}</p>
       </Card>
