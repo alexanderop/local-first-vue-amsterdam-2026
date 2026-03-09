@@ -704,78 +704,14 @@ transition: fade
 <!--
 Two devices, same data, offline edits — how do you merge?
 
-Let me show you the most elegant solution first...
--->
-
----
-clicks: 5
----
-
-# CRDTs: Git for JSON
-
-<CrdtCounterDemo :roughness="1.2" :seed="800" />
-
-
-<!--
-CLICK -- Two peers go offline
-
-CLICK -- Peer A: +1
-
-CLICK -- Peer B: +2, independent
-
-CLICK -- LWW = 2 (WRONG), CRDT = slot per peer. 1+2 = 3 (CORRECT)
-
-CLICK -- Both online again. Both peers now show 3. That's the magic — they converge.
-
-[slow down]
-Analogy: two doctors on a flight
-- A adds allergy, B updates dosage
-- LWW: one edit LOST. CRDT: both survive
-
-CLICK -- Real objects, three rules:
-- Different fields -> auto-merge
-- Same field -> LWW
-- Delete vs update -> delete wins (tombstone)
-
-[look up]
-Server needs ZERO conflict logic -- just relays bytes
-
-TRANSITION: But a counter is just numbers. Real apps have objects...
--->
-
----
-layout: statement
-clicks: 1
----
-
-# From Counter to Map
-
-G-Counter = one number per peer. But real apps have **objects with fields**.
-
-<div v-click="1" class="mt-8 text-lg op-80">
-
-Each field stores `{ value, timestamp, peerId }` — an **LWW Register**.
-
-Many registers together → an **LWW Map**.
-
-</div>
-
-<!--
-Counter was great for the concept. But real data = objects.
-
-A todo has title, done, assignee. Not just a number.
-
-CLICK -- Each field is an LWW Register. Value + timestamp + who wrote it.
-Put many registers together? You get an LWW Map.
-
-TRANSITION: Let me show you exactly how this merges...
+TRANSITION: Let me show you how real objects handle this...
 -->
 
 ---
 clicks: 6
 ---
 
-# The LWW Map — How Real Objects Merge
+# CRDT LWW: Git for JSON
 
 <CoMapDiagram />
 
@@ -795,6 +731,33 @@ CLICK 5 -- Alice changes title to "Buy eggs" -- conflict! LWW: 8:05 > 8:03, Alic
 CLICK 6 -- Bob marks it not done. Final state merges per-field LWW.
 
 TRANSITION: Now you've seen how CRDTs work — let's zoom out and see the full spectrum of approaches...
+-->
+
+---
+
+# The CRDT Zoo
+
+<div class="mt-8 text-lg space-y-4">
+
+- **LWW Register** — last write wins per field <span class="text-sm op-50">→ Jazz CoMap, Automerge, Riak</span>
+- **Text CRDTs** — collaborative editing (YATA, RGA, Peritext) <span class="text-sm op-50">→ Yjs, Automerge, Diamond Types</span>
+- **Sequences / Lists** — ordered collections (RGA, LSEQ) <span class="text-sm op-50">→ Yjs, Automerge, Jazz CoList</span>
+- **Counters & Sets** — distributed counting and membership <span class="text-sm op-50">→ Redis CRDT, Riak, Soundcloud</span>
+
+</div>
+
+<!--
+Quick zoo tour — four families of CRDTs.
+
+LWW Register — what you just saw. Per-field last-write-wins. Jazz, Automerge, Riak all use this.
+
+Text CRDTs — the hard one. Yjs, Automerge, Diamond Types each have their own algorithm for collaborative text.
+
+Sequences — ordered lists. Think arrays that merge. Used everywhere.
+
+Counters and Sets — distributed counting (like/view counts), set membership. Redis CRDT, Riak, Soundcloud use these at scale.
+
+We won't go deep — just know these exist. TRANSITION: Now let's zoom out and see the full spectrum of conflict resolution approaches...
 -->
 
 ---
@@ -820,11 +783,11 @@ What if you got LWW's simplicity with CRDT's guarantees? That's exactly what a *
 </Callout>
 
 <!--
-Full picture -- now that you've SEEN CRDTs in action
+Full picture -- the spectrum of conflict resolution approaches.
 
 LWW -- simplest. Last save wins. Fast, but LOSES data.
 
-CLICK -- CRDTs. Math guarantees convergence. No server needed. You just saw this!
+CLICK -- CRDTs. Math guarantees convergence. No server needed. The LWW Map you just saw!
 
 CLICK -- Hybrid. Surface conflict to user (like Git merge).
 
