@@ -1120,9 +1120,15 @@ TRANSITION: Let's build it with Jazz.
 -->
 
 ---
+transition: fade
+---
 
-<div class="h-full w-full">
-  <iframe src="https://jazz.tools" class="w-full h-full border-0 rounded-lg" allow="fullscreen" />
+<PartSlide part="4" title="Jazz" subtitle="Local-First Vue in Practice" />
+
+---
+
+<div class="h-full w-full flex items-center justify-center">
+  <img src="/jazz-website.png" class="max-h-full max-w-full rounded-lg shadow-xl" />
 </div>
 
 <!--
@@ -1130,12 +1136,6 @@ Before we dive in -- here's the Jazz website. Take a look.
 
 TRANSITION: Let's build it with Jazz.
 -->
-
----
-transition: fade
----
-
-<PartSlide part="4" title="Jazz" subtitle="Local-First Vue in Practice" />
 
 <!--
 [breathe]
