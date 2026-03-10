@@ -917,7 +917,7 @@ TRANSITION: Let's look at the apps you already love...
 <div class="grid grid-cols-3 gap-6 mt-6">
 
 <Card variant="muted" size="lg">
-<div class="text-lg font-bold text-brand mb-2">Linear</div>
+<div class="flex items-center gap-2 text-lg font-bold text-brand mb-2"><img src="/linear-logo.svg" class="h-6 w-6" /> Linear</div>
 
 - Syncs workspace to **IndexedDB**
 - Sub-50ms page loads
@@ -926,7 +926,7 @@ TRANSITION: Let's look at the apps you already love...
 </Card>
 
 <Card variant="muted" size="lg">
-<div class="text-lg font-bold text-brand mb-2">Figma</div>
+<div class="flex items-center gap-2 text-lg font-bold text-brand mb-2"><img src="/figma-logo.svg" class="h-6 w-6" /> Figma</div>
 
 - CRDT-**inspired**, not a true CRDT
 - Central server decides ordering
@@ -935,10 +935,9 @@ TRANSITION: Let's look at the apps you already love...
 </Card>
 
 <Card variant="muted" size="lg">
-<div class="text-lg font-bold text-brand mb-2">Notion</div>
+<div class="flex items-center gap-2 text-lg font-bold text-brand mb-2"><img src="/notion-logo.svg" class="h-6 w-6" /> Notion</div>
 
 - **SQLite WASM** replaced IndexedDB
-- 33% faster in India, 20% overall
 - Offline mode shipped Dec 2025
 
 </Card>
@@ -1362,7 +1361,7 @@ import { co, z } from 'jazz-tools'
 // schema.ts
 import { co, z } from 'jazz-tools'
 
-// A collaborative object - like a Prisma model, but syncs in real-time
+// Jazz version of the LWW CRDT
 const Message = co.map({
 })
 ```
@@ -1371,7 +1370,7 @@ const Message = co.map({
 import { co, z } from 'jazz-tools'
 
 const Message = co.map({
-  // Zod-style validator for primitives
+  // using zod to define the schema
   text: z.string(),
 })
 ```
@@ -1395,7 +1394,7 @@ export const Message = co.map({
 export const Chat = co.list(Message)
   .withPermissions({
     onCreate: (owner) => owner.addMember('everyone', 'writer'),
-  })
+})
 ```
 ```ts
 // schema.ts - complete schema
