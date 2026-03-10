@@ -19,7 +19,6 @@
       <div
         v-for="(app, i) in apps"
         :key="app.name"
-        v-click="i + 1"
         class="grid items-center text-center border-t"
         :style="{ ...gridStyle, borderColor: 'rgba(255,255,255,0.06)' }"
         :class="i % 2 === 0 ? 'bg-white/[0.02]' : ''"

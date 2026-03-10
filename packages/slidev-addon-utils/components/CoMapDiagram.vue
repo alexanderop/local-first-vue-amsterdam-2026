@@ -21,8 +21,6 @@ const EVENTS: HistoryEvent[] = [
   { click: 2, user: 'bob',   device: 1, field: 'title', value: 'Buy oat milk', time: '8:02 AM' },
   { click: 3, user: 'bob',   device: 1, field: 'title', value: 'Get oat milk', time: '8:03 AM' },
   { click: 4, user: 'bob',   device: 2, field: 'done',  value: true,           time: '8:04 AM' },
-  { click: 5, user: 'alice', device: 1, field: 'title', value: 'Buy eggs',     time: '8:05 AM' },
-  { click: 6, user: 'bob',   device: 1, field: 'done',  value: false,          time: '8:06 AM' },
 ]
 
 const visibleEvents = computed(() => EVENTS.filter(e => clicks.value >= e.click))
@@ -55,7 +53,8 @@ const mergedEntries = computed(() => Object.entries(mergedState.value))
 
 const currentTime = computed(() => {
   const visible = visibleEvents.value
-  return visible.length > 0 ? visible.at(-1).time : '8:00 AM'
+  const lastEvent = visible[visible.length - 1]
+  return lastEvent?.time ?? '8:00 AM'
 })
 
 // Track which fields just changed for flash animation

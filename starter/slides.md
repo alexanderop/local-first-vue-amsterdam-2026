@@ -100,7 +100,7 @@ Way fewer hands -- THAT gap is why we're here
 
 <PyramidOutline :items="[
   { title: 'The Status Quo', subtitle: 'Vue abstracts the DOM, not the data' },
-  { title: 'Offline-First', subtitle: 'The app that never stops working' },
+  { title: 'Offline-First', subtitle: 'The app that works without WIFI' },
   { title: 'Sync Engines', subtitle: 'The new data layer' },
   { title: 'Local-First', subtitle: 'More than just offline' },
   { title: 'Jazz', subtitle: 'Local-first Vue in practice' }
@@ -308,12 +308,6 @@ db.todos.insert({ text: 'Buy milk' })
 
 </div>
 
-<div v-click class="mt-3 text-sm op-70 text-center">
-
-Different layers. Sync engines replace the **fetch → cache → invalidate** cycle entirely.
-
-</div>
-
 <!--
 "I already use TanStack / Pinia" -- why something else?
 
@@ -377,7 +371,7 @@ Let's change that.
 
 <WebAppsScorecard />
 
-<div v-click="6" class="mt-3 text-center text-sm text-gray-500">
+<div class="mt-3 text-center text-sm text-gray-500">
 
 Source: <a href="https://www.inkandswitch.com/essay/local-first/" target="_blank" style="color: #ff6bed">"Local-First Software"</a> — Ink & Switch, 2019
 
