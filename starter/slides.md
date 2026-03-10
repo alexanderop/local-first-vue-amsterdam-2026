@@ -780,17 +780,17 @@ TRANSITION: Now you've seen how CRDTs work - let's zoom out and see the full spe
 </div>
 
 <!--
-Quick zoo tour - four families of CRDTs.
+Let me walk you through the four main families of CRDTs and where you'll actually see them in the wild.
 
-LWW Register - what you just saw. Per-field last-write-wins. Jazz, Automerge, Riak all use this.
+**LWW Register** — Last Write Wins per field. This is the simplest one. Two users edit the same field, the latest timestamp wins. Example: in a todo app, if Alice renames a task to "Buy milk" and Bob renames it to "Buy oat milk" at the same time, whichever write has the later timestamp sticks. Jazz CoMap uses this for every property on a collaborative object. Automerge uses it for primitive values. Riak has used LWW registers in production for years — it's battle-tested at scale.
 
-Text CRDTs - the hard one. Yjs, Automerge, Diamond Types each have their own algorithm for collaborative text.
+**Text CRDTs** — This is the hard problem. You need character-by-character merging for collaborative text editing. Real example: Google Docs-style editing. Two people type in the same paragraph simultaneously — YATA (used by Yjs) and RGA (used by Automerge) ensure every character finds its correct position without conflicts. Figma uses a text CRDT for their collaborative design tool. Peritext extends this to handle rich text formatting — bold, italic, links — which is a whole extra layer of complexity.
 
-Sequences - ordered lists. Think arrays that merge. Used everywhere.
+**Sequences / Lists** — Ordered collections that merge. Think of a collaborative kanban board where two people reorder cards at the same time, or a shared playlist. Yjs Y.Array and Jazz CoList both handle this. Real example: in Linear (the project management tool), when two users drag issues into different positions simultaneously, a sequence CRDT ensures a consistent order for everyone.
 
-Counters and Sets - distributed counting (like/view counts), set membership. Redis CRDT, Riak, Soundcloud use these at scale.
+**Counters & Sets** — Distributed counting and set membership. The classic example: like counts. SoundCloud uses CRDTs for play counts across their distributed infrastructure — millions of increments per second across data centers, eventually consistent. Redis CRDT module gives you G-Counters and PN-Counters out of the box. OR-Sets (Observed-Remove Sets) let you add/remove items from a set without conflicts — think tags on a document or members in a channel.
 
-We won't go deep - just know these exist. TRANSITION: Now let's zoom out and see the full spectrum of conflict resolution approaches...
+The key takeaway: you pick the CRDT type that matches your data shape. Most real apps combine several of these. TRANSITION: Now let's zoom out and see the full spectrum of conflict resolution approaches...
 -->
 
 ---
@@ -889,6 +889,29 @@ TRANSITION: Let's look at the apps you already love...
 ---
 ---
 
+# What Sync Engines Add
+
+<Scorecard :achieved="['fast', 'offline', 'multi-device', 'collaboration']" :descriptions="{
+  fast: 'Local reads, optimistic writes. UI never waits for the server.',
+  offline: 'Sync engines queue changes and reconcile when back online.',
+  'multi-device': 'State syncs across devices via the server in real time.',
+  collaboration: 'Multiple users edit the same document - conflicts resolved automatically.'
+}" />
+
+<!--
+CLICK -- Four things covered now: speed, offline, multi-device, collaboration.
+Sync engines are POWERFUL.
+
+CLICK -- But three question marks remain: longevity, privacy, user control.
+If Linear shuts down -- your data is gone. Server owns it.
+
+CLICK -- 4 out of 7. Great engineering, but not truly local-first yet.
+
+TRANSITION: Let's look at the apps you already love...
+-->
+
+---
+
 # Sync Engines in the Wild
 
 <div class="grid grid-cols-3 gap-6 mt-6">
@@ -943,29 +966,6 @@ Switched to SQLite WASM. 33% faster in India. Offline mode only shipped Dec 2025
 CLICK -- [slow down] All three. Sync engines. Fast. Some offline.
 But... are they truly local-first? What happens if Linear shuts down?
 Your data? Gone. Your workspace? Gone.
-
-TRANSITION: Let's define what truly local-first means...
--->
-
----
-
-# What Sync Engines Add
-
-<Scorecard :achieved="['fast', 'offline', 'multi-device', 'collaboration']" :descriptions="{
-  fast: 'Local reads, optimistic writes. UI never waits for the server.',
-  offline: 'Sync engines queue changes and reconcile when back online.',
-  'multi-device': 'State syncs across devices via the server in real time.',
-  collaboration: 'Multiple users edit the same document - conflicts resolved automatically.'
-}" />
-
-<!--
-CLICK -- Four things covered now: speed, offline, multi-device, collaboration.
-Sync engines are POWERFUL.
-
-CLICK -- But three question marks remain: longevity, privacy, user control.
-If Linear shuts down -- your data is gone. Server owns it.
-
-CLICK -- 4 out of 7. Great engineering, but not truly local-first yet.
 
 TRANSITION: Let's define what truly local-first means...
 -->
