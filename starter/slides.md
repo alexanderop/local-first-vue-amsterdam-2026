@@ -20,7 +20,7 @@ hideFooter: true
 
 ---
 
-<PartSlide title="How to Build Local-First Apps with Vue" subtitle="Vue Amsterdam 2026 — Alexander Opalic" />
+<PartSlide title="How to Build Local-First Apps with Vue" subtitle="Vue Amsterdam 2026 - Alexander Opalic" />
 
 <!--
 [breathe] [scan room]
@@ -202,7 +202,7 @@ layout: quote
 transition: fade
 ---
 
-<QuoteCard author="Kyle Mathews — Co-founder of ElectricSQL, creator of Gatsby" highlight="jQuery era of data">
+<QuoteCard author="Kyle Mathews - Co-founder of ElectricSQL, creator of Gatsby" highlight="jQuery era of data">
   We're in the jQuery era of data.
 </QuoteCard>
 
@@ -266,7 +266,7 @@ TRANSITION: What about tools you already use?
 <div class="grid grid-cols-2 gap-4 mt-3">
 
 <div v-click>
-<div class="font-bold text-brand mb-2 text-sm">TanStack Query — server cache</div>
+<div class="font-bold text-brand mb-2 text-sm">TanStack Query - server cache</div>
 
 ```ts
 const { data } = useQuery({
@@ -281,7 +281,7 @@ client.invalidateQueries(['todos'])
 </div>
 
 <div v-click>
-<div class="font-bold text-brand mb-2 text-sm">Pinia — client state</div>
+<div class="font-bold text-brand mb-2 text-sm">Pinia - client state</div>
 
 ```ts
 const ui = useUiStore()
@@ -298,12 +298,12 @@ ui.theme = 'dark'
 </div>
 
 <div v-click class="mt-3 mx-auto w-2/3">
-<div class="font-bold text-brand mb-2 text-sm">Sync engine — local truth</div>
+<div class="font-bold text-brand mb-2 text-sm">Sync engine - local truth</div>
 
 ```ts
 const todos = useQuery(db.todos)
 db.todos.insert({ text: 'Buy milk' })
-// instant — local DB write | works offline | syncs to all devices
+// instant - local DB write | works offline | syncs to all devices
 ```
 
 </div>
@@ -334,22 +334,30 @@ TRANSITION: Where that leaves us on the scorecard...
 
 <Scorecard mode="intro" :achieved="[]" :show-summary="false" />
 
-<div v-click="1" class="mt-4 text-center text-gray-500">
+<div v-click="8" class="mt-4 text-center text-gray-500">
 
 Vue solved **rendering**. But the data layer? Still the jQuery era. **0 out of 7.**
 
 </div>
 
-<div v-click="2" class="mt-6 text-center">
+<div v-click="9" class="mt-6 text-center">
   <span class="text-sm text-gray-400 italic">The 7 ideals from </span>
   <a href="https://www.inkandswitch.com/essay/local-first/" target="_blank" class="text-sm font-semibold italic" style="color: #ff6bed">"Local-First Software"</a>
-  <span class="text-sm text-gray-400 italic"> — Ink & Switch, 2019</span>
+  <span class="text-sm text-gray-400 italic"> - Ink & Switch, 2019</span>
 </div>
 
 <!--
 Seven ideals -- our scorecard for the WHOLE talk
 
-[gesture] Walk through each card briefly
+[gesture] Walk through each card briefly:
+
+1. Fast — "Local-first software has the potential to respond near-instantaneously to user input, never needing to show you a spinner."
+2. Multi-device — "Users today rely on several computing devices — it is necessary for data to be synchronized across all of them."
+3. Offline — "There is plenty of need for offline-capable apps. Local-first apps store the primary copy in each device's local filesystem."
+4. Collaboration — "Real-time collaboration that is on par with the best cloud apps today, or better."
+5. Longevity — "Your work should continue to be accessible indefinitely, even after the company that produced the software is gone."
+6. Privacy — "Your local devices store only your own data, avoiding the centralized cloud database holding everybody's data."
+7. User control — "You should be able to copy and modify data in any way, write down any thought, and no company should restrict what you are allowed to do."
 
 CLICK -- Not random criteria
 STAT: 7 ideals from Ink & Switch paper, 2019
@@ -361,6 +369,36 @@ Rendering = solved. Data layer = not started.
 Let's change that.
 
 [wait for reaction]
+-->
+
+---
+
+# How Do Today's Web Apps Score?
+
+<WebAppsScorecard />
+
+<div v-click="6" class="mt-3 text-center text-sm text-gray-500">
+
+Source: <a href="https://www.inkandswitch.com/essay/local-first/" target="_blank" style="color: #ff6bed">"Local-First Software"</a> — Ink & Switch, 2019
+
+</div>
+
+<!--
+From the original Ink & Switch paper -- how do REAL apps score?
+
+CLICK -- Google Docs. Fast? Depends on connection. Multi-device, collaboration? Yes. Offline? Partial. Privacy? No -- Google reads your data.
+
+CLICK -- Trello. Similar story. No privacy, no user control.
+
+CLICK -- Pinterest. Even worse. Fully cloud-dependent.
+
+CLICK -- Dropbox. Different pattern! Fast, longevity, user control -- but no real-time collaboration.
+
+CLICK -- Git + GitHub. Best score so far! Fast, offline, longevity, user control. But collaboration is only partial -- merge conflicts, anyone?
+
+CLICK -- Notice: NO app gets all seven. Cloud apps nail collaboration but fail privacy/control. Dev tools nail control but fail collaboration. That's the gap local-first fills.
+
+TRANSITION: Let's start fixing this -- offline-first.
 -->
 
 ---
@@ -427,7 +465,7 @@ layout: center
 
 <div class="flex flex-col items-center">
   <Youtube id="7yNG1aj7-Aw" width="560" height="315" />
-  <p class="mt-2 opacity-70">Conrad Hofmeyr (PowerSync) — "SQLite Persistence on the Web" @ Sync Conf 2025</p>
+  <p class="mt-2 opacity-70">Conrad Hofmeyr (PowerSync) - "SQLite Persistence on the Web" @ Sync Conf 2025</p>
 </div>
 
 <!--
@@ -464,11 +502,11 @@ clicks: 2
         { id: 'pending', label: 'Pending Writes', variant: 'muted', click: 2 },
       ],
       edges: [
-        { from: 'local2', to: 'pending', label: 'queued', click: 2 },
+        { from: 'local2', to: 'pending', label: 'saved locally', click: 2 },
       ],
       badges: [
         { text: '✗ no network', position: 'inline', variant: 'danger', click: 2 },
-        { text: 'Still works!', position: 'bottom', variant: 'success', click: 2 },
+        { text: 'Still works! → syncs when back online', position: 'bottom', variant: 'success', click: 2 },
       ],
     },
   ]"
@@ -478,8 +516,9 @@ clicks: 2
 <!--
 [gesture] Online side: read/write LOCAL. Sync in background.
 
-Offline side: network drops -- app doesn't care
-Writes queue, sync when network returns
+Offline side: network drops - app writes to IndexedDB first.
+Transactions are saved locally as pending writes.
+When connectivity returns, they sync to the server automatically.
 
 [look up] App NEVER stops working
 
@@ -702,7 +741,7 @@ transition: fade
 <div class="mt-4 text-xl op-70">Two devices go offline. Both edit the same data. How do you merge?</div>
 
 <!--
-Two devices, same data, offline edits — how do you merge?
+Two devices, same data, offline edits - how do you merge?
 
 TRANSITION: Let me show you how real objects handle this...
 -->
@@ -730,7 +769,7 @@ CLICK 5 -- Alice changes title to "Buy eggs" -- conflict! LWW: 8:05 > 8:03, Alic
 
 CLICK 6 -- Bob marks it not done. Final state merges per-field LWW.
 
-TRANSITION: Now you've seen how CRDTs work — let's zoom out and see the full spectrum of approaches...
+TRANSITION: Now you've seen how CRDTs work - let's zoom out and see the full spectrum of approaches...
 -->
 
 ---
@@ -739,25 +778,25 @@ TRANSITION: Now you've seen how CRDTs work — let's zoom out and see the full s
 
 <div class="mt-8 text-lg space-y-4">
 
-- **LWW Register** — last write wins per field <span class="text-sm op-50">→ Jazz CoMap, Automerge, Riak</span>
-- **Text CRDTs** — collaborative editing (YATA, RGA, Peritext) <span class="text-sm op-50">→ Yjs, Automerge, Diamond Types</span>
-- **Sequences / Lists** — ordered collections (RGA, LSEQ) <span class="text-sm op-50">→ Yjs, Automerge, Jazz CoList</span>
-- **Counters & Sets** — distributed counting and membership <span class="text-sm op-50">→ Redis CRDT, Riak, Soundcloud</span>
+- **LWW Register** - last write wins per field <span class="text-sm op-50">→ Jazz CoMap, Automerge, Riak</span>
+- **Text CRDTs** - collaborative editing (YATA, RGA, Peritext) <span class="text-sm op-50">→ Yjs, Automerge, Diamond Types</span>
+- **Sequences / Lists** - ordered collections (RGA, LSEQ) <span class="text-sm op-50">→ Yjs, Automerge, Jazz CoList</span>
+- **Counters & Sets** - distributed counting and membership <span class="text-sm op-50">→ Redis CRDT, Riak, Soundcloud</span>
 
 </div>
 
 <!--
-Quick zoo tour — four families of CRDTs.
+Quick zoo tour - four families of CRDTs.
 
-LWW Register — what you just saw. Per-field last-write-wins. Jazz, Automerge, Riak all use this.
+LWW Register - what you just saw. Per-field last-write-wins. Jazz, Automerge, Riak all use this.
 
-Text CRDTs — the hard one. Yjs, Automerge, Diamond Types each have their own algorithm for collaborative text.
+Text CRDTs - the hard one. Yjs, Automerge, Diamond Types each have their own algorithm for collaborative text.
 
-Sequences — ordered lists. Think arrays that merge. Used everywhere.
+Sequences - ordered lists. Think arrays that merge. Used everywhere.
 
-Counters and Sets — distributed counting (like/view counts), set membership. Redis CRDT, Riak, Soundcloud use these at scale.
+Counters and Sets - distributed counting (like/view counts), set membership. Redis CRDT, Riak, Soundcloud use these at scale.
 
-We won't go deep — just know these exist. TRANSITION: Now let's zoom out and see the full spectrum of conflict resolution approaches...
+We won't go deep - just know these exist. TRANSITION: Now let's zoom out and see the full spectrum of conflict resolution approaches...
 -->
 
 ---
@@ -791,7 +830,7 @@ CLICK -- CRDTs. Math guarantees convergence. No server needed. The LWW Map you j
 
 CLICK -- Hybrid. Surface conflict to user (like Git merge).
 
-CLICK -- What if LWW simplicity + CRDT guarantees? That's a CoMap — you just saw it.
+CLICK -- What if LWW simplicity + CRDT guarantees? That's a CoMap - you just saw it.
 
 TRANSITION: But WHERE does this resolution happen?
 -->
@@ -922,7 +961,7 @@ TRANSITION: Let's define what truly local-first means...
   fast: 'Local reads, optimistic writes. UI never waits for the server.',
   offline: 'Sync engines queue changes and reconcile when back online.',
   'multi-device': 'State syncs across devices via the server in real time.',
-  collaboration: 'Multiple users edit the same document — conflicts resolved automatically.'
+  collaboration: 'Multiple users edit the same document - conflicts resolved automatically.'
 }" />
 
 <!--
@@ -983,7 +1022,7 @@ clicks: 4
 <div class="grid gap-3 mt-6">
   <Card v-click="1" variant="muted">
     <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">1.</span> Offline reads <strong>and</strong> writes</div>
-    <p class="text-sm text-gray-400 mt-1 pl-6">Not just cached reads — the app must accept writes while disconnected and reconcile later.</p>
+    <p class="text-sm text-gray-400 mt-1 pl-6">Not just cached reads - the app must accept writes while disconnected and reconcile later.</p>
   </Card>
   <Card v-click="2" variant="muted">
     <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">2.</span> Collaboration across devices</div>
@@ -997,7 +1036,7 @@ clicks: 4
 
 <div v-click="4" class="mt-4 text-center text-sm text-gray-500">
 
-Criterion 3 is the hardest — and it's what separates **offline-first** from **local-first**.
+Criterion 3 is the hardest - and it's what separates **offline-first** from **local-first**.
 
 </div>
 
@@ -1061,7 +1100,7 @@ Server is a utility
 
 Server can't reject your write → it just relays
 
-No foreign kill switch — your data, your jurisdiction
+No foreign kill switch - your data, your jurisdiction
 
 </div>
 
@@ -1086,12 +1125,12 @@ TRANSITION: Now that we know what local-first means -- let's see the full scorec
 
 <Scorecard :achieved="['fast', 'offline', 'multi-device', 'collaboration', 'longevity', 'privacy', 'user-control']" :descriptions="{
   fast: 'Data is local. Reads are instant. No waiting for the network.',
-  offline: 'Full read and write without connectivity — not just a cache.',
+  offline: 'Full read and write without connectivity - not just a cache.',
   'multi-device': 'State syncs seamlessly across every device you own.',
   collaboration: 'Real-time multiplayer with automatic conflict resolution.',
   longevity: 'Your data outlives any company. No server dependency for access.',
   privacy: 'End-to-end encryption. The server never sees your plaintext data.',
-  'user-control': 'You own your data. Export, switch, delete — your choice, always.'
+  'user-control': 'You own your data. Export, switch, delete - your choice, always.'
 }" />
 
 <!--
@@ -1158,11 +1197,146 @@ clicks: 2
 <!--
 Let's build a chat app for this conference.
 
-CLICK -- Here's what it'll look like. Simple wireframe. Messages, an input, send. But also: image uploads, edit history, permissions — all from the same schema.
+CLICK -- Here's what it'll look like. Simple wireframe. Messages, an input, send. But also: image uploads, edit history, permissions - all from the same schema.
 
-CLICK -- With Jazz: define schema, done. Real-time sync, image uploads, edit history, permissions — all included. Schema IS the CRDT. Database IS the sync engine.
+CLICK -- With Jazz: define schema, done. Real-time sync, image uploads, edit history, permissions - all included. Schema IS the CRDT. Database IS the sync engine.
 
 [pause] Let me show you the code...
+-->
+
+---
+layout: two-cols
+transition: fade
+---
+
+# Building Blocks
+
+<div class="pr-4">
+
+## CoMap
+
+<div class="text-sm text-gray-400 mb-2">Like a reactive JS object - but it's a CRDT</div>
+
+```ts
+// Per-field last-write-wins
+{
+  text: "hello",
+  done: false,
+  author: "alice"
+}
+```
+
+<div class="text-xs text-gray-500 mt-2">Each field merges independently via LWW</div>
+
+</div>
+
+::right::
+
+<div class="pl-4 mt-12">
+
+## CoList
+
+<div class="text-sm text-gray-400 mb-2">Like a reactive JS array - but it merges</div>
+
+```ts
+// Ordered, append-friendly
+[msg1, msg2, msg3]
+```
+
+<div class="text-xs text-gray-500 mt-2">Ordered collection that syncs across peers</div>
+
+</div>
+
+<div class="absolute bottom-16 left-8 right-8">
+
+<Callout type="info">
+That's all you need for a chat app: a <strong>CoMap</strong> per message, a <strong>CoList</strong> to hold them.
+</Callout>
+
+</div>
+
+<!--
+Before we dive into code - two building blocks.
+
+CoMap: a collaborative object. You saw this earlier - per-field LWW, like a reactive JS object that syncs.
+
+CoList: an ordered list that merges. Think reactive array.
+
+For our chat: each message is a CoMap, the chat itself is a CoList of messages. That's it. Let's code it.
+-->
+
+---
+transition: fade
+---
+
+# Every CoValue Knows If It's Loaded
+
+CoValues carry their own <strong class="text-[#ff6bed]">loading state</strong> in the type system.
+
+<div class="grid grid-cols-2 gap-6 mt-4">
+<div>
+
+```ts
+// Declare how deep you need data resolved
+type LoadedChat = co.loaded<
+  Chat, { messages: { $each: true } }
+>
+
+// TypeScript narrows the type after the check
+if (chat?.$isLoaded) {
+  // ✅ fully typed, guaranteed present
+  chat.messages
+  // ✅ no undefined, no optional chaining
+  chat.messages[0].text
+}
+```
+
+</div>
+<div>
+
+```mermaid
+stateDiagram-v2
+  [*] --> loading
+  loading --> loaded
+  loading --> unavailable
+  loading --> unauthorized
+  loaded --> loading: refetch
+```
+
+</div>
+</div>
+
+<!--
+Jazz encodes loading state into the type system via co.loaded<T, ResolveQuery>.
+The state diagram shows the four possible states a CoValue reference can be in.
+After an $isLoaded check, TypeScript narrows the type so everything is guaranteed present.
+-->
+
+---
+clicks: 5
+transition: fade
+---
+
+# The Big Picture
+
+<div class="flex items-center justify-center h-[85%]">
+  <ChatFlowDiagram />
+</div>
+
+<!--
+Before we code — the user journey.
+
+CLICK: User A opens the app. Chat.create creates a new CoValue locally. No server round-trip.
+
+CLICK: The route changes to include the CoValue's unique ID. This URL IS the data.
+
+CLICK: User A shares this URL.
+
+CLICK: User B opens it. The app loads the same CoValue by ID. Both are now connected.
+
+CLICK: Both write to the same CoValue. Real-time sync. No API, no WebSocket boilerplate. Just shared data.
+
+Now let's build this step by step...
 -->
 
 ---
@@ -1194,7 +1368,7 @@ import { co, z } from 'jazz-tools'
 // schema.ts
 import { co, z } from 'jazz-tools'
 
-// A collaborative object — like a Prisma model, but syncs in real-time
+// A collaborative object - like a Prisma model, but syncs in real-time
 const Message = co.map({
 })
 ```
@@ -1213,8 +1387,7 @@ import { co, z } from 'jazz-tools'
 
 export const Message = co.map({
   text: z.string(),
-  // Inherit permissions from the parent container
-}).withPermissions({ onInlineCreate: 'sameAsContainer' })
+})
 ```
 ```ts
 // schema.ts
@@ -1222,16 +1395,16 @@ import { co, z } from 'jazz-tools'
 
 export const Message = co.map({
   text: z.string(),
-}).withPermissions({ onInlineCreate: 'sameAsContainer' })
+})
 
-// An ordered list of Messages — with public write access
+// An ordered list of Messages - with public write access
 export const Chat = co.list(Message)
   .withPermissions({
     onCreate: (owner) => owner.addMember('everyone', 'writer'),
   })
 ```
 ```ts
-// schema.ts — complete schema
+// schema.ts - complete schema
 import { co, z } from 'jazz-tools'
 
 export const Message = co.map({
@@ -1239,21 +1412,24 @@ export const Message = co.map({
 })
 
 export const Chat = co.list(Message)
+
+export type Message = co.loaded<typeof Message>
+export type Chat = co.loaded<typeof Chat>
 ```
 ````
 
 <!--
-We start with just an import. co and z from jazz-tools — that's all you need.
+We start with just an import. co and z from jazz-tools - that's all you need.
 
-CLICK: co.map — think of it like a Prisma model, but it syncs in real-time across all clients.
+CLICK: co.map - think of it like a Prisma model, but it syncs in real-time across all clients.
 
-CLICK: text field. z.string() — Jazz uses Zod-style validators for primitives. Fully type-safe.
+CLICK: text field. z.string() - Jazz uses Zod-style validators for primitives. Fully type-safe.
 
 CLICK: Export + permissions. withPermissions on Message says "inherit from the parent container." Permissions are DECLARATIVE, right in the schema.
 
-CLICK: Chat — an ordered list of Messages. onCreate adds 'everyone' as writer. That's public write access, declared right here. No Group.create() at runtime.
+CLICK: Chat - an ordered list of Messages. onCreate adds 'everyone' as writer. That's public write access, declared right here. No Group.create() at runtime.
 
-CLICK: Final schema. That's everything — messages with text, permissions, public access. No API routes, no server config.
+CLICK: Final schema. That's everything - messages with text, permissions, public access. No API routes, no server config.
 
 TRANSITION: Now let's wire it up...
 -->
@@ -1261,48 +1437,9 @@ TRANSITION: Now let's wire it up...
 ---
 layout: code-editor
 project: vue-jazz-chat
-activeFile: main.ts
-tabs: schema.ts, main.ts
-step: 2/6 Entry Point
-transition: fade
-clicks: 0
-files: |
-  src
-    main.ts
-    schema.ts
-    RootApp.vue
-    pages/
-      index.vue
-      chat/
-        [chatId].vue
-  package.json
-  vite.config.ts
----
-
-````md magic-move {lines: true}
-```ts
-// main.ts
-import './assets/main.css'
-import { createApp } from 'vue'
-import RootApp from './RootApp.vue'
-import router from './router'
-
-const app = createApp(RootApp)
-app.use(router)
-app.mount('#app')
-```
-````
-
-<!--
-Standard Vue entry point — but notice it mounts RootApp, not App. That's intentional: RootApp wraps your entire app with Jazz's provider. Let's look at that next...
--->
-
----
-layout: code-editor
-project: vue-jazz-chat
 activeFile: RootApp.vue
-tabs: schema.ts, main.ts, RootApp.vue
-step: 3/6 Provider
+tabs: schema.ts, RootApp.vue
+step: 2/6 Provider
 transition: fade
 clicks: 5
 files: |
@@ -1340,7 +1477,7 @@ import { JazzVueProvider } from 'community-jazz-vue'
 import type { SyncConfig } from 'jazz-tools'
 import App from './App.vue'
 
-// Point to Jazz Cloud — one WebSocket, that's your entire backend
+// Point to Jazz Cloud - one WebSocket, that's your entire backend
 const sync: SyncConfig = {
   peer: `wss://cloud.jazz.tools/?key=${import.meta.env.VITE_JAZZ_KEY}`,
 }
@@ -1359,7 +1496,7 @@ const sync: SyncConfig = {
 </script>
 
 <template>
-  <!-- Like Vue Router — wrap your app, give it config -->
+  <!-- Like Vue Router - wrap your app, give it config -->
   <JazzVueProvider :sync="sync">
     <App />
   </JazzVueProvider>
@@ -1378,7 +1515,7 @@ const sync: SyncConfig = {
 </script>
 
 <template>
-  <!-- Anonymous auth — no login screen, no Auth0 -->
+  <!-- Anonymous auth - no login screen, no Auth0 -->
   <JazzVueProvider :sync="sync" :defaultProfileName="'Anonymous'">
     <App />
   </JazzVueProvider>
@@ -1391,14 +1528,14 @@ import { JazzVueProvider } from 'community-jazz-vue'
 import type { SyncConfig } from 'jazz-tools'
 import App from './App.vue'
 
-// One WebSocket connection — that's your entire backend
+// One WebSocket connection - that's your entire backend
 const sync: SyncConfig = {
   peer: `wss://cloud.jazz.tools/?key=${import.meta.env.VITE_JAZZ_KEY}`,
 }
 </script>
 
 <template>
-  <!-- One provider, one config — your app is now syncing -->
+  <!-- One provider, one config - your app is now syncing -->
   <JazzVueProvider :sync="sync" :defaultProfileName="'Anonymous'">
     <App />
   </JazzVueProvider>
@@ -1407,17 +1544,58 @@ const sync: SyncConfig = {
 ````
 
 <!--
-Step 2: the provider. RootApp.vue — this is where we wire Jazz into our Vue app.
+Step 2: the provider. RootApp.vue - this is where we wire Jazz into our Vue app.
 
-CLICK: Imports. JazzVueProvider from community-jazz-vue — the Vue integration. Plus our App component.
+CLICK: Imports. JazzVueProvider from community-jazz-vue - the Vue integration. Plus our App component.
 
 CLICK: Sync config. One WebSocket URL pointing to Jazz Cloud. That's your entire backend connection. No REST, no GraphQL.
 
-CLICK: Template. Wrap your App in JazzVueProvider — just like Vue Router or Pinia. Pass the sync config.
+CLICK: Template. Wrap your App in JazzVueProvider - just like Vue Router or Pinia. Pass the sync config.
 
 CLICK: Anonymous auth. defaultProfileName gives users an identity without a login screen. No Auth0, no OAuth setup.
 
 CLICK: And that's the full picture. One provider, one config object. Your app is SYNCING. Zero backend code.
+
+TRANSITION: Now let's look at main.ts - where we wire this all together...
+-->
+
+---
+layout: code-editor
+project: vue-jazz-chat
+activeFile: main.ts
+tabs: schema.ts, RootApp.vue, main.ts
+step: 3/6 Entry Point
+transition: fade
+clicks: 0
+files: |
+  src
+    main.ts
+    schema.ts
+    RootApp.vue
+    pages/
+      index.vue
+      chat/
+        [chatId].vue
+  package.json
+  vite.config.ts
+---
+
+````md magic-move {lines: true}
+```ts
+// main.ts
+import './assets/main.css'
+import { createApp } from 'vue'
+import RootApp from './RootApp.vue'
+import router from './router'
+
+const app = createApp(RootApp)
+app.use(router)
+app.mount('#app')
+```
+````
+
+<!--
+Standard Vue entry point - notice it mounts RootApp, not App. That's the provider we just built - it wraps your entire app with Jazz.
 
 TRANSITION: Now let's create a chat...
 -->
@@ -1445,7 +1623,7 @@ files: |
 
 ````md magic-move {lines: true}
 ```vue
-<!-- pages/index.vue — creating a chat -->
+<!-- pages/index.vue - creating a chat -->
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -1455,7 +1633,7 @@ const router = useRouter()
 </script>
 ```
 ```vue
-<!-- pages/index.vue — creating a chat -->
+<!-- pages/index.vue - creating a chat -->
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -1476,9 +1654,9 @@ onMounted(() => {
 ````
 
 <!--
-Step 3: creating a chat — imports and setup. No Group import needed — permissions come from the schema.
+Step 3: creating a chat - imports and setup. No Group import needed - permissions come from the schema.
 
-CLICK: onMounted — Chat.create with an empty array. That's it. The withPermissions we defined in the schema automatically adds 'everyone' as writer. No Group.create(), no addMember — it's all declarative.
+CLICK: onMounted - Chat.create with an empty array. That's it. The withPermissions we defined in the schema automatically adds 'everyone' as writer. No Group.create(), no addMember - it's all declarative.
 
 No API call, no await, no POST request. Created locally, Jazz syncs in the background.
 
@@ -1524,7 +1702,7 @@ import { useAccount, useCoState } from 'community-jazz-vue'
 import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
 
-// A standard Vue composable — accepts a reactive chat ID
+// A standard Vue composable - accepts a reactive chat ID
 export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
 }
 ```
@@ -1536,7 +1714,7 @@ import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
 
 export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
-  // Load the chat by ID — one line, that's your entire data layer
+  // Load the chat by ID - one line, that's your entire data layer
   const chat = useCoState(Chat, chatId)
 }
 ```
@@ -1549,7 +1727,7 @@ import { Chat } from '@/schema'
 
 export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
   const chat = useCoState(Chat, chatId)
-  // Current user — for showing "you" vs others
+  // Current user - for showing "you" vs others
   const me = useAccount(undefined, { resolve: { profile: true } })
 }
 ```
@@ -1564,7 +1742,7 @@ export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
   const chat = useCoState(Chat, chatId)
   const me = useAccount(undefined, { resolve: { profile: true } })
 
-  // Plain Vue reactivity — nothing Jazz-specific here
+  // Plain Vue reactivity - nothing Jazz-specific here
   const inputValue = ref('')
   const messages = computed(() => {
     if (!chat.value?.$isLoaded) return []
@@ -1589,7 +1767,7 @@ export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
     return chat.value.slice(-30).toReversed()
   })
 
-  // Push a plain object — Jazz creates the Message inline
+  // Push a plain object - Jazz creates the Message inline
   function sendMessage() {
     if (!inputValue.value.trim() || !chat.value?.$isLoaded) return
     chat.value.$jazz.push({ text: inputValue.value })
@@ -1620,12 +1798,12 @@ export function useChat(chatId: MaybeRefOrGetter<ID<typeof Chat>>) {
     inputValue.value = ''
   }
 
-  // No API calls, no stores — just return reactive state
+  // No API calls, no stores - just return reactive state
   return { chat, me, inputValue, messages, sendMessage }
 }
 ```
 ```ts
-// composables/useChat.ts — real-time, offline-first, encrypted
+// composables/useChat.ts - real-time, offline-first, encrypted
 import { computed, ref, type MaybeRefOrGetter } from 'vue'
 import { useAccount, useCoState } from 'community-jazz-vue'
 import type { ID } from 'jazz-tools'
@@ -1648,19 +1826,19 @@ Step 4: the useChat composable. This is where Vue devs will feel right at home.
 
 CLICK: Imports. Vue's computed, ref, MaybeRefOrGetter. Jazz's useCoState and useAccount. Our Chat schema.
 
-CLICK: Function signature. A standard Vue composable — accepts a reactive chat ID. MaybeRefOrGetter means pass a ref, a getter, or a raw value.
+CLICK: Function signature. A standard Vue composable - accepts a reactive chat ID. MaybeRefOrGetter means pass a ref, a getter, or a raw value.
 
-CLICK: useCoState. Load the chat by ID. One line — that's your entire data layer.
+CLICK: useCoState. Load the chat by ID. One line - that's your entire data layer.
 
 CLICK: useAccount. Gives us the current user. Two composables total for all our data needs.
 
-CLICK: Reactive state. inputValue is a plain ref. messages is a computed — last 30, reversed. Standard Vue reactivity, nothing Jazz-specific.
+CLICK: Reactive state. inputValue is a plain ref. messages is a computed - last 30, reversed. Standard Vue reactivity, nothing Jazz-specific.
 
-CLICK: sendMessage. $jazz.push with a plain object — Jazz creates the Message inline using onInlineCreate permissions from the schema. No Message.create(), no owner parameter.
+CLICK: sendMessage. $jazz.push with a plain object - Jazz creates the Message inline using onInlineCreate permissions from the schema. No Message.create(), no owner parameter.
 
 CLICK: Return. No API calls, no Pinia stores. Just reactive state.
 
-CLICK: Zoom out. Details collapse — just the structure. useCoState, useAccount, a computed, a function, a return. A composable any Vue dev would write — except it's real-time, offline-first, and end-to-end encrypted.
+CLICK: Zoom out. Details collapse - just the structure. useCoState, useAccount, a computed, a function, a return. A composable any Vue dev would write - except it's real-time, offline-first, and end-to-end encrypted.
 
 TRANSITION: Now let's see how clean the component becomes...
 -->
@@ -1719,7 +1897,7 @@ import { useChat } from '@/composables/useChat'
 
 const props = defineProps<{ chatId: ID<typeof Chat> }>()
 
-// One destructure — all logic lives in the composable
+// One destructure - all logic lives in the composable
 const { chat, me, inputValue, messages, sendMessage } = useChat(
   () => props.chatId
 )
@@ -1740,7 +1918,7 @@ const { chat, me, inputValue, messages, sendMessage } = useChat(
 </script>
 
 <template>
-  <!-- Early return pattern — show loading first -->
+  <!-- Early return pattern - show loading first -->
   <div v-if="!chat?.$isLoaded || !me?.$isLoaded">Loading...</div>
   <template v-else>
     <div v-for="msg in messages" :key="msg.$jazz.id">
@@ -1772,7 +1950,7 @@ const { chat, me, inputValue, messages, sendMessage } = useChat(
       {{ msg.text }}
     </div>
 
-    <!-- v-model + submit — no store, no server calls -->
+    <!-- v-model + submit - no store, no server calls -->
     <form @submit.prevent="sendMessage">
       <input v-model="inputValue" placeholder="Message" />
       <button type="submit">Send</button>
@@ -1781,7 +1959,7 @@ const { chat, me, inputValue, messages, sendMessage } = useChat(
 </template>
 ```
 ```vue
-<!-- pages/chat/[chatId].vue — complete component -->
+<!-- pages/chat/[chatId].vue - complete component -->
 <script setup lang="ts">
 import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
@@ -1810,17 +1988,17 @@ const { chat, me, inputValue, messages, sendMessage } = useChat(
 ````
 
 <!--
-Step 5: the component. Start with just the page setup — props with a typed chat ID from the route.
+Step 5: the component. Start with just the page setup - props with a typed chat ID from the route.
 
-CLICK: Import useChat — the composable we just built. That's our entire data layer.
+CLICK: Import useChat - the composable we just built. That's our entire data layer.
 
-CLICK: One destructure. chat, me, inputValue, messages, sendMessage — all logic lives in the composable. The component just wires it to the template.
+CLICK: One destructure. chat, me, inputValue, messages, sendMessage - all logic lives in the composable. The component just wires it to the template.
 
-CLICK: Template. Plain Vue patterns — v-if for loading, v-for to loop messages. Nothing special.
+CLICK: Template. Plain Vue patterns - v-if for loading, v-for to loop messages. Nothing special.
 
 CLICK: The form. v-model on input, submit calls sendMessage. No special syntax, no store, no server calls.
 
-CLICK: Clean up. Comments gone — this is the final component. Look how small it is. This is what local-first looks like in Vue.
+CLICK: Clean up. Comments gone - this is the final component. Look how small it is. This is what local-first looks like in Vue.
 
 TRANSITION: Let that sink in...
 -->
@@ -1893,7 +2071,7 @@ CLICK -- On the left: what you'd write today. Pinia for state, axios for the API
 
 On the right: $jazz.push with a plain object. Jazz handles creation, sync, persistence, conflict resolution, and encryption. All of it.
 
-[look up] THIS is the promise of local-first. Not "offline mode." Not "cache layer." Your entire data layer — gone.
+[look up] THIS is the promise of local-first. Not "offline mode." Not "cache layer." Your entire data layer - gone.
 
 TRANSITION: Now let me show you what you DIDN'T have to build...
 -->
@@ -2004,7 +2182,7 @@ TRANSITION: What can you do today?
 
 # What You Can Do Today
 
-<div class="text-sm op-70 mb-4">We're in the <span v-mark="{ type: 'underline', color: '#ff6bed' }" class="font-bold">pragmatist phase</span> — the tools aren't perfect, but you can start today.</div>
+<div class="text-sm op-70 mb-4">We're in the <span v-mark="{ type: 'underline', color: '#ff6bed' }" class="font-bold">pragmatist phase</span> - the tools aren't perfect, but you can start today.</div>
 
 <Card v-click variant="muted" class="mb-3">
 
@@ -2018,7 +2196,7 @@ TRANSITION: What can you do today?
 
 ### <span class="inline-flex items-center gap-2"><span class="i-ph-download-simple-bold text-brand" /> Step 2: Let users export their data.</span>
 
-JSON, CSV — whatever. Give them a **download button**. This is the simplest local-first gesture.
+JSON, CSV - whatever. Give them a **download button**. This is the simplest local-first gesture.
 
 </Card>
 
@@ -2089,126 +2267,47 @@ Vue is perfectly POSITIONED.
 -->
 
 ---
-layout: two-cols
+layout: two-cols-header
 transition: slide-left
 ---
 
-<div v-click class="h-full flex flex-col justify-center">
+# Local-First Software Fit Guide
 
-## <span class="text-green-400">Great Fit</span>
+::left::
 
-<div class="space-y-2 mt-4">
+<div v-click="2">
 
-<div class="flex items-start gap-2">
-  <span class="text-green-400 text-lg">✓</span>
-  <span>Note-taking & productivity <span class="op-50 text-sm">(Linear, Obsidian)</span></span>
-</div>
+## <span class="text-green-400">Good Fit</span>
 
-<div class="flex items-start gap-2">
-  <span class="text-green-400 text-lg">✓</span>
-  <span>Creative tools <span class="op-50 text-sm">(docs, design, whiteboards)</span></span>
-</div>
+- **File Editing** - docs, spreadsheets, graphics, video
+- **Productivity** - notes, tasks, calendar, messaging
+- **EU Data Sovereignty** - on-device, GDPR-aligned
 
-<div class="flex items-start gap-2">
-  <span class="text-green-400 text-lg">✓</span>
-  <span>Personal data <span class="op-50 text-sm">(health, finance, journals)</span></span>
-</div>
-
-<div class="flex items-start gap-2">
-  <span class="text-green-400 text-lg">✓</span>
-  <span>Field / mobile apps <span class="op-50 text-sm">(healthcare, logistics)</span></span>
-</div>
-
-<div class="flex items-start gap-2">
-  <span class="text-green-400 text-lg">✓</span>
-  <span>Privacy-sensitive apps</span>
-</div>
-
-</div>
-
-<div class="mt-6 text-sm op-70 italic">
-
-Heuristic: "User creates and owns the data"
-
-</div>
+*Ideal for apps where users freely manipulate their data*
 
 </div>
 
 ::right::
 
-<div v-click class="h-full flex flex-col justify-center">
+<div v-click="1">
 
-## <span class="text-yellow-400">Think Twice</span>
+## <span class="text-red-400">Bad Fit</span>
 
-<div class="space-y-2 mt-4">
+- **Money** - banking, payments
+- **Physical Resources** - e-commerce, inventory
+- **Vehicles** - car sharing, logistics
 
-<div class="flex items-start gap-2">
-  <span class="text-yellow-400 text-lg">⚠</span>
-  <span>Banking & financial transactions <span class="op-50 text-sm">(strong consistency)</span></span>
-</div>
-
-<div class="flex items-start gap-2">
-  <span class="text-yellow-400 text-lg">⚠</span>
-  <span>E-commerce inventory <span class="op-50 text-sm">(overselling risk)</span></span>
-</div>
-
-<div class="flex items-start gap-2">
-  <span class="text-yellow-400 text-lg">⚠</span>
-  <span>Ride-sharing / real-time matching <span class="op-50 text-sm">(central arbitration)</span></span>
-</div>
-
-<div class="flex items-start gap-2">
-  <span class="text-yellow-400 text-lg">⚠</span>
-  <span>Large shared datasets <span class="op-50 text-sm">(analytics, social networks)</span></span>
-</div>
-
-<div class="flex items-start gap-2">
-  <span class="text-yellow-400 text-lg">⚠</span>
-  <span>Strict centralized access control</span>
-</div>
-
-</div>
-
-<div class="mt-6 text-sm op-70 italic">
-
-Heuristic: "A central authority must arbitrate"
-
-</div>
+*Better with centralized cloud/server model for real-world resource management*
 
 </div>
 
 <!--
-Linear is the poster child — feels impossibly fast because reads/writes are local DB operations.
+Good fit: apps where users CREATE and OWN their data. File editing, productivity tools - the user IS the source of truth.
 
-Banking: "An offline banking app that lets you initiate a transfer with an out-of-date balance is dangerous" (RxDB)
-
-E-commerce: two warehouses claiming the last item → CRDTs can't resolve this automatically.
--->
-
----
-transition: slide-left
----
-
-<div class="h-full flex flex-col justify-center items-center">
-
-<Callout type="info">
-
-**EU Data Sovereignty** — The US CLOUD Act lets authorities demand data from US-owned companies regardless of server location. Local-first = data stays on the user's device = no foreign server to subpoena. A structural solution to a legal problem.
-
-</Callout>
-
-<div class="mt-8 text-sm op-70 italic text-center">
-
-Local-first is data sovereignty by architecture, not by legal agreement.
-
-</div>
-
-</div>
-
-<!--
-EU angle: US providers hold 70% of European cloud market; Schrems II invalidated Privacy Shield; CLOUD Act applies even to EU-hosted servers if the company is US-based.
-
-Key framing: local-first is data sovereignty by architecture, not by legal agreement.
+Bad fit: anything involving real-world resources that need a central authority.
+Money: "An offline banking app that lets you initiate a transfer with an out-of-date balance is dangerous" (RxDB)
+Inventory: two warehouses claiming the last item - CRDTs can't resolve this automatically.
+Vehicles: ride-sharing needs central arbitration for matching.
 -->
 
 ---
@@ -2243,7 +2342,7 @@ transition: fade
 
 <div class="mt-5 flex items-center justify-center gap-3 text-sm op-70">
   <img src="/local-first-logo.svg" class="w-5 h-5" />
-  <span>Local First Conf — Berlin 2026</span>
+  <span>Local First Conf - Berlin 2026</span>
   <span class="op-40">·</span>
   <a href="https://www.localfirstconf.com/" class="text-brand hover:underline">localfirstconf.com</a>
 </div>

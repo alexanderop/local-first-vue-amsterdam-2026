@@ -2,7 +2,7 @@
   <!-- Intro mode: all cards muted, vertical icon layout -->
   <template v-if="mode === 'intro'">
     <div class="grid grid-cols-4 gap-3 mt-6">
-      <Card v-for="ideal in IDEALS.slice(0, 4)" :key="ideal.key" variant="muted" size="sm">
+      <Card v-for="(ideal, idx) in IDEALS.slice(0, 4)" :key="ideal.key" v-click="idx + 1" variant="muted" size="sm">
         <div class="flex flex-col items-center gap-2 text-center">
           <div :class="ideal.icon" class="text-2xl text-brand/50" />
           <div class="text-sm font-semibold text-gray-300">{{ ideal.label }}</div>
@@ -12,7 +12,7 @@
     </div>
 
     <div class="flex justify-center gap-3 mt-3">
-      <Card v-for="ideal in IDEALS.slice(4)" :key="ideal.key" variant="muted" size="sm" class="w-[calc(25%-9px)]">
+      <Card v-for="(ideal, idx) in IDEALS.slice(4)" :key="ideal.key" v-click="idx + 5" variant="muted" size="sm" class="w-[calc(25%-9px)]">
         <div class="flex flex-col items-center gap-2 text-center">
           <div :class="ideal.icon" class="text-2xl text-brand/50" />
           <div class="text-sm font-semibold text-gray-300">{{ ideal.label }}</div>
