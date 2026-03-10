@@ -1012,26 +1012,7 @@ clicks: 4
 
 # The Three Criteria
 
-<div class="grid gap-3 mt-6">
-  <Card v-click="1" variant="muted">
-    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">1.</span> Offline reads <strong>and</strong> writes</div>
-    <p class="text-sm text-gray-400 mt-1 pl-6">Not just cached reads - the app must accept writes while disconnected and reconcile later.</p>
-  </Card>
-  <Card v-click="2" variant="muted">
-    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">2.</span> Collaboration across devices</div>
-    <p class="text-sm text-gray-400 mt-1 pl-6">Multiple users and devices can edit concurrently, and changes merge automatically.</p>
-  </Card>
-  <Card v-click="3" glow>
-    <div class="flex items-center gap-2 text-lg font-bold"><span class="text-brand">3.</span> Data survives the developer shutting down</div>
-    <p class="text-sm text-gray-400 mt-1 pl-6">If the company disappears, your data and app must keep working. No vendor lock-in.</p>
-  </Card>
-</div>
-
-<div v-click="4" class="mt-4 text-center text-sm text-gray-500">
-
-Criterion 3 is the hardest - and it's what separates **offline-first** from **local-first**.
-
-</div>
+<ThreeCriteriaDiagram />
 
 <!--
 CLICK -- Offline reads AND writes
