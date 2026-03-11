@@ -208,7 +208,7 @@ transition: fade
 
 <!--
 QUOTE: Kyle Mathews -- Gatsby founder, now ElectricSQL
-Source: localfirst.fm podcast
+Source: Sync Conf panel discussion
 
 [slow down]
 jQuery = fiddling with DOM manually
@@ -413,7 +413,7 @@ clicks: 7
     { id: 'ck', label: 'Cookies', subtitles: ['~4 KB limit', 'Sent with every request', 'Not for app data'], status: 'rejected', click: 3 },
   ]"
   :accepted="[
-    { id: 'idb', label: 'IndexedDB', subtitles: ['Unlimited storage', 'Async API', 'Structured data'], status: 'accepted', click: 4 },
+    { id: 'idb', label: 'IndexedDB', subtitles: ['Generous storage quota', 'Async API', 'Structured data'], status: 'accepted', click: 4 },
     { id: 'sql', label: 'SQLite (WASM)', subtitles: ['Full SQL queries', 'OPFS persistence', '~900KB bundle'], status: 'accepted', click: 5 },
     { id: 'pg', label: 'PGlite (Postgres WASM)', subtitles: ['Full Postgres in the browser', 'pgvector & extensions', '<3MB gzipped'], status: 'accepted', click: 6 },
   ]"
@@ -745,7 +745,7 @@ TRANSITION: Now you've seen how CRDTs work - let's zoom out and see the full spe
 - **LWW Register** - last write wins per field <span class="text-sm op-50">→ Jazz CoMap, Automerge, Riak</span>
 - **Text CRDTs** - collaborative editing (YATA, RGA, Peritext) <span class="text-sm op-50">→ Yjs, Automerge, Diamond Types</span>
 - **Sequences / Lists** - ordered collections (RGA, LSEQ) <span class="text-sm op-50">→ Yjs, Automerge, Jazz CoList</span>
-- **Counters & Sets** - distributed counting and membership <span class="text-sm op-50">→ Redis CRDT, Riak, Soundcloud</span>
+- **Counters & Sets** - distributed counting and membership <span class="text-sm op-50">→ Redis CRDT, Riak</span>
 
 </div>
 
@@ -756,7 +756,7 @@ TRANSITION: Now you've seen how CRDTs work - let's zoom out and see the full spe
 
 **Sequences / Lists** — Ordered collections that merge. Think of a collaborative kanban board where two people reorder cards at the same time, or a shared playlist. Yjs Y.Array and Jazz CoList both handle this. Real example: in Linear (the project management tool), when two users drag issues into different positions simultaneously, a sequence CRDT ensures a consistent order for everyone.
 
-**Counters & Sets** — Distributed counting and set membership. The classic example: like counts. SoundCloud uses CRDTs for play counts across their distributed infrastructure — millions of increments per second across data centers, eventually consistent. Redis CRDT module gives you G-Counters and PN-Counters out of the box. OR-Sets (Observed-Remove Sets) let you add/remove items from a set without conflicts — think tags on a document or members in a channel.
+**Counters & Sets** — Distributed counting and set membership. The classic example: like counts. SoundCloud uses CRDTs (Roshi) for their activity stream/timeline — eventually consistent across data centers. Redis CRDT module gives you G-Counters and PN-Counters out of the box. OR-Sets (Observed-Remove Sets) let you add/remove items from a set without conflicts — think tags on a document or members in a channel.
 
 The key takeaway: you pick the CRDT type that matches your data shape. Most real apps combine several of these. TRANSITION: Now let's zoom out and see the full spectrum of conflict resolution approaches...
 -->
@@ -905,8 +905,8 @@ TRANSITION: Let's look at the apps you already love...
 <Card variant="muted" size="lg">
 <div class="flex items-center gap-2 text-lg font-bold text-brand mb-2"><img src="/notion-logo.svg" class="h-6 w-6" /> Notion</div>
 
-- **SQLite WASM** replaced IndexedDB
-- Offline mode shipped Dec 2025
+- **SQLite WASM** for client-side caching
+- Offline mode shipped Aug 2025
 
 </Card>
 
@@ -927,8 +927,8 @@ BUT: server is the source of truth. It can reject your writes.
 Figma -- CRDT-inspired, NOT a true CRDT. Central server decides ordering.
 Offline? Only files already open in your tab. Can't open new ones.
 
-Notion -- IndexedDB failed at scale (too slow per-row for their block model).
-Switched to SQLite WASM. 33% faster in India. Offline mode only shipped Dec 2025.
+Notion -- Their previous caching approach didn't scale (too slow per-row for their block model).
+Switched to SQLite WASM. 33% faster in India. Offline mode shipped Aug 2025.
 
 CLICK -- [slow down] All three. Sync engines. Fast. Some offline.
 But... are they truly local-first? What happens if Linear shuts down?
@@ -1379,11 +1379,11 @@ CLICK: co.map - think of it like a Prisma model, but it syncs in real-time acros
 
 CLICK: text field. z.string() - Jazz uses Zod-style validators for primitives. Fully type-safe.
 
-CLICK: Export + permissions. withPermissions on Message says "inherit from the parent container." Permissions are DECLARATIVE, right in the schema.
+CLICK: Export the types. co.loaded gives you the resolved TypeScript types for use in components.
 
-CLICK: Chat - an ordered list of Messages. onCreate adds 'everyone' as writer. That's public write access, declared right here. No Group.create() at runtime.
+CLICK: Chat - an ordered list of Messages. Permissions are handled via Jazz Groups at runtime when you create instances.
 
-CLICK: Final schema. That's everything - messages with text, permissions, public access. No API routes, no server config.
+CLICK: Final schema. That's everything - messages with text, typed exports. No API routes, no server config.
 
 TRANSITION: Now let's wire it up...
 -->
