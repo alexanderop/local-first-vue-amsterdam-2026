@@ -1303,8 +1303,11 @@ transition: fade
 clicks: 5
 files: |
   src
+    main.ts
     schema.ts
     RootApp.vue
+    composables/
+      useChat.ts
     pages/
       index.vue
       chat/
@@ -1401,6 +1404,8 @@ files: |
     main.ts
     schema.ts
     RootApp.vue
+    composables/
+      useChat.ts
     pages/
       index.vue
       chat/
@@ -1526,6 +1531,8 @@ files: |
     main.ts
     schema.ts
     RootApp.vue
+    composables/
+      useChat.ts
     pages/
       index.vue
       chat/
@@ -1567,6 +1574,8 @@ files: |
     main.ts
     schema.ts
     RootApp.vue
+    composables/
+      useChat.ts
     pages/
       index.vue
       chat/
