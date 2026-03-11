@@ -341,14 +341,6 @@ Vue solved **rendering**. But the data layer? Still the jQuery era. **0 out of 7
 </div>
 
 <!--
-Seven ideals -- our scorecard for the WHOLE talk
-
-[gesture] Walk through each card briefly:
-
-1. Fast — "Local-first software has the potential to respond near-instantaneously to user input, never needing to show you a spinner."
-2. Multi-device — "Users today rely on several computing devices — it is necessary for data to be synchronized across all of them."
-3. Offline — "There is plenty of need for offline-capable apps. Local-first apps store the primary copy in each device's local filesystem."
-4. Collaboration — "Real-time collaboration that is on par with the best cloud apps today, or better."
 5. Longevity — "Your work should continue to be accessible indefinitely, even after the company that produced the software is gone."
 6. Privacy — "Your local devices store only your own data, avoiding the centralized cloud database holding everybody's data."
 7. User control — "You should be able to copy and modify data in any way, write down any thought, and no company should restrict what you are allowed to do."
@@ -380,17 +372,17 @@ Source: <a href="https://www.inkandswitch.com/essay/local-first/" target="_blank
 <!--
 From the original Ink & Switch paper -- how do REAL apps score?
 
-CLICK -- Google Docs. Fast? Depends on connection. Multi-device, collaboration? Yes. Offline? Partial. Privacy? No -- Google reads your data.
+Google Docs. Fast? Depends on connection. Multi-device, collaboration? Yes. Offline? Partial. Privacy? No -- Google reads your data.
 
-CLICK -- Trello. Similar story. No privacy, no user control.
+Trello. Similar story. No privacy, no user control.
 
-CLICK -- Pinterest. Even worse. Fully cloud-dependent.
+ Pinterest. Even worse. Fully cloud-dependent.
 
-CLICK -- Dropbox. Different pattern! Fast, longevity, user control -- but no real-time collaboration.
+Dropbox. Different pattern! Fast, longevity, user control -- but no real-time collaboration.
 
-CLICK -- Git + GitHub. Best score so far! Fast, offline, longevity, user control. But collaboration is only partial -- merge conflicts, anyone?
+Git + GitHub. Best score so far! Fast, offline, longevity, user control. But collaboration is only partial -- merge conflicts, anyone?
 
-CLICK -- Notice: NO app gets all seven. Cloud apps nail collaboration but fail privacy/control. Dev tools nail control but fail collaboration. That's the gap local-first fills.
+Notice: NO app gets all seven. Cloud apps nail collaboration but fail privacy/control. Dev tools nail control but fail collaboration. That's the gap local-first fills.
 
 TRANSITION: Let's start fixing this -- offline-first.
 -->
@@ -430,25 +422,20 @@ clicks: 7
 />
 
 <!--
-Store data locally -- what options?
+localStorage. 5 MB, sync API, strings only. Not enough.
 
-CLICK -- localStorage. 5 MB, sync API, strings only. Not enough.
+sessionStorage. Tab-scoped. Close tab = gone.
 
-CLICK -- sessionStorage. Tab-scoped. Close tab = gone.
+Cookies. 4 KB. Not for app data.
 
-CLICK -- Cookies. 4 KB. Not for app data.
+IndexedDB. NOW we're talking. Unlimited, async, structured.
 
-CLICK -- IndexedDB. NOW we're talking. Unlimited, async, structured.
+SQLite WASM. Full SQL in WebAssembly. Uses OPFS -- Origin Private File System -- for persistence.
 
-CLICK -- SQLite WASM. Full SQL in WebAssembly. Uses OPFS -- Origin Private File System -- for persistence.
-STAT: Notion -- 20% faster page nav after switching
+PGlite. Full Postgres in WASM, <3MB gzipped. pgvector + extensions.
 
-CLICK -- PGlite. Full Postgres in WASM, <3MB gzipped. pgvector + extensions.
-
-CLICK -- Bottom line: IndexedDB, SQLite WASM, or PGlite.
+Bottom line: IndexedDB, SQLite WASM, or PGlite.
 Most sync engines pick one for you.
-
-TRANSITION: How long does that data stick around?
 -->
 
 ---
@@ -463,11 +450,8 @@ layout: center
 </div>
 
 <!--
-Quick shout-out -- if SQLite in the browser sounds interesting, Aaron's talk from last year's Local-First Conf is THE deep dive. Link is on the slide, check it out after.
-
-TRANSITION: How long does that data stick around?
+Quick shout-out -- if SQLite in the browser sounds interesting,
 -->
-
 
 ---
 clicks: 2
@@ -749,20 +733,6 @@ clicks: 6
 <CoMapDiagram />
 
 <!--
-A CoMap -- like a database row but with a globally unique ID.
-
-CLICK 1 -- Alice creates todo: title "Buy milk" + done: false. Both at 8:01.
-
-CLICK 2 -- Bob renames it to "Buy oat milk" on device 1 -- offline.
-
-CLICK 3 -- Bob refines to "Get oat milk" -- still offline.
-
-CLICK 4 -- Meanwhile on Bob's phone (device 2) -- marks it done.
-
-CLICK 5 -- Alice changes title to "Buy eggs" -- conflict! LWW: 8:05 > 8:03, Alice wins.
-
-CLICK 6 -- Bob marks it not done. Final state merges per-field LWW.
-
 TRANSITION: Now you've seen how CRDTs work - let's zoom out and see the full spectrum of approaches...
 -->
 
@@ -780,9 +750,7 @@ TRANSITION: Now you've seen how CRDTs work - let's zoom out and see the full spe
 </div>
 
 <!--
-Let me walk you through the four main families of CRDTs and where you'll actually see them in the wild.
-
-**LWW Register** — Last Write Wins per field. This is the simplest one. Two users edit the same field, the latest timestamp wins. Example: in a todo app, if Alice renames a task to "Buy milk" and Bob renames it to "Buy oat milk" at the same time, whichever write has the later timestamp sticks. Jazz CoMap uses this for every property on a collaborative object. Automerge uses it for primitive values. Riak has used LWW registers in production for years — it's battle-tested at scale.
+.**LWW Register** — Last Write Wins per field. This is the simplest one. Two users edit the same field, the latest timestamp wins. Example: in a todo app, if Alice renames a task to "Buy milk" and Bob renames it to "Buy oat milk" at the same time, whichever write has the later timestamp sticks. Jazz CoMap uses this for every property on a collaborative object. Automerge uses it for primitive values. Riak has used LWW registers in production for years — it's battle-tested at scale.
 
 **Text CRDTs** — This is the hard problem. You need character-by-character merging for collaborative text editing. Real example: Google Docs-style editing. Two people type in the same paragraph simultaneously — YATA (used by Yjs) and RGA (used by Automerge) ensure every character finds its correct position without conflicts. Figma uses a text CRDT for their collaborative design tool. Peritext extends this to handle rich text formatting — bold, italic, links — which is a whole extra layer of complexity.
 
@@ -1860,7 +1828,7 @@ files: |
 import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
 
-const props = defineProps<{ chatId: ID<typeof Chat> }>()
+const { chadId } = defineProps<{ chatId: ID<typeof Chat> }>()
 </script>
 ```
 ```vue
@@ -1871,7 +1839,8 @@ import { Chat } from '@/schema'
 // The composable we just built
 import { useChat } from '@/composables/useChat'
 
-const props = defineProps<{ chatId: ID<typeof Chat> }>()
+const { chadId } = defineProps<{ chatId: ID<typeof Chat> }>()
+</script>
 </script>
 ```
 ```vue
@@ -1881,11 +1850,11 @@ import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
 import { useChat } from '@/composables/useChat'
 
-const props = defineProps<{ chatId: ID<typeof Chat> }>()
+const { chatId } = defineProps<{ chatId: ID<typeof Chat> }>()
 
 // One destructure - all logic lives in the composable
 const { chat, me, inputValue, messages, sendMessage } = useChat(
-  () => props.chatId
+  () => chatId
 )
 </script>
 ```
@@ -1896,10 +1865,10 @@ import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
 import { useChat } from '@/composables/useChat'
 
-const props = defineProps<{ chatId: ID<typeof Chat> }>()
+const { chadId } = defineProps<{ chatId: ID<typeof Chat> }>()
 
 const { chat, me, inputValue, messages, sendMessage } = useChat(
-  () => props.chatId
+  () => chatId
 )
 </script>
 
@@ -1921,10 +1890,10 @@ import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
 import { useChat } from '@/composables/useChat'
 
-const props = defineProps<{ chatId: ID<typeof Chat> }>()
+const { chatId } = defineProps<{ chatId: ID<typeof Chat> }>()
 
 const { chat, me, inputValue, messages, sendMessage } = useChat(
-  () => props.chatId
+  () => chatId
 )
 </script>
 
@@ -1951,9 +1920,9 @@ import type { ID } from 'jazz-tools'
 import { Chat } from '@/schema'
 import { useChat } from '@/composables/useChat'
 
-const props = defineProps<{ chatId: ID<typeof Chat> }>()
+const { chatId } = defineProps<{ chatId: ID<typeof Chat> }>()
 const { chat, me, inputValue, messages, sendMessage } = useChat(
-  () => props.chatId
+  () => chatId
 )
 </script>
 
@@ -2129,7 +2098,7 @@ TRANSITION: Let's see it LIVE...
 <div class="h-full flex items-center justify-center gap-12">
   <img src="/chat-qr.png" class="w-64 h-64 rounded-lg" />
   <div class="h-[420px] w-[400px] rounded-lg overflow-hidden border border-white/10">
-    <iframe src="https://vue-jazz.vercel.app/chat/co_z7WAhSdGn5vcPwg3z42Su4Gbjc5" class="w-full h-full" />
+    <iframe src="https://vue-jazz.vercel.app" class="w-full h-full" />
   </div>
 </div>
 
@@ -2261,7 +2230,7 @@ transition: slide-left
 
 ::left::
 
-<div v-click="2">
+<div v-click="1">
 
 ## <span class="text-green-400">Good Fit</span>
 
@@ -2275,7 +2244,7 @@ transition: slide-left
 
 ::right::
 
-<div v-click="1">
+<div v-click="2">
 
 ## <span class="text-red-400">Bad Fit</span>
 
