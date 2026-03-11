@@ -1091,7 +1091,7 @@ TRANSITION: Let's build it with Jazz.
 transition: fade
 ---
 
-<PartSlide part="4" title="Jazz" subtitle="Local-First Vue in Practice" />
+<PartSlide part="4" title="Jazz 🎵" subtitle="Local-First Vue in Practice" />
 
 ---
 
@@ -2089,46 +2089,6 @@ CLICK -- On the left: everything you'd normally build. Database, API, WebSockets
 On the right: Jazz equivalents. co.map, useCoState, Groups, co.image, getEdits. Each one is a line or two. Most are automatic.
 
 [look up] This isn't a shortcut. It's a different architecture. When your data IS a CRDT, all of this comes for free.
-
-TRANSITION: Let's see it LIVE...
--->
-
----
-
-<div class="h-full flex items-center justify-center gap-12">
-  <img src="/chat-qr.png" class="w-64 h-64 rounded-lg" />
-  <div class="h-[420px] w-[400px] rounded-lg overflow-hidden border border-white/10">
-    <iframe src="https://vue-jazz.vercel.app" class="w-full h-full" />
-  </div>
-</div>
-
-<!--
-[breathe]
-
-OK -- let's make this REAL.
-
-Scan the QR code. Opens a live chat app -- Jazz + Vue.
-Type something. Everyone in this room sees it INSTANTLY.
-
-LEFT side: QR code for audience phones.
-RIGHT side: live iframe -- I can type here, audience sees it appear.
-
-DEMO STEPS:
-1. Show app on screen -- type a message from laptop in the iframe
-2. Audience sees it appear INSTANTLY
-3. Invite audience to scan QR and type
-4. Messages from audience appear in the iframe -- real-time
-5. If brave: airplane mode -- keep typing -- reconnect -- messages sync
-
-[if QR doesn't work: show URL on screen]
-
-[look up]
-Every message you just sent:
-- Synced via CRDTs
-- Persisted to IndexedDB on YOUR phone
-- No backend server handling your data
-
-Schema + Provider + Group + useCoState = THAT.
 
 TRANSITION: What can you do today?
 -->

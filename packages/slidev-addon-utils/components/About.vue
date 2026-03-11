@@ -10,7 +10,7 @@
         <img
           class="relative w-40 h-40 rounded-full object-cover border-3"
           style="border-color: rgba(255,107,237,0.5)"
-          src="https://avatars.githubusercontent.com/u/33398393?v=4"
+          src="/avatar.png"
           alt="Alex Opalic"
         />
       </div>
