@@ -1201,13 +1201,6 @@ transition: fade
 
 </div>
 
-<div class="absolute bottom-16 left-8 right-8">
-
-<Callout type="info">
-That's all you need for a chat app: a <strong>CoMap</strong> per message, a <strong>CoList</strong> to hold them.
-</Callout>
-
-</div>
 
 <!--
 Before we dive into code - two building blocks.
