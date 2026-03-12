@@ -725,7 +725,7 @@ TRANSITION: Let me show you how real objects handle this...
 -->
 
 ---
-clicks: 6
+clicks: 4
 ---
 
 # CRDT LWW: Git for JSON
@@ -1059,32 +1059,6 @@ YOU are the owner. Server = utility. Can't reject your writes.
 No foreign kill switch -- your data stays in YOUR jurisdiction.
 
 TRANSITION: Now that we know what local-first means -- let's see the full scorecard.
--->
-
----
-
-# The Local-First Promise
-
-<Scorecard :achieved="['fast', 'offline', 'multi-device', 'collaboration', 'longevity', 'privacy', 'user-control']" :descriptions="{
-  fast: 'Data is local. Reads are instant. No waiting for the network.',
-  offline: 'Full read and write without connectivity - not just a cache.',
-  'multi-device': 'State syncs seamlessly across every device you own.',
-  collaboration: 'Real-time multiplayer with automatic conflict resolution.',
-  longevity: 'Your data outlives any company. No server dependency for access.',
-  privacy: 'End-to-end encryption. The server never sees your plaintext data.',
-  'user-control': 'You own your data. Export, switch, delete - your choice, always.'
-}" />
-
-<!--
-CLICK -- All seven. That's the promise of local-first.
-Fast, offline, multi-device, collaboration -- we had those with sync engines.
-
-CLICK -- But now also: longevity, privacy, and USER CONTROL.
-Your data outlives any company. Encrypted. Yours.
-
-CLICK -- 7 out of 7. The full picture. Now -- how do we BUILD this in Vue?
-
-TRANSITION: Let's build it with Jazz.
 -->
 
 ---
