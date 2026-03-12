@@ -58,6 +58,30 @@ TRANSITION: Quick show of hands...
 
 ---
 layout: statement
+---
+
+# "When did you become an expert in Jazz and CRDTs?"
+
+<v-click>
+
+# "Last night."
+
+</v-click>
+
+<!--
+[pause for laughter]
+
+Real talk -- a week ago I had no idea about 60% of what I'm about to tell you
+
+I went DEEP into CRDTs and sync engines
+
+So if I can figure this out in a week, you can too -- that's the whole point of this talk
+
+TRANSITION: Quick show of hands...
+-->
+
+---
+layout: statement
 transition: fade-out
 ---
 
