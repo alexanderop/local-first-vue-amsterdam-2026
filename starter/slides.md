@@ -1089,47 +1089,30 @@ TRANSITION: What if your database was a CRDT?
 -->
 
 ---
-clicks: 2
+transition: fade
 ---
 
-# What If Your Database WAS a CRDT?
+# Try It Live
 
-<div class="grid grid-cols-[1fr_1.6fr] gap-8 mt-4 items-start">
-
-<div v-click="1" class="flex flex-col items-center">
-  <ChatWireframe />
-  <div class="text-xs op-40 mt-2">What we're building</div>
-</div>
-
-<div class="space-y-4">
-
-<div v-click="2">
-
-<Card glow>
-
-<div class="text-sm font-bold text-brand mb-2 flex items-center gap-2"><div class="i-ph-lightning-bold" /> With Jazz...</div>
-
-- Real-time sync, image uploads, edit history, permissions
-- **Define schema → Done.**
-
-<div class="mt-1 text-xs op-50">Schema IS the CRDT. Database IS the sync engine.</div>
-
-</Card>
-
-</div>
-
-</div>
-
+<div class="grid grid-cols-2 gap-8 items-center h-[80%]">
+  <div class="flex flex-col items-center gap-4">
+    <img src="/chat-mobile-screenshot.png" class="h-[380px] rounded-xl shadow-lg border border-gray-700" />
+    <p class="text-sm text-gray-400">vue-jazz.vercel.app</p>
+  </div>
+  <div class="flex flex-col items-center gap-4">
+    <img src="/chat-qr.png" class="h-[300px] rounded-xl" />
+    <p class="text-lg text-gray-300 font-medium">Scan to join the chat</p>
+  </div>
 </div>
 
 <!--
-Let's build a chat app for this conference.
+Before we code — try it yourself!
 
-CLICK -- Here's what it'll look like. Simple wireframe. Messages, an input, send. But also: image uploads, edit history, permissions - all from the same schema.
+Scan the QR code to open the live chat app on your phone.
+This is a real local-first app built with Vue and Jazz.
+Everyone scanning joins the same CoValue — real-time sync, no server logic.
 
-CLICK -- With Jazz: define schema, done. Real-time sync, image uploads, edit history, permissions - all included. Schema IS the CRDT. Database IS the sync engine.
-
-[pause] Let me show you the code...
+Now let's build this step by step...
 -->
 
 ---
@@ -1231,33 +1214,6 @@ stateDiagram-v2
 Jazz encodes loading state into the type system via co.loaded<T, ResolveQuery>.
 The state diagram shows the four possible states a CoValue reference can be in.
 After an $isLoaded check, TypeScript narrows the type so everything is guaranteed present.
--->
-
----
-transition: fade
----
-
-# Try It Live
-
-<div class="grid grid-cols-2 gap-8 items-center h-[80%]">
-  <div class="flex flex-col items-center gap-4">
-    <img src="/chat-mobile-screenshot.png" class="h-[380px] rounded-xl shadow-lg border border-gray-700" />
-    <p class="text-sm text-gray-400">vue-jazz.vercel.app</p>
-  </div>
-  <div class="flex flex-col items-center gap-4">
-    <img src="/chat-qr.png" class="h-[300px] rounded-xl" />
-    <p class="text-lg text-gray-300 font-medium">Scan to join the chat</p>
-  </div>
-</div>
-
-<!--
-Before we code — try it yourself!
-
-Scan the QR code to open the live chat app on your phone.
-This is a real local-first app built with Vue and Jazz.
-Everyone scanning joins the same CoValue — real-time sync, no server logic.
-
-Now let's build this step by step...
 -->
 
 ---
@@ -2181,34 +2137,40 @@ transition: fade
 
 # Thank You!
 
-<div class="text-lg op-80">
+<div class="text-lg op-80 mb-6">
 
 **alexop.dev** · **@alexanderopalic**
 
 </div>
 
-<div class="mt-8 flex items-center justify-center gap-8">
-<Card glow class="inline-flex items-center gap-6 !px-6 !py-5">
-  <img src="/awesome-local-first-qr.png" class="w-32 h-32 rounded-lg" />
+<div class="grid grid-cols-2 gap-6 max-w-4xl mx-auto">
+
+<Card glow class="flex items-center gap-4 !px-5 !py-4">
+  <img src="/awesome-local-first-qr.png" class="w-28 h-28 rounded-lg flex-shrink-0" />
   <div class="text-left">
-    <div class="flex items-center gap-3">
-      <img src="/local-first-logo.svg" class="w-10 h-10" />
-      <div class="text-xl font-bold" style="color: #ff6bed">awesome-local-first</div>
+    <div class="flex items-center gap-2">
+      <img src="/local-first-logo.svg" class="w-8 h-8" />
+      <div class="text-lg font-bold" style="color: #ff6bed">awesome-local-first</div>
     </div>
-    <div class="text-sm op-60 mt-2">A curated collection of local-first resources,<br/>tools, frameworks & articles</div>
-    <div class="mt-3 flex items-center gap-2 text-xs op-40">
+    <div class="text-xs op-60 mt-1.5">A curated collection of local-first resources, tools, frameworks & articles</div>
+    <div class="mt-2 flex items-center gap-2 text-xs op-40">
       <div class="i-ph-github-logo" />
       <span>github.com/alexanderop/awesome-local-first</span>
     </div>
   </div>
 </Card>
-</div>
 
-<div class="mt-5 flex items-center justify-center gap-3 text-sm op-70">
-  <img src="/local-first-logo.svg" class="w-5 h-5" />
-  <span>Local First Conf - Berlin 2026</span>
-  <span class="op-40">·</span>
-  <a href="https://www.localfirstconf.com/" class="text-brand hover:underline">localfirstconf.com</a>
+<Card variant="muted" class="!p-0 overflow-hidden h-full">
+  <img src="/local-first-conf.png" class="w-full h-28 object-cover object-top" />
+  <div class="px-4 py-2.5 flex items-center justify-between">
+    <div>
+      <div class="text-sm font-bold">Local First Conf</div>
+      <div class="text-xs op-50">Berlin · 12-14 July 2026</div>
+    </div>
+    <div class="text-brand text-xs font-medium">localfirstconf.com <span class="i-ph-arrow-up-right-bold inline-block align-middle" /></div>
+  </div>
+</Card>
+
 </div>
 
 <!--
