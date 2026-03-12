@@ -408,8 +408,8 @@ clicks: 7
 
 <StorageFunnelDiagram
   :rejected="[
-    { id: 'ls', label: 'localStorage', subtitles: ['~5 MB limit', 'Sync API (blocks UI)', 'Strings only'], status: 'rejected', click: 1 },
-    { id: 'ss', label: 'sessionStorage', subtitles: ['Tab-scoped only', 'Gone on close', '~5 MB limit'], status: 'rejected', click: 2 },
+    { id: 'ss', label: 'sessionStorage', subtitles: ['Tab-scoped only', 'Gone on close', '~5 MB limit'], status: 'rejected', click: 1 },
+    { id: 'ls', label: 'localStorage', subtitles: ['~5 MB limit', 'Sync API (blocks UI)', 'Strings only'], status: 'rejected', click: 2 },
     { id: 'ck', label: 'Cookies', subtitles: ['~4 KB limit', 'Sent with every request', 'Not for app data'], status: 'rejected', click: 3 },
   ]"
   :accepted="[
@@ -422,9 +422,9 @@ clicks: 7
 />
 
 <!--
-localStorage. 5 MB, sync API, strings only. Not enough.
-
 sessionStorage. Tab-scoped. Close tab = gone.
+
+localStorage. 5 MB, sync API, strings only. Not enough.
 
 Cookies. 4 KB. Not for app data.
 
