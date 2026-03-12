@@ -2092,8 +2092,6 @@ Vue is perfectly POSITIONED.
 -->
 
 ---
-clicks: 3
----
 
 # Local-First Software Fit Guide
 

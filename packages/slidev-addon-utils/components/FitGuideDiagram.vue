@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import RoughRect from './RoughRect.vue'
 import RoughLine from './RoughLine.vue'
-import { useClickVisibility } from '../composables/useClickVisibility'
-
 const { roughness = 1.2, seed = 500 } = defineProps<{
   roughness?: number
   seed?: number
 }>()
-
-const { isVisible } = useClickVisibility()
 
 // Colors
 const success = 'rgba(52, 211, 153, 0.8)'
@@ -66,7 +62,7 @@ const footerY = panelH + 30
     preserveAspectRatio="xMidYMid meet"
   >
     <!-- ═══════ Left Panel: Good Fit ═══════ -->
-    <g class="fit-guide__el" :class="{ '--hidden': !isVisible(1) }">
+    <g>
       <!-- Panel border -->
       <RoughRect
         :x="leftX"
@@ -147,7 +143,7 @@ const footerY = panelH + 30
     </g>
 
     <!-- ═══════ Right Panel: Bad Fit ═══════ -->
-    <g class="fit-guide__el" :class="{ '--hidden': !isVisible(2) }">
+    <g>
       <!-- Panel border -->
       <RoughRect
         :x="rightX"
@@ -228,7 +224,7 @@ const footerY = panelH + 30
     </g>
 
     <!-- ═══════ Footer ═══════ -->
-    <g class="fit-guide__el" :class="{ '--hidden': !isVisible(3) }">
+    <g>
       <!-- Dashed divider -->
       <RoughLine
         :x1="20"
@@ -287,14 +283,6 @@ const footerY = panelH + 30
   height: auto;
   display: block;
   margin: auto;
-}
-
-.fit-guide__el {
-  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.fit-guide__el.--hidden {
-  opacity: 0;
 }
 
 .fit-guide__panel-title {
