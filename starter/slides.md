@@ -2158,39 +2158,12 @@ Vue is perfectly POSITIONED.
 -->
 
 ---
-layout: two-cols-header
-transition: slide-left
+clicks: 3
 ---
 
 # Local-First Software Fit Guide
 
-::left::
-
-<div v-click="1">
-
-## <span class="text-green-400">Good Fit</span>
-
-- **File Editing** - docs, spreadsheets, graphics, video
-- **Productivity** - notes, tasks, calendar, messaging
-- **EU Data Sovereignty** - on-device, GDPR-aligned
-
-*Ideal for apps where users freely manipulate their data*
-
-</div>
-
-::right::
-
-<div v-click="2">
-
-## <span class="text-red-400">Bad Fit</span>
-
-- **Money** - banking, payments
-- **Physical Resources** - e-commerce, inventory
-- **Vehicles** - car sharing, logistics
-
-*Better with centralized cloud/server model for real-world resource management*
-
-</div>
+<FitGuideDiagram />
 
 <!--
 Good fit: apps where users CREATE and OWN their data. File editing, productivity tools - the user IS the source of truth.
