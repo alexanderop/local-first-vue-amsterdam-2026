@@ -2242,7 +2242,7 @@ transition: fade
 
 <div class="mt-8 flex items-center justify-center gap-8">
 <Card glow class="inline-flex items-center gap-6 !px-6 !py-5">
-  <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://github.com/alexanderop/awesome-local-first&bgcolor=1a1a2e&color=ff6bed" class="w-32 h-32 rounded-lg" />
+  <img src="/awesome-local-first-qr.png" class="w-32 h-32 rounded-lg" />
   <div class="text-left">
     <div class="flex items-center gap-3">
       <img src="/local-first-logo.svg" class="w-10 h-10" />
