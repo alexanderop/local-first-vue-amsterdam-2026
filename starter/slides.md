@@ -2026,34 +2026,12 @@ TRANSITION: What can you do today?
 -->
 
 ---
+clicks: 4
+---
 
 # What You Can Do Today
 
-<div class="text-sm op-70 mb-4">We're in the <span v-mark="{ type: 'underline', color: '#ff6bed' }" class="font-bold">pragmatist phase</span> - the tools aren't perfect, but you can start today.</div>
-
-<Card v-click variant="muted" class="mb-3">
-
-### <span class="inline-flex items-center gap-2"><span class="i-ph-compass-bold text-brand" /> Step 1: Pick your sync engine.</span>
-
-**Jazz** for batteries-included local-first with Vue support out of the box.
-
-</Card>
-
-<Card v-click variant="muted" class="mb-3">
-
-### <span class="inline-flex items-center gap-2"><span class="i-ph-download-simple-bold text-brand" /> Step 2: Let users export their data.</span>
-
-JSON, CSV - whatever. Give them a **download button**. This is the simplest local-first gesture.
-
-</Card>
-
-<Card v-click variant="muted">
-
-### <span class="inline-flex items-center gap-2"><span class="i-ph-binoculars-bold text-brand" /> Step 3: Watch this space.</span>
-
-The generic sync engine is coming. When it arrives, upgrading from offline-first to local-first will be a **configuration change**, not a rewrite.
-
-</Card>
+<ThreeStepsDiagram />
 
 <!--
 Historical parallels: Cypherpunks → Let's Encrypt, Free Software → GitHub + npm, Local-first ideals → ???
