@@ -1234,28 +1234,28 @@ After an $isLoaded check, TypeScript narrows the type so everything is guarantee
 -->
 
 ---
-clicks: 5
 transition: fade
 ---
 
-# The Big Picture
+# Try It Live
 
-<div class="flex items-center justify-center h-[85%]">
-  <ChatFlowDiagram />
+<div class="grid grid-cols-2 gap-8 items-center h-[80%]">
+  <div class="flex flex-col items-center gap-4">
+    <img src="/chat-mobile-screenshot.png" class="h-[380px] rounded-xl shadow-lg border border-gray-700" />
+    <p class="text-sm text-gray-400">vue-jazz.vercel.app</p>
+  </div>
+  <div class="flex flex-col items-center gap-4">
+    <img src="/chat-qr.png" class="h-[300px] rounded-xl" />
+    <p class="text-lg text-gray-300 font-medium">Scan to join the chat</p>
+  </div>
 </div>
 
 <!--
-Before we code — the user journey.
+Before we code — try it yourself!
 
-CLICK: User A opens the app. Chat.create creates a new CoValue locally. No server round-trip.
-
-CLICK: The route changes to include the CoValue's unique ID. This URL IS the data.
-
-CLICK: User A shares this URL.
-
-CLICK: User B opens it. The app loads the same CoValue by ID. Both are now connected.
-
-CLICK: Both write to the same CoValue. Real-time sync. No API, no WebSocket boilerplate. Just shared data.
+Scan the QR code to open the live chat app on your phone.
+This is a real local-first app built with Vue and Jazz.
+Everyone scanning joins the same CoValue — real-time sync, no server logic.
 
 Now let's build this step by step...
 -->
