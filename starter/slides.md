@@ -445,7 +445,9 @@ layout: center
 # Want to go deeper on SQLite?
 
 <div class="flex flex-col items-center">
-  <Youtube id="7yNG1aj7-Aw" width="560" height="315" />
+  <a href="https://www.youtube.com/watch?v=7yNG1aj7-Aw" target="_blank" class="!border-none">
+    <img src="/sqlite-persistence-youtube.jpg" class="w-140 rounded shadow-lg" />
+  </a>
   <p class="mt-2 opacity-70">Conrad Hofmeyr (PowerSync) - "SQLite Persistence on the Web" @ Sync Conf 2025</p>
 </div>
 
